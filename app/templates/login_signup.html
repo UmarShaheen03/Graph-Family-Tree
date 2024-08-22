@@ -1,9 +1,7 @@
-{% block content %}
-
-<form action="/login" method="post" class="container px-4">
+<form action="/login-form" method="post" class="container px-4">
     <div class="form-group" style="width: 100%">
-        {{ loginForm.username.label }}<br>
-        {{ loginForm.username(class="form-control", placeholder="Enter Username") }} <br>
+        {{ loginForm.email_or_username.label }}<br>
+        {{ loginForm.email_or_username(class="form-control", placeholder="Enter Email or Username") }} <br>
     </div>
     <div class="form-group" style="width: 100%">
         {{ loginForm.password.label }}<br>
@@ -13,7 +11,7 @@
     <p>{{ loginForm.submit(class="btn btn-primary") }}</p>
 </form> 
 
-<form action="/signup" method="post" class="container px-4">
+<form action="/signup-form" method="post" class="container px-4">
     <div class="form-group" style="width: 100%">
         {{ signupForm.email.label }}<br>
         {{ signupForm.email(class="form-control", placeholder="Enter Email") }} <br>
@@ -30,7 +28,6 @@
         {{ signupForm.confirmpassword.label }}<br>
         {{ signupForm.confirmpassword(class="form-control", placeholder="Confirm Password") }} <br>
     </div>
+    <p>{{ signupForm.remember_me() }} {{ form.remember_me.label }}</p>
+    <p>{{ signupForm.submit(class="btn btn-primary") }}</p>
 </form> 
-
-{% end block %}
-
