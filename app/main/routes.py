@@ -8,4 +8,9 @@ main_bp = Blueprint('main_bp', __name__)
 def home_page():
     """The landing page"""
     return render_template('home.html')
-    # return "<p>Hello, World!</p>"
+
+@main_bp.route("/tree")
+def tree_page():
+    """The landing page"""
+    return render_template('tree.html')
+
