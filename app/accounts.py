@@ -45,11 +45,11 @@ def signup(email, username, password, repeat, remember):
 def login(email_or_username, password, remember):
     #TODO: check that user exists in db (search by username and email)
     if False:
-        raise LoginError()
+        raise LoginError("User does not exist")
     
     #TODO: check if the found users password hash matches
     if False:
-        raise LoginError()
+        raise LoginError("Password is incorrect")
     
     login_user(remember=remember)
     

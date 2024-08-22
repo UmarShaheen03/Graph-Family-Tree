@@ -6,7 +6,7 @@ from accounts import signup, login, SignupError, LoginError
 
 #LOGIN AND SIGN UP ROUTES
 
-@app.route("/login")
+@app.route("/login-signup")
 def route_login_signup():
     loginForm = LoginForm()
     signupForm = SignupForm()
@@ -30,10 +30,10 @@ def signup_request():
     try:
         signup(email, username, password, repeat)
     except SignupError as error:
-        print(error)
+        #TODO: display errors
         return route_login_signup()
     
-    #return route for main page
+    #TODO: return route for main page
     
 #form submissions for signup
 @app.route("/login-form", methods=["POST"])
@@ -52,7 +52,7 @@ def login_request():
     try:
         login(email_or_username, password, remember)
     except LoginError as error:
-        print(error)
+        #TODO: display errors
         return route_login_signup()
     
-    #return route for main page
+    #TODO: return route for main page
