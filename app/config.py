@@ -1,4 +1,6 @@
 import os
+from neo4j import GraphDatabase
+
 basedir = os.path.abs(os.path.dirname(__file__))
 
 class Config:
@@ -8,3 +10,5 @@ class Config:
   
   SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'app.db')
+  
+  
