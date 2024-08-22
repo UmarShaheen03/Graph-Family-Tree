@@ -1,19 +1,19 @@
-from flask import Flask, render_template, flash, redirect, url_for, request, session
-from app import app
+from flask import Blueprint, render_template, flash, redirect, url_for, request, session
 from app.forms import LoginForm, SignupForm
 from accounts import signup, login, SignupError, LoginError
 
+main_bp = Blueprint('main_bp', __name__)
 
 #LOGIN AND SIGN UP ROUTES
 
-@app.route("/login-signup")
+@main_bp.route("/")
 def route_login_signup():
     loginForm = LoginForm()
     signupForm = SignupForm()
-    return render_template("login_signup.html", loginForm=loginForm, signupForm=signupForm)
+    return render_template("login.html", loginForm=loginForm, signupForm=signupForm)
 
 #form submissions for signup
-@app.route("/signup-form", methods=["POST"])
+@main_bp.route("/signup-form", methods=["POST"])
 def signup_request():
     form = SignupForm()
 
@@ -36,7 +36,7 @@ def signup_request():
     #TODO: return route for main page
     
 #form submissions for signup
-@app.route("/login-form", methods=["POST"])
+@main_bp.route("/login-form", methods=["POST"])
 def login_request():
     form = LoginForm()
 

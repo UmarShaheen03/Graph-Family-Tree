@@ -1,3 +1,12 @@
+{% extends "base.html" %}
+
+{% block headBlock %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}"/>
+    <title>Login Page</title>
+{% endblock %}
+
+{% block bodyBlock %}
+
 <form action="/login-form" method="post" class="container px-4">
     <div class="form-group" style="width: 100%">
         {{ loginForm.email_or_username.label }}<br>
@@ -31,3 +40,5 @@
     <p>{{ signupForm.remember_me() }} {{ form.remember_me.label }}</p>
     <p>{{ signupForm.submit(class="btn btn-primary") }}</p>
 </form> 
+
+{% endblock %}
