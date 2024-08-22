@@ -7,5 +7,5 @@ main_bp = Blueprint('main_bp', __name__)
 @main_bp.route("/")
 def home_page():
     """The landing page"""
-    # return render_template('home.html')
-    return "<p>Hello, World!</p>"
+    return render_template('home.html')
+    # return "<p>Hello, World!</p>"
