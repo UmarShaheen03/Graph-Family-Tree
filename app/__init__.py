@@ -10,7 +10,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from config import Config #from config.py import the Config class
 
-from main import main_bp
+from .main import main_bp
 
 def create_app():
     """Create and configure app"""

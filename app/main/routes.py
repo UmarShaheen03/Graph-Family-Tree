@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
-from app.forms import LoginForm, SignupForm
+from forms import LoginForm, SignupForm
 from accounts import signup, login, SignupError, LoginError
 
 main_bp = Blueprint('main_bp', __name__)
