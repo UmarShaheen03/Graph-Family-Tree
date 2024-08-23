@@ -1,4 +1,4 @@
-from models import User
+from app.models import User
 from flask_login import login_user
 
 class SignupError(Exception):
