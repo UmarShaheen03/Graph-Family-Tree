@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Family Tree</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+            background-color: #f0f0f0; /* Optional: background color */
+            overflow: hidden; /* Prevents scrollbars if content overflows */
+        }
+        .container {
+            text-align: center;
+        }
+        #graph-container {
+            width: 80vw; /* Adjust the width as needed */
+            height: 80vh; /* Adjust the height as needed */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid #ccc; /* Optional: border around the container */
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        .node {
+            cursor: pointer;
+            stroke: #fff;
+            stroke-width: 1.5px;
+        }
+        .node:hover {
+            fill: orange;
+        }
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+        .edge-label {
+            font-size: 12px;
+            fill: #666;
+            text-anchor: middle;
+        }
+        #tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 4px;
+            font-size: 12px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            pointer-events: none;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interactive Graph</h1>
+        <div id="graph-container">
+            <svg id="graph"></svg>
+        </div>
+        <div id="tooltip"></div>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        var nodes = {{ nodes|tojson }};
+        var links = {{ relationships|tojson }};
+        
+        const width = document.getElementById('graph-container').clientWidth;
+        const height = document.getElementById('graph-container').clientHeight;
+        
+        const svg = d3.select("#graph")
+            .attr("width", width)
+            .attr("height", height);
+        
+        const tooltip = d3.select("#tooltip");
+        
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id))
+            .force("charge", d3.forceManyBody().strength(-500))  // Add repulsion force with custom strength
+            .force("center", d3.forceCenter(width / 2, height / 2));
+        
+        const link = svg.append("g")
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6)
+            .selectAll("line")
+            .data(links)
+            .enter().append("line")
+            .attr("class", "link");
+        
+        // Add edge labels
+        const edgeLabels = svg.append("g")
+            .selectAll("text")
+            .data(links)
+            .enter().append("text")
+            .attr("class", "edge-label")
+            .text(d => d.type);  // Display the type of relationship
+        
+        const node = svg.append("g")
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 1.5)
+            .selectAll("circle")
+            .data(nodes)
+            .enter().append("circle")
+            .attr("class", "node")
+            .attr("r", 30)  // Increased node size
+            .attr("fill", "steelblue")
+            .on("mouseover", (event, d) => {
+                tooltip.transition().duration(200).style("opacity", .9);
+                tooltip.html(`
+                    <strong>Name:</strong> ${d.name}<br>
+                    <strong>Age:</strong> ${d.age}<br>
+                    <strong>About:</strong> ${d.about}<br>
+                    <strong>Location:</strong> ${d.location}<br>
+                    <strong>Email:</strong> ${d.email}<br>
+                    <strong>Phone:</strong> ${d.phoneNumber}<br>
+                    <strong>Address:</strong> ${d.address}
+                `)
+                .style("left", `${event.pageX + 5}px`)
+                .style("top", `${event.pageY - 28}px`);
+            })
+            .on("mouseout", () => {
+                tooltip.transition().duration(500).style("opacity", 0);
+            })
+            .call(drag(simulation));
+        
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+        
+            edgeLabels
+                .attr("x", d => (d.source.x + d.target.x) / 2)
+                .attr("y", d => (d.source.y + d.target.y) / 2);
+        
+            node
+                .attr("cx", d => {
+                    // Constrain x within the container
+                    d.x = Math.max(30, Math.min(width - 30, d.x));
+                    return d.x;
+                })
+                .attr("cy", d => {
+                    // Constrain y within the container
+                    d.y = Math.max(30, Math.min(height - 30, d.y));
+                    return d.y;
+                });
+        });
+        
+        function drag(simulation) {
+            return d3.drag()
+                .on("start", (event, d) => {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x;
+                    d.fy = d.y;
+                })
+                .on("drag", (event, d) => {
+                    d.fx = event.x;
+                    d.fy = event.y;
+                })
+                .on("end", (event, d) => {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null;
+                    d.fy = null;
+                });
+        }
+    </script>
+    
+</body>
+</html>
