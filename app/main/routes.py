@@ -19,7 +19,8 @@ def login_page():
 @main_bp.route("/tree")
 def tree_page():
     """A family tree page"""
-    return render_template('tree.html')
+    nodes, relationships = fetch_data()
+    return render_template('Tree.html', nodes=nodes, relationships=relationships)
 
 @main_bp.route("/biography")
 def biography_page():
@@ -42,7 +43,3 @@ def fetch_data():
         relationships = [{'source': record['a'].id, 'target': record['b'].id, 'type': record['r'].type} for record in relationships_result]
     return nodes, relationships
 
-@main_bp.route('/Graph')
-def index():       ## define the variables used in JINJA TEMPLATING
-    nodes, relationships = fetch_data()
-    return render_template('FamilyTree.html', nodes=nodes, relationships=relationships)
