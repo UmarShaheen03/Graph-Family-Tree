@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+
+{% block headBlock %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tree.css') }}"/>
+    <title>modify_graph_page</title>
+{% endblock %}
+
+{% block bodyBlock %}
+<h1>Add Node</h1>
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.action.label }}<br>
+        {{ form.action() }}
+    </p>
+    <p>
+        {{ form.name.label }}<br>
+        {{ form.name(size=32) }}
+    </p>
+    <p>
+        {{ form.parent.label }}<br>
+        {{ form.parent() }}
+    </p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}
+

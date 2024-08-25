@@ -1,6 +1,8 @@
 """Flask app configurations"""
 
 import os
+from neo4j import GraphDatabase
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:

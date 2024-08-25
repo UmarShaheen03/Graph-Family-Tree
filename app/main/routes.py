@@ -23,3 +23,8 @@ def tree_page():
 def biography_page():
     """The biography page"""
     return render_template('biography.html')
+
+@main_bp.route("/modify_graph")
+def modify_graph_page():
+    """The modify graph page"""
+    return render_template('modify_graph.html')

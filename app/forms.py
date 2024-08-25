@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import EmailField, StringField, PasswordField, BooleanField, SubmitField
+from wtforms import EmailField, StringField, PasswordField, BooleanField, SubmitField, SelectField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import sqlalchemy as sa
 from app import db
@@ -18,6 +18,23 @@ class RegistrationForm(FlaskForm):
 
 class AddNodeForm(FlaskForm):
     ####
-
+    action = SelectField(
+        'Action', 
+        choices=[('create', 'Create'), ('update', 'Update'), ('delete', 'Delete')],
+        validators=[DataRequired()]
+    )
+    
+    name = StringField(
+        'Name', 
+        validators=[DataRequired()]
+    )
+    
+    parent = SelectField(
+        'Parent', 
+        choices=[],  # You will populate this dynamically in your view or route
+        validators=[DataRequired()]
+    )
+    
+    submit = SubmitField('Submit')
 
     
