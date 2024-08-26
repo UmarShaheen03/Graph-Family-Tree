@@ -4,9 +4,8 @@ from typing import Optional
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 from flask_login import UserMixin
-from app import login
-from app.models import db
 from hashlib import md5
+from app import db
 
 class User(UserMixin, db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
