@@ -20,7 +20,7 @@ class AddNodeForm(FlaskForm):
     ####
     action = SelectField(
         'Action', 
-        choices=[('create', 'Create'), ('update', 'Update'), ('delete', 'Delete')],
+        choices=[('add', 'Add Person'), ('edit', 'Edit Person'), ('delete', 'Delete Person'),('shift', 'Shift Person')],
         validators=[DataRequired()]
     )
     

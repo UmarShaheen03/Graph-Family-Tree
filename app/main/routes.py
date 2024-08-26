@@ -24,9 +24,9 @@ def biography_page():
     """The biography page"""
     return render_template('biography.html')
 
-@main_bp.route("/addnode", methods=['GET', 'POST'])
-def addnode_page():
+@main_bp.route("/modify_graph", methods=['GET', 'POST'])
+def modify_graph():
     """The Add node page"""
     form = AddNodeForm()
     
-    return render_template('addnode.html', form=form)
+    return render_template('modify_graph.html', form=form)
