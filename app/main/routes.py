@@ -6,7 +6,7 @@ main_bp = Blueprint('main_bp', __name__)
 
 #LOGIN AND SIGN UP ROUTES
 
-@main_bp.route("/")
+@main_bp.route("/login")
 def route_login_signup():
     loginForm = LoginForm()
     signupForm = SignupForm()
