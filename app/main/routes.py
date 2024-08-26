@@ -1,7 +1,7 @@
 """Main route views"""
 
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
-
+from app.forms import AddNodeForm
 main_bp = Blueprint('main_bp', __name__)
 
 @main_bp.route("/")
@@ -24,7 +24,9 @@ def biography_page():
     """The biography page"""
     return render_template('biography.html')
 
-@main_bp.route("/modify_graph")
-def modify_graph_page():
-    """The modify graph page"""
-    return render_template('modify_graph.html')
+@main_bp.route("/addnode", methods=['GET', 'POST'])
+def addnode_page():
+    """The Add node page"""
+    form = AddNodeForm()
+    
+    return render_template('addnode.html', form=form)
