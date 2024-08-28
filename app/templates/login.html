@@ -9,7 +9,7 @@
 
 <!--LOGIN FORM-->
 <div class="d-md-flex flex-md-row container">
-    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%; visibility:visible" id="login">    
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%;" id="login">    
         <h2 class="text-center">Login</h2>
 
         <form action="/login-form" method="post" class="container px-4">
@@ -32,7 +32,7 @@
 </div>
 
 <div class="d-md-flex flex-md-row container">
-    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%; visibility:hidden" id="signup">    
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%;" id="signup">    
         <h2 class="text-center">Sign Up</h2>
 
         <form action="/signup-form" method="post" class="container px-4">
@@ -64,15 +64,15 @@
 
 <script>
     function login_off_signup_on() {
-        document.getElementById("login").style.visibility="visible";
-        document.getElementById("signup").style.visibility="hidden";
-        console.log("triggered")
+        $("#signup *").css("visibility", "visible");
+        $("#login *").css("visibility", "hidden");
+        console.log("triggered");
     }
 
     function signup_off_login_on() {
-        document.getElementById("signup").style.visibility="visible";
-        document.getElementById("login").style.visibility="hidden";
-        console.log("triggered")
+        $("#login *").css("visibility", "visible");
+        $("#signup *").css("visibility", "hidden");
+        console.log("triggered");
     }
 
 </script>
