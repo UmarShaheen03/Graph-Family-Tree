@@ -1,10 +1,17 @@
+"""Main route views"""
+
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
 from app.forms import LoginForm, SignupForm
 from app.accounts import signup, login, SignupError, LoginError
 
 main_bp = Blueprint('main_bp', __name__)
 
-#LOGIN AND SIGN UP ROUTES
+@main_bp.route("/")
+def home_page():
+    """The landing page"""
+    return render_template('home.html')
+
+"""LOGIN AND SIGNUP PAGE/FORMS"""
 
 @main_bp.route("/login")
 def route_login_signup():
@@ -56,3 +63,13 @@ def login_request():
         return route_login_signup()
     
     #TODO: return route for main page
+
+@main_bp.route("/tree")
+def tree_page():
+    """A family tree page"""
+    return render_template('tree.html')
+
+@main_bp.route("/biography")
+def biography_page():
+    """The biography page"""
+    return render_template('biography.html')
