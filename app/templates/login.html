@@ -9,14 +9,14 @@
 
 <form action="/login-form" method="post" class="container px-4">
     <div class="form-group" style="width: 100%">
-        {{ loginForm.email_or_username.label }}<br>
-        {{ loginForm.email_or_username(class="form-control", placeholder="Enter Email or Username") }} <br>
+        {{ loginForm.username_or_email.label }}<br>
+        {{ loginForm.username_or_email(class="form-control", placeholder="Enter Email or Username") }} <br>
     </div>
     <div class="form-group" style="width: 100%">
         {{ loginForm.password.label }}<br>
         {{ loginForm.password(class="form-control", placeholder="Enter Password") }} <br>
     </div>
-    <p>{{ loginForm.remember_me() }} {{ form.remember_me.label }}</p>
+    <p>{{ loginForm.remember_me() }} {{ signupForm.remember_me.label }}</p>
     <p>{{ loginForm.submit(class="btn btn-primary") }}</p>
 </form> 
 
@@ -34,10 +34,10 @@
         {{ signupForm.password(class="form-control", placeholder="Enter Password") }} <br>
     </div>
     <div class="form-group" style="width: 100%">
-        {{ signupForm.confirmpassword.label }}<br>
-        {{ signupForm.confirmpassword(class="form-control", placeholder="Confirm Password") }} <br>
+        {{ signupForm.repeat.label }}<br>
+        {{ signupForm.repeat(class="form-control", placeholder="Confirm Password") }} <br>
     </div>
-    <p>{{ signupForm.remember_me() }} {{ form.remember_me.label }}</p>
+    <p>{{ signupForm.remember_me() }} {{ signupForm.remember_me.label }}</p>
     <p>{{ signupForm.submit(class="btn btn-primary") }}</p>
 </form> 
 

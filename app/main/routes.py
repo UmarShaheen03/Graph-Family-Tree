@@ -14,7 +14,7 @@ def home_page():
 """LOGIN AND SIGNUP PAGE/FORMS"""
 
 @main_bp.route("/login")
-def route_login_signup():
+def login_page():
     loginForm = LoginForm()
     signupForm = SignupForm()
     return render_template("login.html", loginForm=loginForm, signupForm=signupForm)
@@ -26,7 +26,7 @@ def signup_request():
 
     #if form doesn't validate, redirect to signup page
     if not form.validate_on_submit():
-        return route_login_signup()
+        return login_page()
     
     email = request.form.get("email")
     username = request.form.get("username")
@@ -38,7 +38,7 @@ def signup_request():
         signup(email, username, password, repeat)
     except SignupError as error:
         #TODO: display errors
-        return route_login_signup()
+        return login_page()
     
     #TODO: return route for main page
     
@@ -49,7 +49,7 @@ def login_request():
 
     #if form doesn't validate, redirect to signup page
     if not form.validate_on_submit():
-        return route_login_signup()
+        return login_page()
     
     email_or_username = request.form.get("email_or_username")
     password = request.form.get("password")
@@ -60,7 +60,7 @@ def login_request():
         login(email_or_username, password, remember)
     except LoginError as error:
         #TODO: display errors
-        return route_login_signup()
+        return login_page()
     
     #TODO: return route for main page
 
