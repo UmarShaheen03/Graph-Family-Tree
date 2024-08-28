@@ -12,15 +12,6 @@ def signup(email, username, password, repeat, remember):
     if password != repeat:
         raise SignupError("Passwords do not match")
     
-    if len(password) < 8:
-        raise SignupError("Password is less than 8 characters")
-
-    if not any(char.isdigit() for char in password):
-        raise SignupError("Password requires at least 1 number")
-    
-    if not any(char.isupper() for char in password):
-        raise SignupError("Password requires at least 1 capital letter")
-    
     #TODO: check if email is already in db
     if False:
         raise SignupError("Email already exists")

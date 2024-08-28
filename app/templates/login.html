@@ -7,38 +7,74 @@
 
 {% block bodyBlock %}
 
-<form action="/login-form" method="post" class="container px-4">
-    <div class="form-group" style="width: 100%">
-        {{ loginForm.username_or_email.label }}<br>
-        {{ loginForm.username_or_email(class="form-control", placeholder="Enter Email or Username") }} <br>
-    </div>
-    <div class="form-group" style="width: 100%">
-        {{ loginForm.password.label }}<br>
-        {{ loginForm.password(class="form-control", placeholder="Enter Password") }} <br>
-    </div>
-    <p>{{ loginForm.remember_me() }} {{ signupForm.remember_me.label }}</p>
-    <p>{{ loginForm.submit(class="btn btn-primary") }}</p>
-</form> 
+<!--LOGIN FORM-->
+<div class="d-md-flex flex-md-row container">
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%; visibility:visible" id="login">    
+        <h2 class="text-center">Login</h2>
 
-<form action="/signup-form" method="post" class="container px-4">
-    <div class="form-group" style="width: 100%">
-        {{ signupForm.email.label }}<br>
-        {{ signupForm.email(class="form-control", placeholder="Enter Email") }} <br>
+        <form action="/login-form" method="post" class="container px-4">
+            <div class="form-group" style="width: 100%">
+                {{ loginForm.username_or_email.label }}<br>
+                {{ loginForm.username_or_email(class="form-control", placeholder="Enter Email or Username") }} <br>
+            </div>
+            <div class="form-group" style="width: 100%">
+                {{ loginForm.password.label }}<br>
+                {{ loginForm.password(class="form-control", placeholder="Enter Password") }} <br>
+            </div>
+            <div style="display: flex; justify-content: space-between">
+            <p>{{ loginForm.remember_me() }} {{ signupForm.remember_me.label }}</p>
+            <p>{{ loginForm.submit(class="btn btn-primary") }}</p>
+            </div>
+        </form>
+
+        <div class="btn btn-secondary" onclick="signup_off_login_on()">Click here to create an account</div>
     </div>
-    <div class="form-group" style="width: 100%">
-        {{ signupForm.username.label }}<br>
-        {{ signupForm.username(class="form-control", placeholder="Enter Username") }} <br>
+</div>
+
+<div class="d-md-flex flex-md-row container">
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%; visibility:hidden" id="signup">    
+        <h2 class="text-center">Sign Up</h2>
+
+        <form action="/signup-form" method="post" class="container px-4">
+            <div class="form-group" style="width: 100%">
+                {{ signupForm.email.label }}<br>
+                {{ signupForm.email(class="form-control", placeholder="Enter Email") }} <br>
+            </div>
+            <div class="form-group" style="width: 100%">
+                {{ signupForm.username.label }}<br>
+                {{ signupForm.username(class="form-control", placeholder="Enter Username") }} <br>
+            </div>
+            <div class="form-group" style="width: 100%">
+                {{ signupForm.password.label }}<br>
+                {{ signupForm.password(class="form-control", placeholder="Enter Password") }} <br>
+            </div>
+            <div class="form-group" style="width: 100%">
+                {{ signupForm.repeat.label }}<br>
+                {{ signupForm.repeat(class="form-control", placeholder="Confirm Password") }} <br>
+            </div>
+            <div style="display: flex; justify-content: space-between">
+            <p>{{ signupForm.remember_me() }} {{ signupForm.remember_me.label }}</p>
+            <p>{{ signupForm.submit(class="btn btn-primary") }}</p>
+            </div>
+        </form>
+
+        <div class="btn btn-secondary" onclick="login_off_signup_on()">Click here to login</div>
     </div>
-    <div class="form-group" style="width: 100%">
-        {{ signupForm.password.label }}<br>
-        {{ signupForm.password(class="form-control", placeholder="Enter Password") }} <br>
-    </div>
-    <div class="form-group" style="width: 100%">
-        {{ signupForm.repeat.label }}<br>
-        {{ signupForm.repeat(class="form-control", placeholder="Confirm Password") }} <br>
-    </div>
-    <p>{{ signupForm.remember_me() }} {{ signupForm.remember_me.label }}</p>
-    <p>{{ signupForm.submit(class="btn btn-primary") }}</p>
-</form> 
+</div>
+
+<script>
+    function login_off_signup_on() {
+        document.getElementById("login").style.visibility="visible";
+        document.getElementById("signup").style.visibility="hidden";
+        console.log("triggered")
+    }
+
+    function signup_off_login_on() {
+        document.getElementById("signup").style.visibility="visible";
+        document.getElementById("login").style.visibility="hidden";
+        console.log("triggered")
+    }
+
+</script>
 
 {% endblock %}
