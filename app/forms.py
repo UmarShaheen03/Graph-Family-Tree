@@ -13,6 +13,50 @@ from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipl
 from wtforms.validators import DataRequired, NumberRange, email
 
 
+
+class RelationshipForm(FlaskForm):
+    node = SelectField('Node:', choices=[], validators=[DataRequired()])
+    relationship_type = StringField('Relationship Type:')
+
+class UpdateNode (FlaskForm):
+    Nodes = SelectField(
+        'Select Node:',
+        choices=[],  # Will be populated dynamically
+        widget=widgets.ListWidget(prefix_label=False),
+        option_widget=widgets.RadioInput()  # Use radio buttons for single choice
+    )
+    FullName = StringField("Full Name:")
+    DateOfBirth = DateField("Date of Birth")
+    Age = IntegerField("Age")
+    About = TextAreaField("About",)
+    Location = TextAreaField("General Comments")
+    Email = EmailField("Email")
+    PhoneNumber = IntegerField("PhoneNumber",validators=[NumberRange(min=1000000000, max=9999999999)])
+    Address = StringField("Address")  # Added correct form type
+    node_choices = SelectMultipleField('Select Nodes:', choices=[], option_widget=widgets.CheckboxInput(), widget=widgets.ListWidget(prefix_label=False))
+    relationship_type= StringField("Address")
+    relationships = FieldList(FormField(RelationshipForm), min_entries=1, max_entries=10) 
+    submit = SubmitField("Add to Family Tree")
+
+
+    
+class AppendGraph(FlaskForm):
+    FullName = StringField("Full Name:")
+    DateOfBirth = DateField("Date of Birth")
+    Age = IntegerField("Age")
+    About = TextAreaField("About",)
+    Location = TextAreaField("General Comments")
+    Email = EmailField("Email")
+    PhoneNumber = IntegerField("PhoneNumber")
+    Address = StringField("Address")  # Added correct form type
+    node_choices = SelectMultipleField('Connect to Node:', choices=[], option_widget=widgets.CheckboxInput(), widget=widgets.ListWidget(prefix_label=False))
+    relationship_type= StringField("Address")
+    relationships = FieldList(FormField(RelationshipForm), min_entries=1, max_entries=10) 
+    submit = SubmitField("Add to Family Tree")
+
+
+
+
     
 class LoginForm(FlaskForm):
     ###
