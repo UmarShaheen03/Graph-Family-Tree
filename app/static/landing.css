@@ -1,13 +1,15 @@
  body{
-    min-height: 100vh;
-    background-image: url("../static/landing.png");
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    background-color: rgba(225,225,225, .1);
+   background-color: black;
+   background-image: url("landing.png");
+   background-position: center;
+   background-size:cover;
+   background-repeat: no-repeat;
  }
+
  
  .welcome{
+    padding-top: 50px;
+    text-align: center;
     background: linear-gradient(135deg, rgba(225,225,225,0.1), rgba(225,225,225,0));
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -18,18 +20,54 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 50px;
-    height: 50vh;
-    text-align: center;
+    color: white;
 
  }
 
- .btn{
-    background-color: rgb(81, 192, 137);
-    transition: all 0.3s ease;
+ .welcome>h1{
+   font-weight: 600;
+ }
+
+ .welcome>p{
+   padding-left: 200px;
+   padding-right: 200px;
+   padding-top: 30px;
+ }
+
+ .start{
+   background-color: transparent;
+   border: 1px, rgba(225,225,225,0.18), solid;
+   border-radius: 1000px;
+   margin: 30px;
+   transition: all, ease, 0.3s;
+ }
+
+ .start:hover{
+   background-image: linear-gradient(to right, rgb(50, 100, 175) , rgb(196, 52, 172));
+   transform: scale(1.2);
+   box-shadow: 40px 0 100px rgb(50, 100, 175) , -40px 0 100px rgb(196, 52, 172);
+ }
+
+ .learn{
+   background-color: transparent;
+   border: 1px, rgba(225,225,225,0.18), solid;
+   border-radius: 1000px;
+   transition: all,ease, 0.3s;
+ }
+
+ .learn:hover{
+   transform: scale(1.2);
+   background-color: rgba(214, 214, 214, 0.253);
+ }
+ 
+ #name{
+   background-image: linear-gradient(to right, rgb(67, 125, 212) , rgb(230, 61, 201));
+   background-clip: text;
+   color: transparent;
+   display: inline-block;
 
  }
 
- .btn:hover{
-    transform: scale(1.25);
-    background-color: rgb(91, 211, 151);
+ .nav{
+   background-color: black;
  }
