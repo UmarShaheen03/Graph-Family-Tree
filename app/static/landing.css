@@ -1,9 +1,15 @@
  body{
    background-color: black;
+ }
+
+ #back{
    background-image: url("landing.png");
    background-position: center;
    background-size:cover;
    background-repeat: no-repeat;
+   padding-top: 25px;
+   padding-bottom: 25px;
+   
  }
 
  
@@ -19,7 +25,7 @@
     width: 75vw;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 50px;
+    margin-top: 25px;
     color: white;
 
  }
@@ -71,3 +77,86 @@
  .nav{
    background-color: black;
  }
+
+ .text{
+   color: white;
+   padding:10rem;
+   
+ }
+
+ .image{
+   padding: 5rem;
+ }
+
+ #info{
+   margin-top: 10rem;
+   margin-left: auto;
+   margin-right: auto;
+   background-color: black;
+   width: 80vw;
+ }
+ 
+
+ img{
+   height: 100%;
+   width: 100%;
+ }
+
+#visualise{
+   display: flex;
+   margin-bottom: 5rem;
+}
+
+#visualise > .text{
+   width: 50%;
+   
+}
+
+#visualise > .image{
+   height: 500px;
+}
+
+
+
+#navigate{
+   display: flex;
+   margin-bottom: 5rem;
+}
+
+#navigate > .text{
+   width: 50%;
+   
+}
+
+#navigate > .image{
+   height: 500px;
+}
+
+
+#learn{
+   display: flex;
+   margin-bottom: 5rem;
+}
+
+#learn > .text{
+   width: 50%;
+   
+}
+
+#learn > .image{
+   height: 500px;
+}
+
+#discover{
+   display: flex;
+   margin-bottom: 5rem;
+}
+
+#discover > .text{
+   width: 50%;
+   
+}
+
+#discover> .image{
+   height: 500px;
+}
