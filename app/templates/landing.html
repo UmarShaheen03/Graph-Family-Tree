@@ -2,6 +2,7 @@
 
 {%block headBlock %}
 <link rel="stylesheet" href="{{url_for('static', filename='landing.css')}}">
+<script src="{{url_for('static', filename='landing.js')}}">s</script>
 
 {%endblock%}
 
@@ -14,11 +15,13 @@
     <p> Discover connections, trace your lineage, and watch your family story come to life in an intuitive,
       easy-to-navigate interface.</p>
     <div class='buttons'>
-      <a class="btn start"> Get Started</a>
-      <a class="btn learn"> Learn More</a>
+      <a class="btn", id = 'started'> Get Started</a>
+      <a class="btn", id = 'learnMore'> Learn More</a>
     </div>
   </div>
 </div>
+
+<hr>
 
 <div id="info">
   <div id="visualise">
@@ -59,7 +62,7 @@
     <div class="image">
       <img src="../static/example.jpg" alt="insert image here">
     </div>
-    
+
     <div class="text">
       <h1>Learn</h1>
       <p>Learn more about your family with dedicated biography pages for each node</p>
