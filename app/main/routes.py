@@ -7,8 +7,13 @@ from datetime import datetime
 from flask_wtf import CSRFProtect
 from neo4j import GraphDatabase
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
+from flask import Flask, flash, render_template, redirect, request, session, url_for
+from flask_wtf import CSRFProtect, FlaskForm
+from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, TextAreaField, SubmitField, widgets
+from wtforms.validators import DataRequired, NumberRange, email
 
-from models import AddTreeForm
+
+
 
 main_bp = Blueprint('main_bp', __name__)
 
@@ -100,6 +105,13 @@ def add_tree():
     return render_template('AddNode.html', form=form)
 
 
+@main_bp.route('/updateTree', methods=['GET', 'POST'])
+def update_tree():
+    Updateform = UpdateNode()
+    return render_template('UpdateNode.html', Updateform=Updateform)
+
+
+
 
 NEO4J_URI = os.getenv('NEO4J_URI')
 NEO4J_USERNAME = os.getenv('NEO4J_USERNAME')
@@ -126,4 +138,31 @@ def calculate_age(date_of_birth_str):
     if age is not None:
             print(f"Calculated Age: {age}",date_of_birth_str)
     return age
+
+
+
+
+class RelationshipForm(FlaskForm):
+    node = SelectField('Node:', choices=[], validators=[DataRequired()])
+    relationship_type = StringField('Relationship Type:')
+
+class UpdateNode (FlaskForm):
+    Nodes = SelectField(
+        'Select Node:',
+        choices=[],  # Will be populated dynamically
+        widget=widgets.ListWidget(prefix_label=False),
+        option_widget=widgets.RadioInput()  # Use radio buttons for single choice
+    )
+    FullName = StringField("Full Name:")
+    DateOfBirth = DateField("Date of Birth")
+    Age = IntegerField("Age")
+    About = TextAreaField("About",)
+    Location = TextAreaField("General Comments")
+    Email = EmailField("Email")
+    PhoneNumber = IntegerField("PhoneNumber",validators=[NumberRange(min=1000000000, max=9999999999)])
+    Address = StringField("Address")  # Added correct form type
+    node_choices = SelectMultipleField('Select Nodes:', choices=[], option_widget=widgets.CheckboxInput(), widget=widgets.ListWidget(prefix_label=False))
+    relationship_type= StringField("Address")
+    relationships = FieldList(FormField(RelationshipForm), min_entries=1, max_entries=10) 
+    submit = SubmitField("Add to Family Tree")
 

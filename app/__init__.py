@@ -9,6 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from config import Config #from config.py import the Config class
+from flask_wtf import CSRFProtect
 
 from .main import main_bp
 
@@ -16,6 +17,7 @@ def create_app():
     """Create and configure app"""
     flask_app = Flask(__name__)
     flask_app.config.from_object(Config)
+    csrf = CSRFProtect(flask_app)
 
     db = SQLAlchemy(flask_app)
 
