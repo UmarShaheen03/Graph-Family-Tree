@@ -12,9 +12,23 @@ class AddNodeForm(FlaskForm):
     name = StringField(
         'Name', 
         validators=[DataRequired()],
+        render_kw={"placeholder": "Enter name"}  # Only shown when 'Add Person' or 'Edit Person' is selected
+    )
+    new_name = StringField(
+        'New Name', 
+        validators=[DataRequired()],
         render_kw={"placeholder": "Enter new name"}  # Only shown when 'Add Person' or 'Edit Person' is selected
     )
-    
+    person_to_shift = SelectField(
+        'Person to Shift', 
+        choices=[],  # Populate this dynamically in your view
+        validators=[DataRequired()]
+    )
+    person_to_delete = SelectField(
+        'Person to Delete', 
+        choices=[],  # Populate this dynamically in your view
+        validators=[DataRequired()]
+    )
     old_name = SelectField(
         'Old Name', 
         choices=[],  # Populate this dynamically in your view
