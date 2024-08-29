@@ -1,10 +1,121 @@
 {% extends "base.html" %}
 
 {% block headBlock %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/biography.css') }}"/>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/pulse/bootstrap.min.css">
     <title>Biography Page</title>
+    <style>
+        .biography-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding-top: 40px;
+        }
+        .biography-header {
+            background-color: #343a40;
+            color: #fff;
+            padding: 20px;
+        }
+        .biography-header h1 {
+            margin-bottom: 0;
+        }
+        .biography-details {
+            padding: 20px;
+            background-color: #f8f9fa;
+        
+        }
+        .biography-details p {
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        
+        }
+
+        .comments-section {
+            padding: 20px;
+            background-color: #f8f9fa;
+            margin-top: 40px;
+            margin-bottom: 30px;
+            max-width:none;
+        }
+
+        .comments-section h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        .comment-form h3 {
+            margin-top: 20px;
+            font-size: 1.3rem;
+        }
+        .media {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 0.5rem;
+            margin-bottom: 10px;
+        }
+        .media h5 {
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+            color: #343a40;
+        }
+        .media .text-muted {
+            font-size: 0.9rem;
+
+        }
+
+        .btn-custom {
+        background-color: #343a40; 
+        color: white; 
+        border: none; 
+    }
+        .btn-custom:hover {
+            background-color: #1d2124; 
+            color: #f8f9fa; 
+        }
+
+    </style>
 {% endblock %}
 
 {% block bodyBlock %}
-    <p>Biography page</p>
+    <div class="biography-container">
+        <div class="card">
+            <div class="biography-header">
+                <h1>Biography</h1>
+            </div>
+            <div class="biography-details">
+                <p><strong>Full Name:</strong>{{full_name if full_name else "None"}}</p>
+                <p><strong>Date of Birth:</strong>{{dob if dob else "None"}}</p>
+                <p><strong>Biography:</strong></p>
+                <p>{{biography if biography else "No additional information"}}</p>
+                <p><strong>Location:</strong> {{location if location else "None"}}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="comments-section">
+        <h2>Comments</h2>
+        {% if comments %}
+        <ul class="list-unstyled">
+            {% for comments in comments %}
+             <li class="media">
+                <div class="media-body">
+                    <h5 class="mt-0 mb-1">{{ comment.user }}</h5>
+                    {{ comment.text }}
+                    <div class="text-muted">{{ comment.timestamp }}</div>
+                </div>
+            </li>
+            {{% endfor %}}
+        </ul>
+        {% else %}
+           <p>No comments yet. Be the first to leave a comment</p>
+        {% endif %}
+
+        <div class="comment-form">
+            <h3>Leave a Comment</h3>
+            <form method="post" action="{{ url_for('submit_comment', node_id=node_id) }}">
+                <div class="form-group">
+                    <textarea class="form-control" name="comment" rows="4" placeholder="Write your comment here..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-custom">Submit</button>
+            </form>
+        </div>
+    </div>
+
 {% endblock %}
