@@ -2,9 +2,17 @@
 
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
 from app.forms import LoginForm, SignupForm
-from app.accounts import signup, login, SignupError, LoginError
+from app.accounts import signup, login, SignupError, LoginError, init_database
+
 
 main_bp = Blueprint('main_bp', __name__)
+
+#test function, resets database and adds two mock users
+@main_bp.before_request
+def run_once_on_start():
+    init_database()
+    #replaces code of this function with none, so it only runs once
+    run_once_on_start.__code__ = (lambda:None).__code__
 
 @main_bp.route("/")
 def home_page():
@@ -16,12 +24,12 @@ def home_page():
 @main_bp.route("/login")
 def login_page():
     loginForm = LoginForm()
-    return render_template("login.html", loginForm=loginForm)
+    return render_template("login.html", loginForm=loginForm, error="")
 
 @main_bp.route("/signup")
 def signup_page():
     signupForm = SignupForm()
-    return render_template("signup.html", signupForm=signupForm)
+    return render_template("signup.html", signupForm=signupForm, error="")
 
 #form submissions for login
 @main_bp.route("/login-form", methods=["POST"])
@@ -30,7 +38,7 @@ def login_request():
 
     #if form doesn't validate, redirect to signup page
     if not form.validate_on_submit():
-        return login_page()
+        return render_template("login.html", loginForm=form, error="Invalid form")
     
     email_or_username = request.form.get("email_or_username")
     password = request.form.get("password")
@@ -40,10 +48,10 @@ def login_request():
     try:
         login(email_or_username, password, remember)
     except LoginError as error:
-        #TODO: display errors
-        return login_page()
-    
-    #TODO: return route for main page
+        return render_template("login.html", loginForm=form, error=error)
+
+    #currently sends to home page on success
+    return home_page()
 
 #form submissions for signup
 @main_bp.route("/signup-form", methods=["POST"])
@@ -52,7 +60,7 @@ def signup_request():
 
     #if form doesn't validate, redirect to signup page
     if not form.validate_on_submit():
-        return login_page()
+        return render_template("signup.html", loginForm=form, error="Invalid form")
     
     email = request.form.get("email")
     username = request.form.get("username")
@@ -63,10 +71,10 @@ def signup_request():
     try:
         signup(email, username, password, repeat)
     except SignupError as error:
-        #TODO: display errors
-        return login_page()
+        return render_template("signup.html", loginForm=form, error=error)
     
-    #TODO: return route for main page
+    #currently sends to home page on success
+    return home_page()
 
 @main_bp.route("/tree")
 def tree_page():

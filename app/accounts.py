@@ -1,5 +1,7 @@
 from app.models import User
 from flask_login import login_user
+from app.databases import db
+from werkzeug.security import generate_password_hash
 
 class SignupError(Exception):
     pass
@@ -7,6 +9,31 @@ class SignupError(Exception):
 class LoginError(Exception):
     pass
 
+def init_database():
+    #create tables
+    db.create_all()
+    #clear any existing info 
+    User.query.delete()
+
+    #create mock accounts
+    test_admin = User(
+        user_id=0,
+        username="test_admin",
+        email="admin@test.com",
+        privillege=1,
+        password_hash=str(generate_password_hash("admin1234"))
+    )
+
+    test_user = User(
+        user_id=1,
+        username="test_user",
+        email="user@test.com",
+        privillege=0,
+        password_hash=str(generate_password_hash("user1234"))
+    )
+
+    db.session.add(test_admin)
+    db.session.add(test_user)
 
 def signup(email, username, password, repeat, remember):
     if password != repeat:
