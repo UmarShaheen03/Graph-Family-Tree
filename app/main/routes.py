@@ -37,16 +37,16 @@ def login_request():
     form = LoginForm()
 
     #if form doesn't validate, redirect to signup page
-    if not form.validate_on_submit():
-        return render_template("login.html", loginForm=form, error="Invalid form")
+    #if not form.validate_on_submit():
+    #    return render_template("login.html", loginForm=form, error="Invalid form")
     
-    email_or_username = request.form.get("email_or_username")
+    username_or_email = request.form.get("username_or_email")
     password = request.form.get("password")
     remember = request.form.get("remember")
 
-        #call function in other file
+    #call login function in other file
     try:
-        login(email_or_username, password, remember)
+        login(username_or_email, password, remember)
     except LoginError as error:
         return render_template("login.html", loginForm=form, error=error)
 
@@ -67,7 +67,7 @@ def signup_request():
     password = request.form.get("password")
     repeat = request.form.get("repeat")
 
-    #call function in other file
+    #call signup function in other file
     try:
         signup(email, username, password, repeat)
     except SignupError as error:

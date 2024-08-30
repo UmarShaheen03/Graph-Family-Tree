@@ -2,6 +2,7 @@ from app.models import User
 from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
+from flask import current_app
 
 class SignupError(Exception):
     pass
@@ -61,13 +62,15 @@ def signup(email, username, password, repeat, remember):
     login(username, password, remember)
     
 def login(email_or_username, password, remember):
-    #TODO: check that user exists in db (search by username and email)
-    if False:
+    current_app.logger.info(str(email_or_username) + "  " + str(password))
+    user = db.session.query(User).filter((User.username == email_or_username) | (User.email == email_or_username)).first()
+    current_app.logger.info(user)
+
+    if not user:
         raise LoginError("User does not exist")
     
-    #TODO: check if the found users password hash matches
-    if False:
+    if not user.check_password(password):
         raise LoginError("Password is incorrect")
     
-    login_user(remember=remember)
+    login_user(user, remember=remember)
     

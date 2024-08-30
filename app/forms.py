@@ -8,19 +8,19 @@ from wtforms.validators import Length
 from flask_login import current_user
 
 class LoginForm(FlaskForm):
-    username_or_email = StringField('Username or Email', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    remember_me = BooleanField('Stay logged in?')
-    submit = SubmitField('Log In')
+    username_or_email = StringField("Username or Email", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    remember_me = BooleanField("Stay logged in?")
+    submit = SubmitField("Log In")
 
 
 class SignupForm(FlaskForm):
-    email = EmailField('Email', validators=[DataRequired(), Email()])
-    username = StringField('Username', validators=[DataRequired()])
-    password = PasswordField('Password', [DataRequired()])
-    repeat = PasswordField('Repeat Password',[DataRequired()])
-    remember_me = BooleanField('Stay logged in?')
-    submit = SubmitField('Sign Up')
+    email = EmailField("Email", validators=[DataRequired(), Email()])
+    username = StringField("Username", validators=[DataRequired()])
+    password = PasswordField("Password", [DataRequired()])
+    repeat = PasswordField("Repeat Password",[DataRequired()])
+    remember_me = BooleanField("Stay logged in?")
+    submit = SubmitField("Sign Up")
 
 
 class AddNodeForm(FlaskForm):
