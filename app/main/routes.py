@@ -8,7 +8,7 @@ from flask_wtf import CSRFProtect
 from neo4j import GraphDatabase
 from flask import Flask, flash, redirect, render_template, request, send_file, url_for
 from flask import Flask, flash, render_template, redirect, request, session, url_for
-from app.forms import UpdateNode,AppendGraph
+from app.forms import AddNodeForm, UpdateNode,AppendGraph
 
 
 
@@ -37,83 +37,13 @@ def biography_page():
     return render_template('biography.html')
 
 
-@main_bp.route('/addTree', methods=['GET', 'POST'])
-def add_tree():
-    form = AppendGraph()
-
-    # Fetch nodes for the select box for form 
-    with driver.session() as session:
-        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
-        nodes = [(record["name"], record["name"]) for record in result]
-
-    # Populate choices for relationship fields
-    for relationship_form in form.relationships:
-        relationship_form.node.choices = nodes
-
-    if form.validate_on_submit():
-        # Add debugging output
-        print("Form validated successfully. Processing submission.")
-
-        age_Person = calculate_age(str(form.DateOfBirth.data))
-
-        # Example of how to append nodes and relationships
-        # Replace this with actual data handling logic
-        with driver.session() as session:
-            # Add or update node
-            session.run(
-                "CREATE (n:Person {FullName: $full_name, DateOfBirth: $date_of_birth, About: $about, Location: $location, Email: $email, PhoneNumber: $phone_number, Address: $address,Age:$age})",
-                full_name=form.FullName.data,
-                date_of_birth=form.DateOfBirth.data,
-                age=age_Person,  # Ensure the date is in the correct format
-                about=form.About.data,
-                location=form.Location.data,
-                email=form.Email.data,
-                phone_number=form.PhoneNumber.data,
-                address=form.Address.data
-            )
-        
-            # Add relationships
-            for relationship in form.relationships:
-                node_name = relationship.node.data
-                relationship_type = relationship.relationship_type.data
-
-                # Ensure the relationship type is sanitized and valid
-                relationship_type = relationship_type.upper().replace(" ", "_")
-
-                # Build the dynamic query string
-                query = f"""
-                MATCH (a:Person {{FullName: $node_name}}), (b:Person {{FullName: $full_name}})
-                MERGE (a)-[r:{relationship_type}]->(b)
-                """
-
-                # Create or update relationship
-                session.run(
-                    query,
-                    node_name=node_name,
-                    full_name=form.FullName.data
-                )
-
-        print("Data processed. Redirecting to index.")
-        return redirect(url_for("index"))
-    else:
-        # Add debugging output
-        print("Form validation failed.")
-        print(form.errors)  # Print form validation errors if any
-
-    return render_template('AddNode.html', form=form)
-
-
-@main_bp.route('/updateTree', methods=['GET', 'POST'])
-def update_tree():
-    Updateform = UpdateNode()
-    return render_template('UpdateNode.html', Updateform=Updateform)
 
 
 
 
-NEO4J_URI = os.getenv('NEO4J_URI')
-NEO4J_USERNAME = os.getenv('NEO4J_USERNAME')
-NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD')
+NEO4J_URI='neo4j+s://633149e1.databases.neo4j.io'
+NEO4J_USERNAME='neo4j'
+NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
 
 # Connect to Neo4j
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
@@ -138,3 +68,114 @@ def calculate_age(date_of_birth_str):
     return age
 
 
+@main_bp.route("/modify_graph", methods=['GET', 'POST'])
+def modify_graph():
+    """The Add node page"""
+    form = AddNodeForm()
+    
+ # Fetch nodes for the select box for form 
+    with driver.session() as session:
+        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
+        nodes = [(record["name"], record["name"]) for record in result]
+        
+    form.parent.choices = nodes
+    form.new_parent.choices=nodes
+    form.person_to_delete.choices=nodes
+    form.person_to_shift.choices=nodes
+    form.old_name.choices=nodes
+    
+
+
+    if form.validate_on_submit():
+        if form.action.data == "add":
+            with driver.session() as session:
+                # Add node
+                session.run(
+                    "CREATE (n:Person {FullName: $full_name})",
+                    full_name=form.name.data
+                )
+
+                # Build the dynamic query string to add a relationship
+                query = f"""
+                MATCH (a:Person {{FullName: $Parent}}), (b:Person {{FullName: $full_name}})
+                MERGE (a)-[r:Parent]->(b)
+                """
+
+                # Create or update relationship
+                session.run(
+                    query,
+                    full_name=form.name.data,
+                    Parent=form.parent.data
+                )
+
+            print("Data processed. Redirecting to index.")
+            return redirect(url_for("main_bp.tree_page"))
+        else:
+            print("Selected action is not 'Add Person'.")
+
+    else:
+        # Add debugging output
+        print("Form validation failed.")
+        print(form.errors)  # Print form validation errors if any
+    
+    
+    if form.action.data == "edit":
+            with driver.session() as session:
+                # Add node
+                session.run(
+                    """
+                   MATCH (n:Person {FullName: $old_name})
+                   SET n.FullName = $new_name
+                   """,
+    old_name=form.old_name.data,
+    new_name=form.new_name.data
+                )
+            return redirect(url_for("main_bp.tree_page"))
+    
+
+    if form.action.data == "delete":
+        with driver.session() as session:
+        # Delete person logic
+           session.run(
+            """
+            MATCH (n:Person {FullName: $person_to_delete})
+            DETACH DELETE n
+            """,
+            person_to_delete=form.person_to_delete.data
+        )
+        return redirect(url_for("main_bp.tree_page"))
+    
+
+    if form.action.data == "shift":
+        with driver.session() as session:
+              query = f"""
+                MATCH (a:Person {{FullName: $Parent}}), (b:Person {{FullName: $full_name}})
+                MERGE (a)-[r:Parent]->(b)
+                """
+
+                # Create or update relationship
+              session.run(
+                    query,
+                    full_name=form.person_to_shift.data,
+                    Parent=form.new_parent.data
+                )
+          
+        return redirect(url_for("main_bp.tree_page"))
+
+
+
+    return render_template('modify_graph.html', form=form)
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
