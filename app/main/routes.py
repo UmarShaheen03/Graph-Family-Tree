@@ -40,10 +40,9 @@ def biography_page():
 
 
 
-
-NEO4J_URI='neo4j+s://633149e1.databases.neo4j.io'
-NEO4J_USERNAME='neo4j'
-NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
+NEO4J_URI = os.getenv('NEO4J_URI')
+NEO4J_USERNAME = os.getenv('NEO4J_USERNAME')
+NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD')
 
 # Connect to Neo4j
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
