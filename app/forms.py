@@ -17,8 +17,8 @@ class LoginForm(FlaskForm):
 class SignupForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email()])
     username = StringField("Username", validators=[DataRequired()])
-    password = PasswordField("Password", [DataRequired()])
-    repeat = PasswordField("Repeat Password",[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    repeat = PasswordField("Repeat Password", validators=[DataRequired()])
     remember_me = BooleanField("Stay logged in?")
     submit = SubmitField("Sign Up")
 

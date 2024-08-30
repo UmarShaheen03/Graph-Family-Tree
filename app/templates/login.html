@@ -12,7 +12,7 @@
     <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%; padding-bottom:10%;" id="login">    
         <h2 class="text-center">Login</h2>
 
-        <form action="/login-form" method="post" class="container px-4" autocomplete="off">
+        <form action="/login-form" method="post" class="container px-4">
             <div class="form-group" style="width: 100%">
                 {{ loginForm.username_or_email.label }}<br>
                 {{ loginForm.username_or_email(class="form-control", placeholder="Enter Email or Username") }} <br>

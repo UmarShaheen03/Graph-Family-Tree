@@ -36,7 +36,7 @@ def signup_page():
 def login_request():
     form = LoginForm()
 
-    #if form doesn't validate, redirect to signup page
+    #form validation isn't working, so commented out
     #if not form.validate_on_submit():
     #    return render_template("login.html", loginForm=form, error="Invalid form")
     
@@ -59,19 +59,20 @@ def signup_request():
     form = SignupForm()
 
     #if form doesn't validate, redirect to signup page
-    if not form.validate_on_submit():
-        return render_template("signup.html", loginForm=form, error="Invalid form")
+    #if not form.validate_on_submit():
+    #    return render_template("signup.html", signupForm=form, error="Invalid form")
     
     email = request.form.get("email")
     username = request.form.get("username")
     password = request.form.get("password")
     repeat = request.form.get("repeat")
+    remember = request.form.get("remember")
 
     #call signup function in other file
     try:
-        signup(email, username, password, repeat)
+        signup(email, username, password, repeat, remember)
     except SignupError as error:
-        return render_template("signup.html", loginForm=form, error=error)
+        return render_template("signup.html", signupForm=form, error=error)
     
     #currently sends to home page on success
     return home_page()

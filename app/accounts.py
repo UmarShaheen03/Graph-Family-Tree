@@ -13,7 +13,7 @@ class LoginError(Exception):
 def init_database():
     #create tables
     db.create_all()
-    #clear any existing info 
+    #clear any existing info (for testing DO NOT KEEP IN FINAL)
     User.query.delete()
 
     #create mock accounts
@@ -21,7 +21,7 @@ def init_database():
         user_id=0,
         username="test_admin",
         email="admin@test.com",
-        privillege=1,
+        privilege=1,
         password_hash=str(generate_password_hash("admin1234"))
     )
 
@@ -29,48 +29,49 @@ def init_database():
         user_id=1,
         username="test_user",
         email="user@test.com",
-        privillege=0,
+        privilege=0,
         password_hash=str(generate_password_hash("user1234"))
     )
 
     db.session.add(test_admin)
     db.session.add(test_user)
+    db.session.commit()
 
 def signup(email, username, password, repeat, remember):
     if password != repeat:
         raise SignupError("Passwords do not match")
     
-    #TODO: check if email is already in db
-    if False:
+    if db.session.query(User).filter(User.email == email).first() != None:
         raise SignupError("Email already exists")
 
-    #TODO: check if username is already in db
-    if False:
+    if db.session.query(User).filter(User.username == username).first() != None:
         raise SignupError("Username already exists")
     
+    #get a new user_id, +1 to last user_id
+    new_id = db.session.query(User).order_by(User.user_id.desc()).first().user_id + 1
+
     #construct user object
     user = User(
-        user_id = 0, #TODO: change this to an incrementing/random value later
+        user_id = new_id,
         username = username,
         email = email,
-        privillege = 0,
+        privilege = 0 #default privilege is 0, for user level
     )
-    user.set_password(user, password)
+
+    user.set_password(password)
     
-    #TODO: add user to db
+    db.session.add(user)
+    db.session.commit()
 
     login(username, password, remember)
     
 def login(email_or_username, password, remember):
-    current_app.logger.info(str(email_or_username) + "  " + str(password))
     user = db.session.query(User).filter((User.username == email_or_username) | (User.email == email_or_username)).first()
-    current_app.logger.info(user)
 
     if not user:
         raise LoginError("User does not exist")
     
     if not user.check_password(password):
-        raise LoginError("Password is incorrect")
+        raise LoginError("Incorrect password")
     
     login_user(user, remember=remember)
-    
