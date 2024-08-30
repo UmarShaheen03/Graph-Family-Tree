@@ -37,6 +37,7 @@ def login_request():
     form = LoginForm()
 
     #form validation isn't working, so commented out
+    #TODO: figure out why it isn't validating
     #if not form.validate_on_submit():
     #    return render_template("login.html", loginForm=form, error="Invalid form")
     
@@ -44,7 +45,7 @@ def login_request():
     password = request.form.get("password")
     remember = request.form.get("remember")
 
-    #call login function in other file
+    #call login function from other file
     try:
         login(username_or_email, password, remember)
     except LoginError as error:
@@ -58,7 +59,8 @@ def login_request():
 def signup_request():
     form = SignupForm()
 
-    #if form doesn't validate, redirect to signup page
+    #form validation isn't working, so commented out
+    #TODO: figure out why it isn't validating
     #if not form.validate_on_submit():
     #    return render_template("signup.html", signupForm=form, error="Invalid form")
     
@@ -68,7 +70,7 @@ def signup_request():
     repeat = request.form.get("repeat")
     remember = request.form.get("remember")
 
-    #call signup function in other file
+    #call signup function from other file
     try:
         signup(email, username, password, repeat, remember)
     except SignupError as error:

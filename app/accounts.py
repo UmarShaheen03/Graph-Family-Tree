@@ -19,7 +19,7 @@ def init_database():
     #create mock accounts
     test_admin = User(
         user_id=0,
-        username="test_admin",
+        username="admin_test",
         email="admin@test.com",
         privilege=1,
         password_hash=str(generate_password_hash("admin1234"))
@@ -27,12 +27,13 @@ def init_database():
 
     test_user = User(
         user_id=1,
-        username="test_user",
+        username="user_test",
         email="user@test.com",
         privilege=0,
         password_hash=str(generate_password_hash("user1234"))
     )
 
+    #add mock accounts to db
     db.session.add(test_admin)
     db.session.add(test_user)
     db.session.commit()
@@ -47,7 +48,8 @@ def signup(email, username, password, repeat, remember):
     if db.session.query(User).filter(User.username == username).first() != None:
         raise SignupError("Username already exists")
     
-    #get a new user_id, +1 to last user_id
+    #get a new user_id, +1 from the last user_id
+    #TODO: make the user ids more random? harder to guess
     new_id = db.session.query(User).order_by(User.user_id.desc()).first().user_id + 1
 
     #construct user object
