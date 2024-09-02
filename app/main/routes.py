@@ -23,3 +23,7 @@ def tree_page():
 def biography_page():
     """The biography page"""
     return render_template('biography.html')
+
+@main_bp.route("/submit_comment")
+def submit_comment():
+    return render_template('biography.html')
