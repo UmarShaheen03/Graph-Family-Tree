@@ -3,13 +3,13 @@
 {% block headBlock %}
     <!--Shares css page with login-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}"/>
-    <title>Signup Page</title>
+    <title>Signup</title>
 {% endblock %}
 
 {% block bodyBlock %}
 
 <div class="d-md-flex flex-md-row container">
-    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;" id="signup">    
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">    
         <h2 class="text-center">Sign Up</h2>
 
         <form action="/signup-form" method="post" class="container px-4">

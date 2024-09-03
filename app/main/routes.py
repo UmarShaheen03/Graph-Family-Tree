@@ -81,7 +81,13 @@ def signup_request():
 
 @main_bp.route("/forgot")
 def forgot_password_page():
-    return render_template("forgot.html", forgotForm=ForgotPassword)
+    form = ForgotPassword()
+    return render_template("forgot.html", forgotForm=form, submitted=False)
+
+@main_bp.route("/forgot-form", methods=["POST"])
+def forgot_request():
+    form = ForgotPassword()
+    return render_template("forgot.html", forgotForm=form, submitted=True)
 
 
 
