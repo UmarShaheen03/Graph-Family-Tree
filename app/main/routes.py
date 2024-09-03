@@ -1,7 +1,7 @@
 """Main route views"""
 
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
-from app.forms import LoginForm, SignupForm
+from app.forms import LoginForm, SignupForm, ForgotPassword
 from app.accounts import signup, login, SignupError, LoginError, init_database
 
 
@@ -78,6 +78,12 @@ def signup_request():
     
     #currently sends to home page on success
     return home_page()
+
+@main_bp.route("/forgot")
+def forgot_password_page():
+    return render_template("forgot.html", forgotForm=ForgotPassword)
+
+
 
 @main_bp.route("/tree")
 def tree_page():

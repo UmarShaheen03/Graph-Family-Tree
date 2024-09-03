@@ -25,3 +25,7 @@ class SignupForm(FlaskForm):
 
 class AddNodeForm(FlaskForm):
     pass
+
+class ForgotPassword(FlaskForm):
+    email = EmailField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Submit")

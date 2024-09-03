@@ -9,25 +9,25 @@
 {% block bodyBlock %}
 
 <div class="d-md-flex flex-md-row container">
-    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%; padding-bottom:10%;" id="signup">    
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;" id="signup">    
         <h2 class="text-center">Sign Up</h2>
 
         <form action="/signup-form" method="post" class="container px-4">
             <div class="form-group" style="width: 100%">
                 {{ signupForm.email.label }}<br>
-                {{ signupForm.email(class="form-control", placeholder="Enter Email") }} <br>
+                {{ signupForm.email(class="form-control", placeholder="Enter Email") }}
             </div>
             <div class="form-group" style="width: 100%">
                 {{ signupForm.username.label }}<br>
-                {{ signupForm.username(class="form-control", placeholder="Enter Username") }} <br>
+                {{ signupForm.username(class="form-control", placeholder="Enter Username") }}
             </div>
             <div class="form-group" style="width: 100%">
                 {{ signupForm.password.label }}<br>
-                {{ signupForm.password(class="form-control", placeholder="Enter Password") }} <br>
+                {{ signupForm.password(class="form-control", placeholder="Enter Password") }}
             </div>
             <div class="form-group" style="width: 100%">
                 {{ signupForm.repeat.label }}<br>
-                {{ signupForm.repeat(class="form-control", placeholder="Confirm Password") }} <br>
+                {{ signupForm.repeat(class="form-control", placeholder="Confirm Password") }}
             </div>
             <div style="display: flex; justify-content: space-between">
             <p>{{ signupForm.remember_me() }} {{ signupForm.remember_me.label }}</p>
