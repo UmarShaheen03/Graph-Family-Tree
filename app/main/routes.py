@@ -2,7 +2,7 @@
 
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
 from app.forms import LoginForm, SignupForm, ForgotPassword
-from app.accounts import signup, login, SignupError, LoginError, init_database
+from app.accounts import signup, login, SignupError, LoginError, init_database, reset_email
 
 
 main_bp = Blueprint('main_bp', __name__)
@@ -87,6 +87,8 @@ def forgot_password_page():
 @main_bp.route("/forgot-form", methods=["POST"])
 def forgot_request():
     form = ForgotPassword()
+    email = request.form.get("email")
+    reset_email(email)
     return render_template("forgot.html", forgotForm=form, submitted=True)
 
 

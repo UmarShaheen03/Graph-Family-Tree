@@ -3,6 +3,7 @@ from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
 from flask import current_app
+import smtplib
 
 class SignupError(Exception):
     pass
@@ -77,3 +78,11 @@ def login(email_or_username, password, remember):
         raise LoginError("Incorrect password")
     
     login_user(user, remember=remember)
+
+def reset_email(email):
+    user = db.session.query(User).filter(User.email == email).first()
+    if user == None:
+        return #return without error if no matching user, vulnerable if it reports when user does/doesn't exist
+    
+    #TODO send email, with link to specific page to reset password
+    pass
