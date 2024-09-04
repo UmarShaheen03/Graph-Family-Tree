@@ -8,6 +8,8 @@
             max-width: 800px;
             margin: 0 auto;
             padding-top: 40px;
+        
+           
         }
         .biography-header {
             background-color: #343a40;
@@ -82,10 +84,19 @@
             <div class="biography-details">
                 <p><strong>Full Name:</strong>{{full_name if full_name else "None"}}</p>
                 <p><strong>Date of Birth:</strong>{{dob if dob else "None"}}</p>
-                <p><strong>Biography:</strong></p>
+                <p><strong>Biography:</strong>{{bio if bio else "None"}}</p>
                 <p>{{biography if biography else "No additional information"}}</p>
                 <p><strong>Location:</strong> {{location if location else "None"}}</p>
+                <p><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d54157.5747152463!2d115.7934617676004!3d-31.96500869717288!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2a32a4ee6e7380e9%3A0xf04f0b618f28290!2zxJDhuqFpIGjhu41jIFTDonkgw5pj!5e0!3m2!1svi!2sau!4v1724976578679!5m2!1svi!2sau" width="750" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></p>
+                <p><strong>Email:</strong>{{email if email else "None"}}</p> 
+                <p><strong>Phone Number:</strong>{{phone_number if phone_number else "None"}}</p> 
+                <p><strong>Address:</strong>{{address if address else "None"}}</p> 
+                <button type="submit" class="btn btn-custom  ">Edit</button>
+
+             
+            
             </div>
+            
         </div>
     </div>
 
