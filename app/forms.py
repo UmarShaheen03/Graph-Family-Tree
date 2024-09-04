@@ -4,8 +4,7 @@ from wtforms.validators import DataRequired
 from wtforms import EmailField, StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import sqlalchemy as sa
-#from app import db
-#from app.models import User
+from app.models import User
 from wtforms import TextAreaField
 from wtforms.validators import Length
 from flask_login import current_user
@@ -16,6 +15,20 @@ from wtforms.validators import DataRequired, NumberRange, email
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField
+
+class LoginForm(FlaskForm):
+    username_or_email = StringField("Username or Email", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    remember_me = BooleanField("Stay logged in?")
+    submit = SubmitField("Log In")
+    
+class SignupForm(FlaskForm):
+    email = EmailField("Email", validators=[DataRequired(), Email()])
+    username = StringField("Username", validators=[DataRequired()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    repeat = PasswordField("Repeat Password", validators=[DataRequired()])
+    remember_me = BooleanField("Stay logged in?")
+    submit = SubmitField("Sign Up")
 
 class AddNodeForm(FlaskForm):
     action = SelectField(
@@ -65,12 +78,6 @@ class AddNodeForm(FlaskForm):
 
     submit = SubmitField('Submit')
 
-    ####
-
-
-
-
-
 class RelationshipForm(FlaskForm):
     node = SelectField('Node:', choices=[], validators=[DataRequired()])
     relationship_type = StringField('Relationship Type:')
@@ -110,5 +117,3 @@ class AppendGraph(FlaskForm):
     relationship_type= StringField("Address")
     relationships = FieldList(FormField(RelationshipForm), min_entries=1, max_entries=10) 
     submit = SubmitField("Add to Family Tree")
-
-
