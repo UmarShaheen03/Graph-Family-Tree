@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +9,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
-
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -31,7 +31,6 @@
     background-color: #f0f0f0; /* Optional: background color */
     overflow: hidden; /* Prevents scrollbars if content overflows */
 }
-
 .navbar {
     width: 100%; /* Full width of the viewport */
     background-color: #333; /* Background color for the navbar */
@@ -41,52 +40,46 @@
     position: relative;
     z-index: 1000; /* Ensure navbar is on top of other content */
 }
-
 #graph-container {
-    width: 80vw; /* Adjust the width as needed */
-    height: 80vh; /* Adjust the height as needed */
-    border: 1px solid #ccc; /* Optional: border around the container */
-    margin-top: 20px; /* Space between navbar and graph container */
-}
-
-svg {
-    width: 100%;
-    height: 100%;
-}
-
-.node {
-    cursor: pointer;
-    stroke: #fff;
-    stroke-width: 1.5px;
-}
-
-.node:hover {
-    fill: orange;
-}
-
-.link {
-    stroke: #999;
-    stroke-opacity: 0.6;
-}
-
-.edge-label {
-    font-size: 12px;
-    fill: #666;
-    text-anchor: middle;
-}
-
-#tooltip {
-    position: absolute;
-    text-align: center;
-    padding: 4px;
-    font-size: 12px;
-    background: white;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    pointer-events: none;
-    opacity: 0;
-}
-
+            width: 80vw;
+            height: 80vh;
+            border: 1px solid #ccc;
+            overflow: hidden;
+        }
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        .node {
+            cursor: pointer;
+            stroke: #fff;
+            stroke-width: 12px;  /* Very large stroke width */
+        }
+        .node:hover {
+            fill: orange;
+        }
+        .link {
+            stroke: #555;
+            stroke-width: 15px;  /* Very large edge thickness */
+            stroke-opacity: 0.8;
+        }
+        .edge-label {
+            font-size: 100px;  /* Very large font size */
+            fill: #333;
+            font-weight: bold;
+            text-anchor: middle;
+        }
+        #tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 4px;
+            font-size: 12px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            pointer-events: none;
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
@@ -132,47 +125,96 @@ svg {
     
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
-    
+
+    const zoom = d3.zoom()
+        .scaleExtent([0.01, 4])  // Adjusted zoom scale extent for more zoom out
+        .on("zoom", (event) => {
+            svg.attr("transform", event.transform);
+        });
+
     const svg = d3.select("#graph")
         .attr("width", width)
         .attr("height", height)
-        .call(d3.zoom().on("zoom", (event) => {
-            svg.attr("transform", event.transform);
-        }))
-        .append("g");  // Append a group element to enable zooming and panning
-    
+        .call(zoom)  // Apply the zoom behavior to the SVG
+        .append("g");
+
     const tooltip = d3.select("#tooltip");
-    
-    const simulation = d3.forceSimulation(nodes)
-        .force("link", d3.forceLink(links).id(d => d.id).distance(200))  // Increase distance
-        .force("charge", d3.forceManyBody().strength(-500))  // Repulsion force
-        .force("center", d3.forceCenter(width / 2, height / 2));
-    
+
+    // Function to create a circular layout based on Hierarchy
+    function circularLayout(nodes) {
+        const maxHierarchy = d3.max(nodes, d => d.Hierarchy);
+        const radiusStep = 4000;  // Significantly increase radius step to space nodes out more
+
+        // Separate nodes by hierarchy
+        let groupedNodes = d3.groups(nodes, d => d.Hierarchy);
+
+        // Create a small inner circle for hierarchy 1 nodes
+        groupedNodes.forEach(([hierarchy, groupNodes], index) => {
+            let radius;
+            if (hierarchy === 1) {
+                radius = 400;  // Small radius for inner circle
+            } else {
+                radius = hierarchy * radiusStep;  // Larger radius for outer circles
+            }
+
+            const angleStep = (2 * Math.PI) / groupNodes.length;
+            groupNodes.forEach((node, i) => {
+                node.x = Math.cos(i * angleStep) * radius;
+                node.y = Math.sin(i * angleStep) * radius;
+            });
+        });
+
+        // Center view on hierarchy 1 nodes and apply initial zoom
+        const hierarchyOneNodes = nodes.filter(node => node.Hierarchy === 1);
+        if (hierarchyOneNodes.length > 0) {
+            const centerX = d3.mean(hierarchyOneNodes, d => d.x);
+            const centerY = d3.mean(hierarchyOneNodes, d => d.y);
+
+            // Apply initial translation and scale
+            const initialScale = 0.013;  // Adjust scale for zoom out
+            const initialTransform = d3.zoomIdentity
+                .translate(width / 2 - centerX * initialScale, height / 2 - centerY * initialScale)
+                .scale(initialScale);
+            svg.attr("transform", initialTransform);
+            d3.select("#graph").call(zoom.transform, initialTransform);
+        }
+    }
+
+    circularLayout(nodes);
+
     const link = svg.append("g")
-        .attr("stroke", "#999")
-        .attr("stroke-opacity", 0.6)
+        .attr("stroke", "#555")
+        .attr("stroke-opacity", 0.8)
         .selectAll("line")
         .data(links)
         .enter().append("line")
-        .attr("class", "link");
-    
+        .attr("class", "link")
+        .attr("x1", d => nodes.find(node => node.id === d.source).x)
+        .attr("y1", d => nodes.find(node => node.id === d.source).y)
+        .attr("x2", d => nodes.find(node => node.id === d.target).x)
+        .attr("y2", d => nodes.find(node => node.id === d.target).y);
+
     // Add edge labels
     const edgeLabels = svg.append("g")
         .selectAll("text")
         .data(links)
         .enter().append("text")
         .attr("class", "edge-label")
-        .text(d => d.type);  // Display the type of relationship
-    
+        .attr("x", d => (nodes.find(node => node.id === d.source).x + nodes.find(node => node.id === d.target).x) / 2)
+        .attr("y", d => (nodes.find(node => node.id === d.source).y + nodes.find(node => node.id === d.target).y) / 2)
+        //.text(d => d.type);
+
     const node = svg.append("g")
         .attr("stroke", "#fff")
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 12)  // Very large stroke width for node border
         .selectAll("circle")
         .data(nodes)
         .enter().append("circle")
         .attr("class", "node")
-        .attr("r", 30)  // Node size
+        .attr("r", 800)  // Very large node size
         .attr("fill", "steelblue")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
         .on("mouseover", (event, d) => {
             tooltip.transition().duration(200).style("opacity", .9);
             tooltip.html(`
@@ -182,49 +224,17 @@ svg {
                 <strong>Location:</strong> ${d.location}<br>
                 <strong>Email:</strong> ${d.email}<br>
                 <strong>Phone:</strong> ${d.phoneNumber}<br>
-                <strong>Address:</strong> ${d.address}
+                <strong>Address:</strong> ${d.address}<br>
+                <strong>Hierarchy:</strong> ${d.Hierarchy}
             `)
             .style("left", `${event.pageX + 5}px`)
             .style("top", `${event.pageY - 28}px`);
         })
         .on("mouseout", () => {
             tooltip.transition().duration(500).style("opacity", 0);
-        })
-        .call(drag(simulation));
-    
-    simulation.on("tick", () => {
-        link
-            .attr("x1", d => d.source.x)
-            .attr("y1", d => d.source.y)
-            .attr("x2", d => d.target.x)
-            .attr("y2", d => d.target.y);
-    
-        edgeLabels
-            .attr("x", d => (d.source.x + d.target.x) / 2)
-            .attr("y", d => (d.source.y + d.target.y) / 2);
-    
-        node
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y);
-    });
-    
-    function drag(simulation) {
-        return d3.drag()
-            .on("start", (event, d) => {
-                if (!event.active) simulation.alphaTarget(0.3).restart();
-                d.fx = d.x;
-                d.fy = d.y;
-            })
-            .on("drag", (event, d) => {
-                d.fx = event.x;
-                d.fy = event.y;
-            })
-            .on("end", (event, d) => {
-                if (!event.active) simulation.alphaTarget(0);
-                d.fx = null;
-                d.fy = null;
-            });
-    }
+        });
+
 </script>
 </body>
 </html>
+

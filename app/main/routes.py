@@ -37,22 +37,21 @@ def biography_page():
     return render_template('biography.html')
 
 
+NEO4J_URI='neo4j+s://633149e1.databases.neo4j.io'
+NEO4J_USERNAME='neo4j'
+NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
 
-
-
-NEO4J_URI = os.getenv('NEO4J_URI')
-NEO4J_USERNAME = os.getenv('NEO4J_USERNAME')
-NEO4J_PASSWORD = os.getenv('NEO4J_PASSWORD')
 
 # Connect to Neo4j
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+
 
 
 def fetch_data():
     with driver.session() as session:
         nodes_result = session.run("MATCH (n:Person) RETURN n ")
         relationships_result = session.run("MATCH (a)-[r]->(b) RETURN a, r, b ")
-        nodes = [{'id': record['n'].id, 'name': record['n']['FullName'], 'age': record['n']['Age'], 'about': record['n']['About'], 'location': record['n']['Location'], 'email': record['n']['Email'], 'phoneNumber': record['n']['PhoneNumber'], 'address': record['n']['Address']} for record in nodes_result]
+        nodes = [{'id': record['n'].id, 'name': record['n']['FullName'], 'age': record['n']['Age'], 'about': record['n']['About'], 'location': record['n']['Location'], 'email': record['n']['Email'], 'phoneNumber': record['n']['PhoneNumber'], 'address': record['n']['Address'],'Hierarchy': record['n']['Hierarchy']} for record in nodes_result]
         relationships = [{'source': record['a'].id, 'target': record['b'].id, 'type': record['r'].type} for record in relationships_result]
     return nodes, relationships
 
