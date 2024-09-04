@@ -1,0 +1,25 @@
+#sidebar {
+    position: fixed;
+    /* z-index: 1000; */
+    display: block;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+
+/* #newPersonForm {
+    overflow-x: hidden;
+    overflow-y: auto;
+} */
+
+/* .container {
+    /* Center child horizontally*/
+    display: flex;
+    justify-content: center;
+} */
+
+@media (min-width: 768px) {
+    #sidebar {
+        height: max-content;
+    }
+}
