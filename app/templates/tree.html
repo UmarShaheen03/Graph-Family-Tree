@@ -1,46 +1,21 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graph Family Tree</title>
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <title>Family Tree </title>
     <style>
         body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column; /* Stack navbar and graph container vertically */
-    align-items: center;
-    height: 100vh; /* Full viewport height */
-    background-color: #f0f0f0; /* Optional: background color */
-    overflow: hidden; /* Prevents scrollbars if content overflows */
-}
-.navbar {
-    width: 100%; /* Full width of the viewport */
-    background-color: #333; /* Background color for the navbar */
-    color: #fff; /* Text color for the navbar */
-    padding: 10px 0; /* Padding for spacing */
-    text-align: center; /* Center text inside the navbar */
-    position: relative;
-    z-index: 1000; /* Ensure navbar is on top of other content */
-}
-#graph-container {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            overflow: hidden;
+        }
+        #graph-container {
             width: 80vw;
             height: 80vh;
             border: 1px solid #ccc;
@@ -53,21 +28,12 @@
         .node {
             cursor: pointer;
             stroke: #fff;
-            stroke-width: 12px;  /* Very large stroke width */
-        }
-        .node:hover {
-            fill: orange;
+            stroke-width: 2px;
         }
         .link {
             stroke: #555;
-            stroke-width: 15px;  /* Very large edge thickness */
+            stroke-width: 2px;
             stroke-opacity: 0.8;
-        }
-        .edge-label {
-            font-size: 100px;  /* Very large font size */
-            fill: #333;
-            font-weight: bold;
-            text-anchor: middle;
         }
         #tooltip {
             position: absolute;
@@ -83,158 +49,146 @@
     </style>
 </head>
 <body>
-    <div class="navbar">
-        <nav class="navbar navbar-expand-lg bg-dark navbar-dark navbar-custom">
-            <a class="navbar-brand w-auto" href="{{ url_for('main_bp.home_page')}}">「Family Tree」</a>
-            <button class="navbar-toggler justify-content-end w-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end w-auto" id="navbarResponsive">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.home_page') }}">Home</a>
-                    </li>
-                    <li>
-                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.login_page') }}">Login</a>
-                    </li>
-                    <li>
-                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.tree_page') }}">Tree</a>
-                    </li>
-                    <li>
-                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.biography_page') }}">Biography</a>
-                    </li>
-                    <li>
-                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.modify_graph') }}">Modify</a>
-                    </li>
-                    
-                </ul>
-            </div>
-        </nav>
-</div>
-<div class="container">
-    <h1>Interactive Graph</h1>
     <div id="graph-container">
         <svg id="graph"></svg>
     </div>
     <div id="tooltip"></div>
-</div>
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script>
-    var nodes = {{ nodes|tojson }};
-    var links = {{ relationships|tojson }};
-    
-    const width = document.getElementById('graph-container').clientWidth;
-    const height = document.getElementById('graph-container').clientHeight;
 
-    const zoom = d3.zoom()
-        .scaleExtent([0.01, 4])  // Adjusted zoom scale extent for more zoom out
-        .on("zoom", (event) => {
-            svg.attr("transform", event.transform);
-        });
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        var nodes = {{ nodes|tojson }};
+        var links = {{ relationships|tojson }};
+        
+        const width = document.getElementById('graph-container').clientWidth;
+        const height = document.getElementById('graph-container').clientHeight;
+        const centerX = width / 2;
+        const centerY = height / 2;
 
-    const svg = d3.select("#graph")
-        .attr("width", width)
-        .attr("height", height)
-        .call(zoom)  // Apply the zoom behavior to the SVG
-        .append("g");
-
-    const tooltip = d3.select("#tooltip");
-
-    // Function to create a circular layout based on Hierarchy
-    function circularLayout(nodes) {
-        const maxHierarchy = d3.max(nodes, d => d.Hierarchy);
-        const radiusStep = 4000;  // Significantly increase radius step to space nodes out more
-
-        // Separate nodes by hierarchy
-        let groupedNodes = d3.groups(nodes, d => d.Hierarchy);
-
-        // Create a small inner circle for hierarchy 1 nodes
-        groupedNodes.forEach(([hierarchy, groupNodes], index) => {
-            let radius;
-            if (hierarchy === 1) {
-                radius = 400;  // Small radius for inner circle
-            } else {
-                radius = hierarchy * radiusStep;  // Larger radius for outer circles
-            }
-
-            const angleStep = (2 * Math.PI) / groupNodes.length;
-            groupNodes.forEach((node, i) => {
-                node.x = Math.cos(i * angleStep) * radius;
-                node.y = Math.sin(i * angleStep) * radius;
+        // Setup zoom
+        const zoom = d3.zoom()
+            .scaleExtent([0.01, 4])
+            .on("zoom", (event) => {
+                svg.attr("transform", event.transform);
             });
-        });
-
-        // Center view on hierarchy 1 nodes and apply initial zoom
-        const hierarchyOneNodes = nodes.filter(node => node.Hierarchy === 1);
-        if (hierarchyOneNodes.length > 0) {
-            const centerX = d3.mean(hierarchyOneNodes, d => d.x);
-            const centerY = d3.mean(hierarchyOneNodes, d => d.y);
-
-            // Apply initial translation and scale
-            const initialScale = 0.013;  // Adjust scale for zoom out
-            const initialTransform = d3.zoomIdentity
-                .translate(width / 2 - centerX * initialScale, height / 2 - centerY * initialScale)
-                .scale(initialScale);
-            svg.attr("transform", initialTransform);
-            d3.select("#graph").call(zoom.transform, initialTransform);
+    
+        const svg = d3.select("#graph")
+            .attr("width", width)
+            .attr("height", height)
+            .call(zoom)
+            .append("g");
+    
+        // Tooltip setup
+        const tooltip = d3.select("#tooltip")
+            .style("opacity", 0);  // Initially hidden
+    
+        
+    
+        // Group nodes by hierarchy level
+        function groupNodesByHierarchy(nodes) {
+            return d3.group(nodes, d => d.hierarchy);
         }
-    }
-
-    circularLayout(nodes);
-
-    const link = svg.append("g")
-        .attr("stroke", "#555")
-        .attr("stroke-opacity", 0.8)
-        .selectAll("line")
-        .data(links)
-        .enter().append("line")
-        .attr("class", "link")
-        .attr("x1", d => nodes.find(node => node.id === d.source).x)
-        .attr("y1", d => nodes.find(node => node.id === d.source).y)
-        .attr("x2", d => nodes.find(node => node.id === d.target).x)
-        .attr("y2", d => nodes.find(node => node.id === d.target).y);
-
-    // Add edge labels
-    const edgeLabels = svg.append("g")
-        .selectAll("text")
-        .data(links)
-        .enter().append("text")
-        .attr("class", "edge-label")
-        .attr("x", d => (nodes.find(node => node.id === d.source).x + nodes.find(node => node.id === d.target).x) / 2)
-        .attr("y", d => (nodes.find(node => node.id === d.source).y + nodes.find(node => node.id === d.target).y) / 2)
-        //.text(d => d.type);
-
-    const node = svg.append("g")
-        .attr("stroke", "#fff")
-        .attr("stroke-width", 12)  // Very large stroke width for node border
-        .selectAll("circle")
-        .data(nodes)
-        .enter().append("circle")
-        .attr("class", "node")
-        .attr("r", 800)  // Very large node size
-        .attr("fill", "steelblue")
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y)
-        .on("mouseover", (event, d) => {
-            tooltip.transition().duration(200).style("opacity", .9);
-            tooltip.html(`
-                <strong>Name:</strong> ${d.name}<br>
-                <strong>Age:</strong> ${d.age}<br>
-                <strong>About:</strong> ${d.about}<br>
-                <strong>Location:</strong> ${d.location}<br>
-                <strong>Email:</strong> ${d.email}<br>
-                <strong>Phone:</strong> ${d.phoneNumber}<br>
-                <strong>Address:</strong> ${d.address}<br>
-                <strong>Hierarchy:</strong> ${d.Hierarchy}
-            `)
-            .style("left", `${event.pageX + 5}px`)
-            .style("top", `${event.pageY - 28}px`);
-        })
-        .on("mouseout", () => {
-            tooltip.transition().duration(500).style("opacity", 0);
-        });
-
-</script>
+    
+        // Calculate dynamic radius for each hierarchy based on node count
+        function calculateDynamicRadius(hierarchy, totalHierarchies, nodeCount) {
+            // A basic formula to increase radius dynamically based on hierarchy and node count
+            const baseRadius = 150;  // Minimum radius
+            return baseRadius + (hierarchy * 50) + (nodeCount * 2);  // Increase radius slightly with node count
+        }
+    
+        // Circular layout with parent-child alignment
+        function visualizeGraph(nodes, links) {
+            const groupedNodes = groupNodesByHierarchy(nodes);
+    
+            // Place nodes in a relaxed circular fashion by hierarchy
+            groupedNodes.forEach((group, hierarchy) => {
+                const nodeCount = group.length;
+                const angleStep = (2 * Math.PI) / nodeCount;
+                const radius = calculateDynamicRadius(hierarchy, groupedNodes.size, nodeCount);
+    
+                group.forEach((node, i) => {
+                    const angle = i * angleStep;
+                    node.x = centerX + Math.cos(angle) * radius;
+                    node.y = centerY + Math.sin(angle) * radius;
+                    node.angle = angle;
+                });
+            });
+    
+            // Filter out links where the source and target are in the same hierarchy
+            const validLinks = links.filter(link => {
+                const sourceNode = nodes.find(node => node.name === link.source);
+                const targetNode = nodes.find(node => node.name === link.target);
+                return sourceNode.hierarchy !== targetNode.hierarchy;
+            });
+    
+            // Draw links between nodes
+            svg.selectAll(".link")
+                .data(validLinks)
+                .enter().append("line")
+                .attr("class", "link")
+                .attr("x1", d => nodes.find(node => node.name === d.source).x)
+                .attr("y1", d => nodes.find(node => node.name === d.source).y)
+                .attr("x2", d => nodes.find(node => node.name === d.target).x)
+                .attr("y2", d => nodes.find(node => node.name === d.target).y)
+                .attr("stroke", "#ccc");
+    
+            // Draw nodes with drag behavior
+            const nodeElements = svg.selectAll(".node")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .on("mouseover", function (event, d) {
+                    tooltip.transition().duration(200).style("opacity", 0.9);
+                    tooltip.html(d.name)  // Display node name in tooltip
+                        .style("left", (event.pageX + 5) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function () {
+                    tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
+                })
+                .call(d3.drag() 
+                    .on("start", function (event, d) {
+                        d3.select(this).raise().classed("active", true);
+                    })
+                    .on("drag", function (event, d) {
+                        d.x = event.x;
+                        d.y = event.y;
+                        d3.select(this).select("circle").attr("cx", d.x).attr("cy", d.y);
+                        d3.select(this).select("text").attr("x", d.x + 10).attr("y", d.y);
+                        svg.selectAll(".link")
+                            .filter(link => link.source === d.name || link.target === d.name)
+                            .attr("x1", link => nodes.find(node => node.name === link.source).x)
+                            .attr("y1", link => nodes.find(node => node.name === link.source).y)
+                            .attr("x2", link => nodes.find(node => node.name === link.target).x)
+                            .attr("y2", link => nodes.find(node => node.name === link.target).y);
+                    })
+                    .on("end", function (event, d) {
+                        d3.select(this).classed("active", false);
+                    })
+                );
+    
+            // Add circle for each node
+            nodeElements.append("circle")
+                .attr("r", 15)
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y)
+                .attr("fill", d => color(d.hierarchy));
+    
+            // Add text label for each node showing the hierarchy number
+            nodeElements.append("text")
+                .attr("x", d => d.x + 10)
+                .attr("y", d => d.y)
+                .text(d => "H" + d.hierarchy)
+                .attr("font-size", "12px")
+                .attr("fill", "#000");
+        }
+    
+        visualizeGraph(nodes, links);
+    </script>
+    
 </body>
 </html>
+
+
+
+
 

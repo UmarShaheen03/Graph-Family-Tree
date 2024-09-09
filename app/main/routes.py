@@ -109,12 +109,52 @@ driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 
 def fetch_data():
+    # Queries for each hierarchy from 1 to 4
+    queries = [   """ MATCH (root:Person {Hierarchy: 1})-[:PARENT_OF]->(child:Person {Hierarchy: 2})
+        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
+        """,
+        """
+        MATCH (root:Person {Hierarchy: 2})-[:PARENT_OF]->(child:Person {Hierarchy: 3})
+        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
+        ""","""
+        MATCH (root:Person {Hierarchy: 3})-[:PARENT_OF]->(child:Person {Hierarchy: 4})
+        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
+        ""","""
+        MATCH (root:Person {Hierarchy: 4})-[:PARENT_OF]->(child:Person {Hierarchy: 5})
+        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
+        ""","""
+        MATCH (root:Person {Hierarchy: 5})-[:PARENT_OF]->(child:Person {Hierarchy: 6})
+        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
+        ""","""
+        MATCH (root:Person {Hierarchy: 6})-[:PARENT_OF]->(child:Person {Hierarchy: 7})
+        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
+        """
+        ]
+
+    nodes = []
+    links = []
+
+    # Execute each query for the respective hierarchies
     with driver.session() as session:
-        nodes_result = session.run("MATCH (n:Person) RETURN n ")
-        relationships_result = session.run("MATCH (a)-[r]->(b) RETURN a, r, b ")
-        nodes = [{'id': record['n'].id, 'name': record['n']['FullName'], 'age': record['n']['Age'], 'about': record['n']['About'], 'location': record['n']['Location'], 'email': record['n']['Email'], 'phoneNumber': record['n']['PhoneNumber'], 'address': record['n']['Address'],'Hierarchy': record['n']['Hierarchy']} for record in nodes_result]
-        relationships = [{'source': record['a'].id, 'target': record['b'].id, 'type': record['r'].type} for record in relationships_result]
-    return nodes, relationships
+        for query in queries:
+            result = session.run(query)
+            for record in result:
+                root_name = record["rootName"]
+                children = record["children"]
+                hierarchy = record["child.Hierarchy"]
+
+                # Add root node (ensure no duplicate nodes are added)
+                if not any(node['name'] == root_name for node in nodes):
+                    nodes.append({'name': root_name, 'hierarchy': hierarchy - 1})  # Parent's hierarchy is one less than child
+
+                # Add children and links to parents, ensuring no intra-hierarchy links
+                for child in children:
+                    if not any(node['name'] == child for node in nodes):
+                        nodes.append({'name': child, 'hierarchy': hierarchy})
+                    if hierarchy - 1 > 0:  # Ensure root is from a different hierarchy than the child
+                        links.append({'source': root_name, 'target': child})
+
+    return nodes, links
 
 
 def calculate_age(date_of_birth_str):
@@ -126,38 +166,49 @@ def calculate_age(date_of_birth_str):
             print(f"Calculated Age: {age}",date_of_birth_str)
     return age
 
-
 @main_bp.route("/modify_graph", methods=['GET', 'POST'])
 def modify_graph():
     """The Add node page"""
     form = AddNodeForm()
     
- # Fetch nodes for the select box for form 
+    # Fetch nodes for the select box for form 
     with driver.session() as session:
         result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
         nodes = [(record["name"], record["name"]) for record in result]
         
     form.parent.choices = nodes
-    form.new_parent.choices=nodes
-    form.person_to_delete.choices=nodes
-    form.person_to_shift.choices=nodes
-    form.old_name.choices=nodes
-    
-
+    form.new_parent.choices = nodes
+    form.person_to_delete.choices = nodes
+    form.person_to_shift.choices = nodes
+    form.old_name.choices = nodes
 
     if form.validate_on_submit():
         if form.action.data == "add":
             with driver.session() as session:
-                # Add node
+                # Retrieve the parent's hierarchy
+                parent_hierarchy_query = """
+                MATCH (p:Person {FullName: $Parent})
+                RETURN p.Hierarchy AS parent_hierarchy
+                """
+                parent_result = session.run(
+                    parent_hierarchy_query, Parent=form.parent.data
+                )
+                
+                parent_hierarchy = parent_result.single()["parent_hierarchy"]
+
+                # Add new node with hierarchy as parent's hierarchy + 1
                 session.run(
-                    "CREATE (n:Person {FullName: $full_name})",
-                    full_name=form.name.data
+                    """
+                    CREATE (n:Person {FullName: $full_name, Hierarchy: $new_hierarchy})
+                    """,
+                    full_name=form.name.data,
+                    new_hierarchy=parent_hierarchy + 1  # Child's hierarchy is parent's + 1
                 )
 
                 # Build the dynamic query string to add a relationship
-                query = f"""
-                MATCH (a:Person {{FullName: $Parent}}), (b:Person {{FullName: $full_name}})
-                MERGE (a)-[r:Parent]->(b)
+                query = """
+                MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
+                MERGE (a)-[r:PARENT_OF]->(b)
                 """
 
                 # Create or update relationship
@@ -171,11 +222,11 @@ def modify_graph():
             return redirect(url_for("main_bp.tree_page"))
         else:
             print("Selected action is not 'Add Person'.")
-
     else:
         # Add debugging output
         print("Form validation failed.")
         print(form.errors)  # Print form validation errors if any
+
     
     
     if form.action.data == "edit":
@@ -204,23 +255,38 @@ def modify_graph():
         )
         return redirect(url_for("main_bp.tree_page"))
     
-
     if form.action.data == "shift":
         with driver.session() as session:
-              query = f"""
-                MATCH (a:Person {{FullName: $Parent}}), (b:Person {{FullName: $full_name}})
-                MERGE (a)-[r:Parent]->(b)
-                """
+        # Retrieve the new parent's hierarchy
+            parent_hierarchy_query = """
+        MATCH (p:Person {FullName: $Parent})
+        RETURN p.Hierarchy AS parent_hierarchy
+        """
+            parent_result = session.run(parent_hierarchy_query, Parent=form.new_parent.data)
+            parent_hierarchy = parent_result.single()["parent_hierarchy"]
 
-                # Create or update relationship
-              session.run(
-                    query,
-                    full_name=form.person_to_shift.data,
-                    Parent=form.new_parent.data
-                )
-          
-        return redirect(url_for("main_bp.tree_page"))
+        # Update the hierarchy of the person being shifted
+            update_hierarchy_query = """
+            MATCH (b:Person {FullName: $full_name})
+            SET b.Hierarchy = $new_hierarchy
+            """
+            session.run(
+            update_hierarchy_query,
+            full_name=form.person_to_shift.data,
+            new_hierarchy=parent_hierarchy + 1  # New hierarchy is parent's hierarchy + 1
+        )
 
+        # Create or update the relationship between the new parent and the person being shifted
+            update_relationship_query = """
+        MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
+        MERGE (a)-[r:PARENT_OF]->(b)
+        """
+            session.run(
+                update_relationship_query,
+                full_name=form.person_to_shift.data,
+                Parent=form.new_parent.data
+        )
 
-
+            print("Person shifted and hierarchy updated. Redirecting to index.")
+            return redirect(url_for("main_bp.tree_page"))
     return render_template('modify_graph.html', form=form)
