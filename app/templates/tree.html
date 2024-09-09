@@ -1,21 +1,47 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Tree </title>
+    <title>Graph Family Tree</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/base.css') }}">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     <style>
         body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f0f0f0;
-            overflow: hidden;
-        }
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column; /* Stack navbar and graph container vertically */
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+    background-color: #f0f0f0; /* Optional: background color */
+    overflow: hidden; /* Prevents scrollbars if content overflows */
+}
+.navbar {
+    width: 100%; /* Full width of the viewport */
+    background-color: #333; /* Background color for the navbar */
+    color: #fff; /* Text color for the navbar */
+    padding: 10px 0; /* Padding for spacing */
+    text-align: center; /* Center text inside the navbar */
+    position: relative;
+    z-index: 1000; /* Ensure navbar is on top of other content */
+}
         #graph-container {
+            background-color: grey;
             width: 80vw;
             height: 80vh;
             border: 1px solid #ccc;
@@ -31,9 +57,15 @@
             stroke-width: 2px;
         }
         .link {
-            stroke: #555;
+            stroke: #ccc;
             stroke-width: 2px;
             stroke-opacity: 0.8;
+            visibility: hidden; /* Hide edges by default */
+        }
+        .highlighted {
+            stroke: #ff5722; /* Highlight color */
+            stroke-width: 3px;
+            visibility: visible; /* Make edges visible when highlighted */
         }
         #tooltip {
             position: absolute;
@@ -49,144 +81,178 @@
     </style>
 </head>
 <body>
+    <div class="navbar">
+        <nav class="navbar navbar-expand-lg bg-dark navbar-dark navbar-custom">
+            <a class="navbar-brand w-auto" href="{{ url_for('main_bp.home_page')}}">「Family Tree」</a>
+            <button class="navbar-toggler justify-content-end w-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end w-auto" id="navbarResponsive">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.home_page') }}">Home</a>
+                    </li>
+                    <li>
+                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.login_page') }}">Login</a>
+                    </li>
+                    <li>
+                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.tree_page') }}">Tree</a>
+                    </li>
+                    <li>
+                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.biography_page') }}">Biography</a>
+                    </li>
+                    <li>
+                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.modify_graph') }}">Modify</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </nav>
+</div>
+<div class="container">
+    <h1>Interactive Family Tree</h1>
     <div id="graph-container">
         <svg id="graph"></svg>
     </div>
     <div id="tooltip"></div>
-
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script>
-        var nodes = {{ nodes|tojson }};
-        var links = {{ relationships|tojson }};
+</div>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    var nodes = {{ nodes|tojson }};
+    var links = {{ relationships|tojson }};
+    const width = document.getElementById('graph-container').clientWidth;
+    const height = document.getElementById('graph-container').clientHeight;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radiusStep = 200;
+    // Filter out links where the hierarchy difference is not 1
+    links = links.filter(link => {
+        const sourceNode = nodes.find(n => n.name === link.source);
+        const targetNode = nodes.find(n => n.name === link.target);
+        return Math.abs(sourceNode.hierarchy - targetNode.hierarchy) === 1;
+    });
+    // Setup zoom
+    const zoom = d3.zoom()
+        .scaleExtent([0.01, 4])
+        .on("zoom", (event) => {
+            svg.attr("transform", event.transform);
+        });
+    const svg = d3.select("#graph")
+        .attr("width", width)
+        .attr("height", height)
+        .call(zoom)
+        .append("g");
+    // Tooltip setup
+    const tooltip = d3.select("#tooltip")
+        .style("opacity", 0);  // Initially hidden
+    // Color scale based on hierarchy
+    const color = d3.scaleOrdinal()
+        .domain([1, 2, 3])
+        .range(["steelblue", "green", "orange", "gold", "deepskyblue", "blueviolet", "hotpink"]);
         
-        const width = document.getElementById('graph-container').clientWidth;
-        const height = document.getElementById('graph-container').clientHeight;
-        const centerX = width / 2;
-        const centerY = height / 2;
-
-        // Setup zoom
-        const zoom = d3.zoom()
-            .scaleExtent([0.01, 4])
-            .on("zoom", (event) => {
-                svg.attr("transform", event.transform);
+    // Group nodes by hierarchy level
+    function groupNodesByHierarchy(nodes) {
+        return d3.group(nodes, d => d.hierarchy);
+    }
+    // Circular layout with parent-child alignment
+    function visualizeGraph(nodes, links) {
+        const groupedNodes = groupNodesByHierarchy(nodes);
+        // Place nodes in a circular fashion by hierarchy
+        groupedNodes.forEach((group, hierarchy) => {
+            const angleStep = (2 * Math.PI) / group.length;
+            const radius = hierarchy * radiusStep;
+            group.forEach((node, i) => {
+                const angle = i * angleStep;
+                node.x = centerX + Math.cos(angle) * radius;
+                node.y = centerY + Math.sin(angle) * radius;
+                node.angle = angle;
             });
-    
-        const svg = d3.select("#graph")
-            .attr("width", width)
-            .attr("height", height)
-            .call(zoom)
-            .append("g");
-    
-        // Tooltip setup
-        const tooltip = d3.select("#tooltip")
-            .style("opacity", 0);  // Initially hidden
-    
-        
-    
-        // Group nodes by hierarchy level
-        function groupNodesByHierarchy(nodes) {
-            return d3.group(nodes, d => d.hierarchy);
-        }
-    
-        // Calculate dynamic radius for each hierarchy based on node count
-        function calculateDynamicRadius(hierarchy, totalHierarchies, nodeCount) {
-            // A basic formula to increase radius dynamically based on hierarchy and node count
-            const baseRadius = 150;  // Minimum radius
-            return baseRadius + (hierarchy * 50) + (nodeCount * 2);  // Increase radius slightly with node count
-        }
-    
-        // Circular layout with parent-child alignment
-        function visualizeGraph(nodes, links) {
-            const groupedNodes = groupNodesByHierarchy(nodes);
-    
-            // Place nodes in a relaxed circular fashion by hierarchy
-            groupedNodes.forEach((group, hierarchy) => {
-                const nodeCount = group.length;
-                const angleStep = (2 * Math.PI) / nodeCount;
-                const radius = calculateDynamicRadius(hierarchy, groupedNodes.size, nodeCount);
-    
-                group.forEach((node, i) => {
-                    const angle = i * angleStep;
-                    node.x = centerX + Math.cos(angle) * radius;
-                    node.y = centerY + Math.sin(angle) * radius;
-                    node.angle = angle;
-                });
-            });
-    
-            // Filter out links where the source and target are in the same hierarchy
-            const validLinks = links.filter(link => {
-                const sourceNode = nodes.find(node => node.name === link.source);
-                const targetNode = nodes.find(node => node.name === link.target);
-                return sourceNode.hierarchy !== targetNode.hierarchy;
-            });
-    
-            // Draw links between nodes
+        });
+        // Add links (hidden by default)
+        const linkElements = svg.selectAll(".link")
+            .data(links)
+            .enter().append("line")
+            .attr("class", "link")
+            .attr("x1", d => nodes.find(node => node.name === d.source).x)
+            .attr("y1", d => nodes.find(node => node.name === d.source).y)
+            .attr("x2", d => nodes.find(node => node.name === d.target).x)
+            .attr("y2", d => nodes.find(node => node.name === d.target).y);
+        // Draw nodes
+        const nodeElements = svg.selectAll(".node")
+            .data(nodes)
+            .enter().append("g")
+            .attr("class", "node")
+            .on("mouseover", function (event, d) {
+                tooltip.transition().duration(200).style("opacity", 0.9);
+                tooltip.html(d.name)  // Display node name in tooltip
+                    .style("left", (event.pageX + 5) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+                // Highlight the node's direct connections
+                highlightConnections(d.name);
+            })
+            .on("mouseout", function () {
+                tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
+                // Remove highlighting on mouse out
+                unhighlightConnections();
+            })
+            .call(d3.drag()
+                .on("start", function (event, d) {
+                    d3.select(this).raise().classed("active", true);
+                })
+                .on("drag", function (event, d) {
+                    d.x = event.x;
+                    d.y = event.y;
+                    d3.select(this).select("circle").attr("cx", d.x).attr("cy", d.y);
+                    d3.select(this).select("text").attr("x", d.x + 30).attr("y", d.y + 5); // Adjusted label position
+                    svg.selectAll(".link")
+                        .filter(link => link.source === d.name || link.target === d.name)
+                        .attr("x1", link => nodes.find(node => node.name === link.source).x)
+                        .attr("y1", link => nodes.find(node => node.name === link.source).y)
+                        .attr("x2", link => nodes.find(node => node.name === link.target).x)
+                        .attr("y2", link => nodes.find(node => node.name === link.target).y);
+                })
+                .on("end", function (event, d) {
+                    d3.select(this).classed("active", false);
+                })
+            );
+        // Add circle for each node with increased size
+        nodeElements.append("circle")
+            .attr("r", 25)  // Increased radius for better visibility
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y)
+            .attr("fill", d => color(d.hierarchy));
+        // Add text label for each node showing the name of the node
+        nodeElements.append("text")
+            .attr("x", d => d.x + 30)  // Position label slightly to the right
+            .attr("y", d => d.y + 5)  // Center vertically to the node
+            .text(d => d.name)  // Show node name
+            .attr("font-size", "14px")
+            .attr("fill", "#000");
+        // Function to highlight the direct lineage and cascade connections
+        function highlightConnections(nodeName) {
+            // Highlight the edges and nodes directly connected to the hovered node (no cascading)
             svg.selectAll(".link")
-                .data(validLinks)
-                .enter().append("line")
-                .attr("class", "link")
-                .attr("x1", d => nodes.find(node => node.name === d.source).x)
-                .attr("y1", d => nodes.find(node => node.name === d.source).y)
-                .attr("x2", d => nodes.find(node => node.name === d.target).x)
-                .attr("y2", d => nodes.find(node => node.name === d.target).y)
-                .attr("stroke", "#ccc");
-    
-            // Draw nodes with drag behavior
-            const nodeElements = svg.selectAll(".node")
-                .data(nodes)
-                .enter().append("g")
-                .attr("class", "node")
-                .on("mouseover", function (event, d) {
-                    tooltip.transition().duration(200).style("opacity", 0.9);
-                    tooltip.html(d.name)  // Display node name in tooltip
-                        .style("left", (event.pageX + 5) + "px")
-                        .style("top", (event.pageY - 28) + "px");
-                })
-                .on("mouseout", function () {
-                    tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
-                })
-                .call(d3.drag() 
-                    .on("start", function (event, d) {
-                        d3.select(this).raise().classed("active", true);
-                    })
-                    .on("drag", function (event, d) {
-                        d.x = event.x;
-                        d.y = event.y;
-                        d3.select(this).select("circle").attr("cx", d.x).attr("cy", d.y);
-                        d3.select(this).select("text").attr("x", d.x + 10).attr("y", d.y);
-                        svg.selectAll(".link")
-                            .filter(link => link.source === d.name || link.target === d.name)
-                            .attr("x1", link => nodes.find(node => node.name === link.source).x)
-                            .attr("y1", link => nodes.find(node => node.name === link.source).y)
-                            .attr("x2", link => nodes.find(node => node.name === link.target).x)
-                            .attr("y2", link => nodes.find(node => node.name === link.target).y);
-                    })
-                    .on("end", function (event, d) {
-                        d3.select(this).classed("active", false);
-                    })
-                );
-    
-            // Add circle for each node
-            nodeElements.append("circle")
-                .attr("r", 15)
-                .attr("cx", d => d.x)
-                .attr("cy", d => d.y)
-                .attr("fill", d => color(d.hierarchy));
-    
-            // Add text label for each node showing the hierarchy number
-            nodeElements.append("text")
-                .attr("x", d => d.x + 10)
-                .attr("y", d => d.y)
-                .text(d => "H" + d.hierarchy)
-                .attr("font-size", "12px")
-                .attr("fill", "#000");
+                .filter(link => link.source === nodeName || link.target === nodeName)
+                .classed("highlighted", true);
+            // Highlight the connected nodes
+            svg.selectAll(".node")
+                .filter(node => node.name === nodeName || links.some(link => (link.source === nodeName && link.target === node.name) || (link.target === nodeName && link.source === node.name)))
+                .select("circle")
+                .attr("fill", "#ff5722"); // Change color of highlighted nodes
         }
-    
-        visualizeGraph(nodes, links);
-    </script>
-    
+        // Function to reset the highlights
+        function unhighlightConnections() {
+            // Reset the edges and nodes back to normal
+            svg.selectAll(".link").classed("highlighted", false);
+            svg.selectAll(".node").select("circle")
+                .attr("fill", d => color(d.hierarchy)); // Reset node colors
+        }
+    }
+    visualizeGraph(nodes, links);
+</script>
 </body>
 </html>
+
 
 
 
