@@ -107,55 +107,45 @@ NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 
-
 def fetch_data():
-    # Queries for each hierarchy from 1 to 4
-    queries = [   """ MATCH (root:Person {Hierarchy: 1})-[:PARENT_OF]->(child:Person {Hierarchy: 2})
-        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
-        """,
-        """
-        MATCH (root:Person {Hierarchy: 2})-[:PARENT_OF]->(child:Person {Hierarchy: 3})
-        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
-        ""","""
-        MATCH (root:Person {Hierarchy: 3})-[:PARENT_OF]->(child:Person {Hierarchy: 4})
-        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
-        ""","""
-        MATCH (root:Person {Hierarchy: 4})-[:PARENT_OF]->(child:Person {Hierarchy: 5})
-        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
-        ""","""
-        MATCH (root:Person {Hierarchy: 5})-[:PARENT_OF]->(child:Person {Hierarchy: 6})
-        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
-        ""","""
-        MATCH (root:Person {Hierarchy: 6})-[:PARENT_OF]->(child:Person {Hierarchy: 7})
-        RETURN root.FullName AS rootName, collect(child.FullName) AS children, child.Hierarchy 
-        """
-        ]
+    # Query all nodes, including their Lineage property
+    node_query = """
+        MATCH (p:Person)
+        RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
+    """
+
+    # Query all relationships
+    relationship_query = """
+        MATCH (p:Person)-[r:PARENT_OF]->(c:Person)
+        RETURN p.FullName AS parent, c.FullName AS child
+    """
 
     nodes = []
     links = []
 
-    # Execute each query for the respective hierarchies
+    # Fetch all nodes
     with driver.session() as session:
-        for query in queries:
-            result = session.run(query)
-            for record in result:
-                root_name = record["rootName"]
-                children = record["children"]
-                hierarchy = record["child.Hierarchy"]
+        node_result = session.run(node_query)
+        for record in node_result:
+            name = record["name"]
+            hierarchy = record["hierarchy"]
+            lineage = record["lineage"]  # Fetch the lineage property
 
-                # Add root node (ensure no duplicate nodes are added)
-                if not any(node['name'] == root_name for node in nodes):
-                    nodes.append({'name': root_name, 'hierarchy': hierarchy - 1})  # Parent's hierarchy is one less than child
+            # Add node if not already in the list (to avoid duplicates)
+            if not any(node['name'] == name for node in nodes):
+                nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
 
-                # Add children and links to parents, ensuring no intra-hierarchy links
-                for child in children:
-                    if not any(node['name'] == child for node in nodes):
-                        nodes.append({'name': child, 'hierarchy': hierarchy})
-                    if hierarchy - 1 > 0:  # Ensure root is from a different hierarchy than the child
-                        links.append({'source': root_name, 'target': child})
+    # Fetch all relationships
+    with driver.session() as session:
+        relationship_result = session.run(relationship_query)
+        for record in relationship_result:
+            parent_name = record["parent"]
+            child_name = record["child"]
+
+            # Add link from parent to child
+            links.append({'source': parent_name, 'target': child_name})
 
     return nodes, links
-
 
 def calculate_age(date_of_birth_str):
     # Assuming date_of_birth_str is in the format 'YYYY-MM-DD'

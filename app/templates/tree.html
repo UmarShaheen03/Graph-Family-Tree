@@ -120,54 +120,67 @@
 <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
+
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
     const centerX = width / 2;
     const centerY = height / 2;
     const radiusStep = 200;
+
     // Filter out links where the hierarchy difference is not 1
     links = links.filter(link => {
         const sourceNode = nodes.find(n => n.name === link.source);
         const targetNode = nodes.find(n => n.name === link.target);
         return Math.abs(sourceNode.hierarchy - targetNode.hierarchy) === 1;
     });
+
     // Setup zoom
     const zoom = d3.zoom()
         .scaleExtent([0.01, 4])
         .on("zoom", (event) => {
             svg.attr("transform", event.transform);
         });
+
     const svg = d3.select("#graph")
         .attr("width", width)
         .attr("height", height)
         .call(zoom)
         .append("g");
+
     // Tooltip setup
     const tooltip = d3.select("#tooltip")
         .style("opacity", 0);  // Initially hidden
+
     // Color scale based on hierarchy
     const color = d3.scaleOrdinal()
         .domain([1, 2, 3])
         .range(["steelblue", "green", "orange", "gold", "deepskyblue", "blueviolet", "hotpink"]);
-        
+
     // Group nodes by hierarchy level
     function groupNodesByHierarchy(nodes) {
         return d3.group(nodes, d => d.hierarchy);
     }
-    // Circular layout with parent-child alignment
+
+    // Circular layout with parent-child alignment, sorted by Lineage
     function visualizeGraph(nodes, links) {
         const groupedNodes = groupNodesByHierarchy(nodes);
+
         // Place nodes in a circular fashion by hierarchy
         groupedNodes.forEach((group, hierarchy) => {
-            const angleStep = (2 * Math.PI) / group.length;
+            // Sort nodes in each hierarchy group by their lineage
+            const sortedGroup = Array.from(group).sort((a, b) => d3.ascending(a.lineage, b.lineage));
+            
+            const angleStep = (2 * Math.PI) / sortedGroup.length;
             const radius = hierarchy * radiusStep;
-            group.forEach((node, i) => {
+
+            sortedGroup.forEach((node, i) => {
                 const angle = i * angleStep;
                 node.x = centerX + Math.cos(angle) * radius;
                 node.y = centerY + Math.sin(angle) * radius;
                 node.angle = angle;
             });
         });
+
         // Add links (hidden by default)
         const linkElements = svg.selectAll(".link")
             .data(links)
@@ -177,6 +190,7 @@
             .attr("y1", d => nodes.find(node => node.name === d.source).y)
             .attr("x2", d => nodes.find(node => node.name === d.target).x)
             .attr("y2", d => nodes.find(node => node.name === d.target).y);
+
         // Draw nodes
         const nodeElements = svg.selectAll(".node")
             .data(nodes)
@@ -187,11 +201,13 @@
                 tooltip.html(d.name)  // Display node name in tooltip
                     .style("left", (event.pageX + 5) + "px")
                     .style("top", (event.pageY - 28) + "px");
+
                 // Highlight the node's direct connections
                 highlightConnections(d.name);
             })
             .on("mouseout", function () {
                 tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
+
                 // Remove highlighting on mouse out
                 unhighlightConnections();
             })
@@ -215,12 +231,14 @@
                     d3.select(this).classed("active", false);
                 })
             );
+
         // Add circle for each node with increased size
         nodeElements.append("circle")
             .attr("r", 25)  // Increased radius for better visibility
             .attr("cx", d => d.x)
             .attr("cy", d => d.y)
             .attr("fill", d => color(d.hierarchy));
+
         // Add text label for each node showing the name of the node
         nodeElements.append("text")
             .attr("x", d => d.x + 30)  // Position label slightly to the right
@@ -228,18 +246,21 @@
             .text(d => d.name)  // Show node name
             .attr("font-size", "14px")
             .attr("fill", "#000");
+
         // Function to highlight the direct lineage and cascade connections
         function highlightConnections(nodeName) {
             // Highlight the edges and nodes directly connected to the hovered node (no cascading)
             svg.selectAll(".link")
                 .filter(link => link.source === nodeName || link.target === nodeName)
                 .classed("highlighted", true);
+
             // Highlight the connected nodes
             svg.selectAll(".node")
                 .filter(node => node.name === nodeName || links.some(link => (link.source === nodeName && link.target === node.name) || (link.target === nodeName && link.source === node.name)))
                 .select("circle")
                 .attr("fill", "#ff5722"); // Change color of highlighted nodes
         }
+
         // Function to reset the highlights
         function unhighlightConnections() {
             // Reset the edges and nodes back to normal
@@ -247,7 +268,13 @@
             svg.selectAll(".node").select("circle")
                 .attr("fill", d => color(d.hierarchy)); // Reset node colors
         }
+
+        // When a node is clicked, redirect to the bio view page for that person COMING SOON
+        
+
     }
+
+    // Call visualizeGraph with the fetched nodes and links
     visualizeGraph(nodes, links);
 </script>
 </body>
