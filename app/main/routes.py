@@ -95,13 +95,13 @@ def tree_page():
  # Fetch nodes for the select box for form 
     with driver.session() as session:
         result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
-        nodes = [(record["name"], record["name"]) for record in result]
+        nodesChoices = [(record["name"], record["name"]) for record in result]
         
-    form.parent.choices = nodes
-    form.new_parent.choices=nodes
-    form.person_to_delete.choices=nodes
-    form.person_to_shift.choices=nodes
-    form.old_name.choices=nodes
+    form.parent.choices = nodesChoices
+    form.new_parent.choices=nodesChoices
+    form.person_to_delete.choices=nodesChoices
+    form.person_to_shift.choices=nodesChoices
+    form.old_name.choices=nodesChoices
     
 
 

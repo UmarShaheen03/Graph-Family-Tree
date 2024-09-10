@@ -76,7 +76,6 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
     var nodes = {{ nodes|tojson }};
@@ -193,5 +192,7 @@
             tooltip.transition().duration(500).style("opacity", 0);
         });
 </script>
+
+<script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
 
 {% endblock %}
