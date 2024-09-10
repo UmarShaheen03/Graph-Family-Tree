@@ -68,22 +68,22 @@
 /* Form controls focus */
 .form-control:focus,
 .form-select:focus {
-    border-color: #007bff;
+    /* border-color: #007bff; */
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
 /* Submit button styling */
 .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
+    /* background-color: #007bff;
+    border-color: #007bff; */
     transition: background-color 0.3s ease, transform 0.3s ease;
     font-size: 1.25rem;
     padding: 0.5rem 1.5rem;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #004085;
+    /* background-color: #0056b3;
+    border-color: #004085; */
     transform: translateY(-2px);
 }
 
@@ -93,18 +93,24 @@
 
 /* Header styling */
 h1 {
-    font-family: 'Montserrat', sans-serif;
+    /* font-family: 'Montserrat', sans-serif; */
     font-weight: 700;
-    color: #343a40;
+    /* color: #343a40; */
     letter-spacing: 2px;
 }
 
 #graph-container {
-    width: 80vw;
+    width: 96vw;
     height: 80vh;
     border: 1px solid #ccc;
     overflow: hidden;
 }
+@media (min-width: 992px) {
+    #graph-container {
+        width: 70vw;
+    }
+}
+
 svg {
     width: 100%;
     height: 100%;
