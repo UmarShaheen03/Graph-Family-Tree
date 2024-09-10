@@ -2,18 +2,16 @@
 
 import os
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
-from forms import BiographyEditForm, CommentForm
-from models import Biography,Comment
 from datetime import datetime
 from flask_login import login_required, current_user
 from neo4j import GraphDatabase
 from datetime import datetime
 from flask_wtf import CSRFProtect
 from neo4j import GraphDatabase
-from flask import Flask, flash, redirect, render_template, request, send_file, url_for
-from flask import Flask, flash, render_template, redirect, request, session, url_for
-from app.forms import AddNodeForm, UpdateNode, AppendGraph, LoginForm, SignupForm
+from app.forms import AddNodeForm, UpdateNode, AppendGraph, LoginForm, SignupForm, BiographyEditForm, CommentForm
 from app.accounts import signup, login, SignupError, LoginError, init_database
+from app.models import Biography, Comment
+from app.databases import db
 
 
 main_bp = Blueprint('main_bp', __name__)
@@ -114,7 +112,7 @@ def biography(biography_id):
         db.session.commit()
         flash('Biography page updated successfully')
     if CommentForm().validate_on_submit():
-        new_comment = Commnent(
+        new_comment = Comment(
             user_id=current_user.id,
             text=CommentForm().comment.data,
             timestamp=datetime.now()

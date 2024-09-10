@@ -28,7 +28,7 @@ class User(UserMixin, db.Model):
         return User.query.get(int(user_id))
     
 
-class Biography(db.model):
+class Biography(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     dob = db.Column(db.String(50), nullable=True)
@@ -39,9 +39,9 @@ class Biography(db.model):
     address = db.Column(db.String(100), nullable=True)
 
 
-class Comment(db.model):
+class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    node_id = db.Column(db.Integer, db.ForeignKey('node.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    #node_id = db.Column(db.Integer, db.ForeignKey('node.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     text = db.Column(db.Text)
     timestamp = db.Column(db.DateTime)
