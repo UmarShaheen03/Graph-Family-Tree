@@ -8,12 +8,67 @@
 {% block bodyBlock %}
 
 <div class="container">
+    <h1 class="text-center mb-4 text-uppercase font-weight-bold">Modify Graph</h1>
+    <div class="card shadow-lg rounded-lg border-0">
+        <div class="card-body p-5">
+            <form action="" method="post" novalidate>
+                {{ form.hidden_tag() }}
+                
+                <div class="form-group mb-4">
+                    <label for="action" class="form-label fw-bold">{{ form.action.label }}</label>
+                    {{ form.action(class="form-select form-select-lg") }}
+                </div>
+
+                <div id="name-group" class="form-group mb-4" style="display:none;">
+                    <label for="name" class="form-label fw-bold">{{ form.name.label }}</label>
+                    {{ form.name(class="form-control form-control-lg") }}
+                </div>
+
+                <div id="new-name-group" class="form-group mb-4" style="display:none;">
+                    <label for="new_name" class="form-label fw-bold">{{ form.new_name.label }}</label>
+                    {{ form.new_name(class="form-control form-control-lg") }}
+                </div>
+
+                <div id="old-name-group" class="form-group mb-4" style="display:none;">
+                    <label for="old_name" class="form-label fw-bold">{{ form.old_name.label }}</label>
+                    {{ form.old_name(class="form-select form-select-lg") }}
+                </div>
+
+                <div id="person-to-shift-group" class="form-group mb-4" style="display:none;">
+                    <label for="person_to_shift" class="form-label fw-bold">{{ form.person_to_shift.label }}</label>
+                    {{ form.person_to_shift(class="form-select form-select-lg") }}
+                </div>
+
+                <div id="person-to-delete-group" class="form-group mb-4" style="display:none;">
+                    <label for="person_to_delete" class="form-label fw-bold">{{ form.person_to_delete.label }}</label>
+                    {{ form.person_to_delete(class="form-select form-select-lg") }}
+                </div>
+
+                <div id="parent-group" class="form-group mb-4">
+                    <label for="parent" class="form-label fw-bold">{{ form.parent.label }}</label>
+                    {{ form.parent(class="form-select form-select-lg") }}
+                </div>
+
+                <div id="new-parent-group" class="form-group mb-4" style="display:none;">
+                    <label for="new_parent" class="form-label fw-bold">{{ form.new_parent.label }}</label>
+                    {{ form.new_parent(class="form-select form-select-lg") }}
+                </div>
+
+                <div class="d-grid gap-2">
+                    {{ form.submit(class="btn btn-primary btn-lg rounded-pill") }}
+                </div>
+            </form>
+        </div>
+    </div>
+
     <h1>Interactive Graph</h1>
     <div id="graph-container">
         <svg id="graph"></svg>
     </div>
     <div id="tooltip"></div>
 </div>
+
+<script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
     var nodes = {{ nodes|tojson }};
