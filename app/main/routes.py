@@ -2,14 +2,17 @@
 
 import os
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
-from neo4j import GraphDatabase
+from app.forms import BiographyEditForm, CommentForm
+from app.models import Biography,Comment
+from datetime import datetime
+from flask_login import login_required, current_user
 from datetime import datetime
 from flask_wtf import CSRFProtect
 from neo4j import GraphDatabase
-from flask import Flask, flash, redirect, render_template, request, send_file, url_for
-from flask import Flask, flash, render_template, redirect, request, session, url_for
-from app.forms import AddNodeForm, UpdateNode, AppendGraph, LoginForm, SignupForm
+from app.forms import AddNodeForm, UpdateNode, AppendGraph, LoginForm, SignupForm, BiographyEditForm, CommentForm
 from app.accounts import signup, login, SignupError, LoginError, init_database
+from app import db
+
 
 
 main_bp = Blueprint('main_bp', __name__)
@@ -92,11 +95,37 @@ def tree_page():
     nodes, relationships = fetch_data()
     return render_template('Tree.html', nodes=nodes, relationships=relationships)
 
-@main_bp.route("/biography")
-def biography_page():
-    """The biography page"""
-    return render_template('biography.html')
 
+@main_bp.route('/biography', methods=['GET', 'POST'])
+@login_required
+def biography():
+    comments = Comment.query.all()
+    comment_form = CommentForm()
+    if comment_form.validate_on_submit():
+        new_comment = Comment(
+            username=current_user.username,
+            text=comment_form.comment.data,
+            timestamp=datetime.now()
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+        flash('Comments added successfully')
+        return redirect(url_for('main_bp.biography'))
+    comments = Comment.query.all() 
+    return render_template('biography.html', biography=biography, comments=comments, comment_form=comment_form)
+
+@main_bp.route('/biography/edit', methods=['GET', 'POST'])
+@login_required
+def edit_biography():
+    biography = Biography.query.first()
+    edit_form = BiographyEditForm(obj=biography)
+    if edit_form.validate_on_submit():
+        edit_form.populate_obj(biography) 
+        db.session.commit()  
+        flash('Biography updated successfully.')
+        return redirect(url_for('main_bp.biography'))  
+    print("Rendering form")
+    return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
 
 NEO4J_URI='neo4j+s://633149e1.databases.neo4j.io'
 NEO4J_USERNAME='neo4j'
