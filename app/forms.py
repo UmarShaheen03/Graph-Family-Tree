@@ -12,7 +12,6 @@ from flask import Flask, flash, render_template, redirect, request, session, url
 from flask_wtf import CSRFProtect, FlaskForm
 from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, TextAreaField, SubmitField, widgets
 from wtforms.validators import DataRequired, NumberRange, email
-
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, SubmitField
 
@@ -127,4 +126,4 @@ class BiographyEditForm(FlaskForm):
     email=StringField('Email', validators=[Optional()])
     phonenumber=StringField('Phone Number', validators=[Optional()])
     address=StringField('Address', validators=[Optional()])
-    submit=SubmitField
+    submit=SubmitField('Update')

@@ -26,9 +26,10 @@ class User(UserMixin, db.Model):
     @login.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
+    comments = db.relationship('Comment', back_populates='user', lazy=True)
     
 
-class Biography(db.model):
+class Biography(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     dob = db.Column(db.String(50), nullable=True)
@@ -39,9 +40,10 @@ class Biography(db.model):
     address = db.Column(db.String(100), nullable=True)
 
 
-class Comment(db.model):
+class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    node_id = db.Column(db.Integer, db.ForeignKey('node.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    username = db.Column(db.Integer, db.ForeignKey('user.username'), nullable=False)
     text = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', back_populates='comments') 
+

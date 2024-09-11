@@ -85,18 +85,13 @@
                 <p><strong>Full Name:</strong>{{full_name if full_name else "None"}}</p>
                 <p><strong>Date of Birth:</strong>{{dob if dob else "None"}}</p>
                 <p><strong>Biography:</strong>{{bio if bio else "None"}}</p>
-                <p>{{biography if biography else "No additional information"}}</p>
                 <p><strong>Location:</strong> {{location if location else "None"}}</p>
                 <p><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d54157.5747152463!2d115.7934617676004!3d-31.96500869717288!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2a32a4ee6e7380e9%3A0xf04f0b618f28290!2zxJDhuqFpIGjhu41jIFTDonkgw5pj!5e0!3m2!1svi!2sau!4v1724976578679!5m2!1svi!2sau" width="750" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></p>
                 <p><strong>Email:</strong>{{email if email else "None"}}</p> 
                 <p><strong>Phone Number:</strong>{{phone_number if phone_number else "None"}}</p> 
                 <p><strong>Address:</strong>{{address if address else "None"}}</p> 
-                <button type="submit" class="btn btn-custom  ">Edit</button>
-
-             
-            
-            </div>
-            
+                <button href="{{ url_for('main_bp.edit_biography') }}" class="btn btn-custom">Edit</button>      
+            </div>  
         </div>
     </div>
 
@@ -104,10 +99,10 @@
         <h2>Comments</h2>
         {% if comments %}
         <ul class="list-unstyled">
-            {% for comments in comments %}
+            {% for comment in comments %}
              <li class="media">
                 <div class="media-body">
-                    <h5 class="mt-0 mb-1">{{ comment.user }}</h5>
+                    <h5 class="mt-0 mb-1">{{ comment.user.username }}</h5>
                     {{ comment.text }}
                     <div class="text-muted">{{ comment.timestamp }}</div>
                 </div>
@@ -120,13 +115,13 @@
 
         <div class="comment-form">
             <h3>Leave a Comment</h3>
-            <form method="post" action="{{ url_for('main_bp.submit_comment', node_id=node_id) }}">
+            <form method="post" action="{{ url_for('main_bp.biography') }}">
+                {{ comment_form.hidden_tag() }} 
                 <div class="form-group">
                     <textarea class="form-control" name="comment" rows="4" placeholder="Write your comment here..." required></textarea>
                 </div>
-                <button type="submit" class="btn btn-custom">Submit</button>
+                <button href="{{ url_for('main_bp.biography') }}"type="submit" class="btn btn-custom">Submit</button>
             </form>
         </div>
     </div>
-
 {% endblock %}
