@@ -9,9 +9,7 @@ from flask_login import login_required, current_user
 from datetime import datetime
 from flask_wtf import CSRFProtect
 from neo4j import GraphDatabase
-from flask import Flask, flash, redirect, render_template, request, send_file, url_for
-from flask import Flask, flash, render_template, redirect, request, session, url_for
-from app.forms import AddNodeForm, UpdateNode, AppendGraph, LoginForm, SignupForm
+from app.forms import AddNodeForm, UpdateNode, AppendGraph, LoginForm, SignupForm, BiographyEditForm, CommentForm
 from app.accounts import signup, login, SignupError, LoginError, init_database
 from app import db
 
