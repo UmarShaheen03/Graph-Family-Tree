@@ -99,7 +99,7 @@
                         <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.tree_page') }}">Tree</a>
                     </li>
                     <li>
-                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.biography') }}">Biography</a>
+                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.edit_biography') }}"> Edit Biography</a>
                     </li>
                     <li>
                         <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.modify_graph') }}">Modify</a>
@@ -269,10 +269,11 @@
                 .attr("fill", d => color(d.hierarchy)); // Reset node colors
         }
 
-        // When a node is clicked, redirect to the bio view page for that person
-        nodeElements.on("click", function (event, d) {
-            window.location.href = "/biography/edit/" + encodeURIComponent(d.name);  // Redirect to view bio page
-        });
+       // When a node is double-clicked, redirect to the bio view page for that person
+nodeElements.on("dblclick", function (event, d) {
+    window.location.href = "/biography/" + encodeURIComponent(d.name);  // Redirect to view bio page
+});
+
 
     }
 

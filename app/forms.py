@@ -111,11 +111,14 @@ class CommentForm(FlaskForm):
     submit=SubmitField('Submit')
 
 class BiographyEditForm(FlaskForm):
-    name=StringField('Full Name', validators=[DataRequired()])
-    dob =StringField('Date of Birth', validators=[Optional()])
+    fullname = SelectField(
+        'Full Name',
+        choices=[]  # Populate this dynamically in your view
+    )
+    dob =DateField('Date of Birth', validators=[Optional()])
     biography=StringField('Biography', validators=[Optional()])
     location=StringField('Location', validators=[Optional()])
-    email=StringField('Email', validators=[Optional()])
-    phonenumber=StringField('Phone Number', validators=[Optional()])
+    email=EmailField('Email', validators=[Optional()])
+    phonenumber=IntegerField('Phone Number', validators=[Optional()])
     address=StringField('Address', validators=[Optional()])
     submit=SubmitField('Update')

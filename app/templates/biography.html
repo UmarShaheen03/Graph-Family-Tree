@@ -2,105 +2,76 @@
 
 {% block headBlock %}
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/pulse/bootstrap.min.css">
-    <title>Biography Page</title>
-    <style>
-        .biography-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding-top: 40px;
-        
-           
-        }
-        .biography-header {
-            background-color: #343a40;
-            color: #fff;
-            padding: 20px;
-        }
-        .biography-header h1 {
-            margin-bottom: 0;
-        }
-        .biography-details {
-            padding: 20px;
-            background-color: #f8f9fa;
-        
-        }
-        .biography-details p {
-            margin-bottom: 50px;
-            font-size: 1.1rem;
-        
-        }
-
-        .comments-section {
-            padding: 20px;
-            background-color: #f8f9fa;
-            margin-top: 40px;
-            margin-bottom: 30px;
-            max-width:none;
-        }
-
-        .comments-section h2 {
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-        }
-        .comment-form h3 {
-            margin-top: 20px;
-            font-size: 1.3rem;
-        }
-        .media {
-            background-color: #e9ecef;
-            padding: 15px;
-            border-radius: 0.5rem;
-            margin-bottom: 10px;
-        }
-        .media h5 {
-            margin-bottom: 5px;
-            font-size: 1.2rem;
-            color: #343a40;
-        }
-        .media .text-muted {
-            font-size: 0.9rem;
-
-        }
-
-        .btn-custom {
-        background-color: #343a40; 
-        color: white; 
-        border: none; 
+<title>Biography Page</title>
+<style>
+    .biography-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding-top: 40px;
     }
-        .btn-custom:hover {
-            background-color: #1d2124; 
-            color: #f8f9fa; 
-        }
-
-    </style>
+    .biography-header {
+        background-color: #343a40;
+        color: #fff;
+        padding: 20px;
+    }
+    .biography-header h1 {
+        margin-bottom: 0;
+    }
+    .biography-details {
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+    .biography-details p {
+        margin-bottom: 50px;
+        font-size: 1.1rem;
+    }
+    .comments-section {
+        padding: 20px;
+        background-color: #f8f9fa;
+        margin-top: 40px;
+        margin-bottom: 30px;
+    }
+    .comments-section h2 {
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+    }
+    .btn-custom {
+        background-color: #343a40;
+        color: white;
+        border: none;
+    }
+    .btn-custom:hover {
+        background-color: #1d2124;
+        color: #f8f9fa;
+    }
+</style>
 {% endblock %}
 
 {% block bodyBlock %}
-    <div class="biography-container">
-        <div class="card">
-            <div class="biography-header">
-                <h1>Biography</h1>
-            </div>
-            <div class="biography-details">
-                <p><strong>Full Name:</strong>{{full_name if full_name else "None"}}</p>
-                <p><strong>Date of Birth:</strong>{{dob if dob else "None"}}</p>
-                <p><strong>Biography:</strong>{{bio if bio else "None"}}</p>
-                <p><strong>Location:</strong> {{location if location else "None"}}</p>
-                <p><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d54157.5747152463!2d115.7934617676004!3d-31.96500869717288!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2a32a4ee6e7380e9%3A0xf04f0b618f28290!2zxJDhuqFpIGjhu41jIFTDonkgw5pj!5e0!3m2!1svi!2sau!4v1724976578679!5m2!1svi!2sau" width="750" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></p>
-                <p><strong>Email:</strong>{{email if email else "None"}}</p> 
-                <p><strong>Phone Number:</strong>{{phone_number if phone_number else "None"}}</p> 
-                <p><strong>Address:</strong>{{address if address else "None"}}</p> 
-                <button class="btn btn-custom" onclick="location.href='/biography/edit'">Edit Bio</button>  
-            </div>  
+<div class="biography-container">
+    <div class="card">
+        <div class="biography-header">
+            <h1>Biography for {{full_name if full_name else "None"}} </h1>
+        </div>
+        <div class="biography-details">
+            <p><strong>Full Name:</strong> {{full_name if full_name else "None"}}</p>
+            <p><strong>Date of Birth:</strong> {{dob if dob else "None"}}</p>
+            <p><strong>Biography:</strong> {{bio if bio else "None"}}</p>
+            <p><strong>Location:</strong> {{location if location else "None"}}</p>
+            <p><strong>Email:</strong> {{email if email else "None"}}</p>
+            <p><strong>Phone Number:</strong> {{phone_number if phone_number else "None"}}</p>
+            <p><strong>Address:</strong> {{address if address else "None"}}</p>
+            <button class="btn btn-custom" onclick="location.href='/biography/edit'">Edit Bio</button>
         </div>
     </div>
+</div>
 
-    <div class="comments-section">
-        <h2>Comments</h2>
-        {% if comments %}
+<div class="comments-section">
+    <h2>Comments</h2>
+    {% if comments %}
         <ul class="list-unstyled">
             {% for comment in comments %}
-             <li class="media">
+            <li class="media">
                 <div class="media-body">
                     <h5 class="mt-0 mb-1">{{ comment.user.username }}</h5>
                     {{ comment.text }}
@@ -109,19 +80,19 @@
             </li>
             {% endfor %}
         </ul>
-        {% else %}
-           <p>No comments yet. Be the first to leave a comment</p>
-        {% endif %}
+    {% else %}
+        <p>No comments yet. Be the first to leave a comment</p>
+    {% endif %}
 
-        <div class="comment-form">
-            <h3>Leave a Comment</h3>
-            <form method="post" action="{{ url_for('main_bp.biography') }}">
-                {{ comment_form.hidden_tag() }} 
-                <div class="form-group">
-                    <textarea class="form-control" name="comment" rows="4" placeholder="Write your comment here..." required></textarea>
-                </div>
-                <button href="{{ url_for('main_bp.biography') }}"type="submit" class="btn btn-custom">Submit</button>
-            </form>
-        </div>
+    <div class="comment-form">
+        <h3>Leave a Comment</h3>
+        <form method="post" action="{{ url_for('main_bp.biography', name=full_name) }}">
+            {{ comment_form.hidden_tag() }}
+            <div class="form-group">
+                <textarea class="form-control" name="comment" rows="4" placeholder="Write your comment here..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-custom">Submit</button>
+        </form>
     </div>
+</div>
 {% endblock %}

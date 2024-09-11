@@ -69,13 +69,13 @@
     </style>
 
     <div class="edit-biography-container">
-        <h2>Edit Biography Information for {{ person['name'] }} </h2>
+        <h2>Edit Biography Information </h2>
         <form method="POST">
             {{ edit_form.hidden_tag() }}
 
             <div class="form-group">
-                {{ edit_form.name.label }}
-                {{ edit_form.name(class="form-control") }}
+                {{ edit_form.fullname.label }}
+                {{ edit_form.fullname(class="form-control") }}
             </div>
 
             <div class="form-group">

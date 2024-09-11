@@ -95,11 +95,18 @@ def tree_page():
     nodes, relationships = fetch_data()
     return render_template('Tree.html', nodes=nodes, relationships=relationships)
 
+@main_bp.route('/biography/<name>', methods=['GET', 'POST'])
+def biography(name):
+    # Fetch person's biography details from Neo4j
+    person = get_person_bio(name)
+    
+    if not person:
+        return "Biography not found.", 404
 
-@main_bp.route('/biography', methods=['GET', 'POST'])
-def biography():
+    # Fetch comments related to this person
     comments = Comment.query.all()
     comment_form = CommentForm()
+
     if comment_form.validate_on_submit():
         new_comment = Comment(
             username=current_user.username,
@@ -108,32 +115,86 @@ def biography():
         )
         db.session.add(new_comment)
         db.session.commit()
-        flash('Comments added successfully')
-        return redirect(url_for('main_bp.biography'))
-    comments = Comment.query.all() 
-    return render_template('biography.html', biography=biography, comments=comments, comment_form=comment_form)
+        flash('Comment added successfully')
+        return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
 
-@main_bp.route('/biography/edit/<name>', methods=['GET', 'POST'])
-def edit_biography(name):
+    # Pass the fetched biography details and comments to the template
+    return render_template('biography.html', 
+                           full_name=person['name'], 
+                           dob=person.get('dob', 'Unknown'), 
+                           bio=person.get('biography', 'No biography available'), 
+                           location=person.get('location', 'Unknown'),
+                           email=person.get('email', 'No email provided'),
+                           phone_number=person.get('phone_number', 'No phone number provided'),
+                           address=person.get('address', 'No address provided'),
+                           comments=comments, 
+                           comment_form=comment_form)
+
+
+
+@main_bp.route('/biography/edit', methods=['GET', 'POST'])
+def edit_biography():
     biography = Biography.query.first()
     edit_form = BiographyEditForm()
 
-    person = get_person_bio(name)
-    print("person")
-    if person:
-        return render_template('edit_biography.html', biography=biography, edit_form=edit_form,person=person)
-    else:
-        return "Biography not found please click on a node on the graph", 404
+    # Fetch nodes (FullName) for the select box for the form 
+    with driver.session() as session:
+        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
+        nodes = [(record["name"], record["name"]) for record in result]
+        
+    # Set choices for the FullName dropdown field
+    edit_form.fullname.choices = nodes
+
+    # Check if the form is submitted and validated
+    if edit_form.validate_on_submit():
+        person_name = edit_form.fullname.data
+        
+        # Update the person's information in the Neo4j graph database
+        with driver.session() as session:
+            session.run(
+                """
+                MATCH (p:Person {FullName: $full_name})
+                SET p.Date_Of_Birth = $DOB,
+                    p.Biography = $Biography,
+                    p.Location = $Location,
+                    p.Email = $Email,
+                    p.PhoneNumber = $PhoneNumber,
+                    p.Address = $Address
+                """,
+                full_name=person_name,
+                DOB=edit_form.dob.data,
+                Biography=edit_form.biography.data,
+                Location=edit_form.location.data,
+                Email=edit_form.email.data,
+                PhoneNumber=edit_form.phonenumber.data,
+                Address=edit_form.address.data
+            )
+        
+        flash(f'Biography for {person_name} has been updated successfully.')
+        return redirect(url_for('main_bp.tree_page'))
+
+    return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
+
+    
+    
     
 # Function to fetch biography from Neo4j
 def get_person_bio(full_name):
     query = """
     MATCH (p:Person {FullName: $full_name})
-    RETURN p.FullName AS name, p.Hierarchy AS hierarchy
+    RETURN p.FullName AS name, 
+           p.Hierarchy AS hierarchy, 
+           p.Date_Of_Birth AS dob, 
+           p.Biography AS biography, 
+           p.Location AS location, 
+           p.Email AS email, 
+           p.PhoneNumber AS phone_number, 
+           p.Address AS address
     """
     with driver.session() as session:
         result = session.run(query, full_name=full_name)
         return result.single()
+
 
 
 
