@@ -90,7 +90,7 @@
                 <p><strong>Email:</strong>{{email if email else "None"}}</p> 
                 <p><strong>Phone Number:</strong>{{phone_number if phone_number else "None"}}</p> 
                 <p><strong>Address:</strong>{{address if address else "None"}}</p> 
-                <button href="{{ url_for('main_bp.edit_biography') }}" class="btn btn-custom">Edit</button>      
+                <button class="btn btn-custom" onclick="location.href='/biography/edit'">Edit Bio</button>  
             </div>  
         </div>
     </div>

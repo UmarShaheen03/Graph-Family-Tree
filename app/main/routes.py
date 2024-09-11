@@ -97,7 +97,6 @@ def tree_page():
 
 
 @main_bp.route('/biography', methods=['GET', 'POST'])
-@login_required
 def biography():
     comments = Comment.query.all()
     comment_form = CommentForm()
@@ -114,18 +113,30 @@ def biography():
     comments = Comment.query.all() 
     return render_template('biography.html', biography=biography, comments=comments, comment_form=comment_form)
 
-@main_bp.route('/biography/edit', methods=['GET', 'POST'])
-@login_required
-def edit_biography():
+@main_bp.route('/biography/edit/<name>', methods=['GET', 'POST'])
+def edit_biography(name):
     biography = Biography.query.first()
-    edit_form = BiographyEditForm(obj=biography)
-    if edit_form.validate_on_submit():
-        edit_form.populate_obj(biography) 
-        db.session.commit()  
-        flash('Biography updated successfully.')
-        return redirect(url_for('main_bp.biography'))  
-    print("Rendering form")
-    return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
+    edit_form = BiographyEditForm()
+
+    person = get_person_bio(name)
+    print("person")
+    if person:
+        return render_template('edit_biography.html', biography=biography, edit_form=edit_form,person=person)
+    else:
+        return "Biography not found please click on a node on the graph", 404
+    
+# Function to fetch biography from Neo4j
+def get_person_bio(full_name):
+    query = """
+    MATCH (p:Person {FullName: $full_name})
+    RETURN p.FullName AS name, p.Hierarchy AS hierarchy
+    """
+    with driver.session() as session:
+        result = session.run(query, full_name=full_name)
+        return result.single()
+
+
+
 
 NEO4J_URI='neo4j+s://633149e1.databases.neo4j.io'
 NEO4J_USERNAME='neo4j'
