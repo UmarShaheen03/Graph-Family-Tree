@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Initialize Select2 on all relevant select elements
+    $('select.form-select-searchable').select2({});
+    
     actionField.addEventListener('change', toggleFields);
     toggleFields();  // Initialize the form based on the current selection
 });
