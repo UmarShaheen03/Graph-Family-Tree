@@ -77,6 +77,8 @@
 </div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
+
+<!-- Neo4J script -->
 <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
@@ -193,6 +195,7 @@
         });
 </script>
 
+<!-- Modify graph script -->
 <script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
 
 {% endblock %}
