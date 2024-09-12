@@ -114,6 +114,10 @@ body{
     height: 100%;
     width: 100%;
   }
+
+  #info h1{
+    color: rgb(152, 43, 152);
+  }
  
  #visualise{
     display: flex;
@@ -123,7 +127,6 @@ body{
  
  #visualise > .text{
     width: 50%;
-    
  }
  
  #visualise > .image{
