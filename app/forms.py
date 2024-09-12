@@ -4,6 +4,7 @@ from app.models import User
 from flask_login import current_user
 from flask import Flask, flash, render_template, redirect, request, session, url_for
 from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField
+from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
 from wtforms.validators import DataRequired, NumberRange, Email, ValidationError, EqualTo, Length
 
 class LoginForm(FlaskForm):
