@@ -12,7 +12,9 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False) 
     password_hash = db.Column(db.String, nullable=False)
-    privilege = db.Column(db.Integer)
+    admin = db.Column(db.Boolean)
+    reset_token = db.Column(db.Integer)
+    reset_expiry = db.Column(db.DateTime)
 
     def get_id(self):
         return (self.user_id)

@@ -26,7 +26,7 @@ def init_database():
         user_id=0,
         username="admin_test",
         email="admin@test.com",
-        privilege=1,
+        admin=True,
         password_hash=str(generate_password_hash("admin1234"))
     )
 
@@ -34,7 +34,7 @@ def init_database():
         user_id=1,
         username="user_test",
         email="user@test.com",
-        privilege=0,
+        admin=False,
         password_hash=str(generate_password_hash("user1234"))
     )
 
@@ -62,7 +62,7 @@ def signup(email, username, password, repeat, remember):
         user_id = new_id,
         username = username,
         email = email,
-        privilege = 0 #default privilege is 0, for user level
+        admin = False
     )
 
     user.set_password(password)
