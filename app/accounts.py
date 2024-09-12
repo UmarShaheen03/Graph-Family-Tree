@@ -2,8 +2,12 @@ from app.models import User
 from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
-from flask import current_app
+from flask import current_app, url_for
+
+#libraries for rest password
 import smtplib
+import ssl
+import uuid
 
 class SignupError(Exception):
     pass
@@ -79,10 +83,34 @@ def login(email_or_username, password, remember):
     
     login_user(user, remember=remember)
 
-def reset_email(email):
-    user = db.session.query(User).filter(User.email == email).first()
+def reset_email(receiver_email):
+    user = db.session.query(User).filter(User.email == receiver_email).first()
     if user == None:
         return #return without error if no matching user, vulnerable if it reports when user does/doesn't exist
     
-    #TODO send email, with link to specific page to reset password
-    pass
+    uuid = uuid.uuid4() #generate a random uuid for the reset passwordl ink
+
+    link = url_for()
+
+    port = 465 #ssl port
+    sender_email = "test" #TODO make an official email (using personal email currently)
+    password = "test" #TODO store password securely
+    context = ssl.create_default_context()
+
+    #create message content
+    message = """\
+    From: %s
+    To: %s
+    Subject: Password reset request for %s
+
+    To reset your password, please visit %s
+    (If you did not request a password reset, simply ignore this message)
+    
+    """ % (sender_email, receiver_email, user.username, link)
+
+    #establish ssl conenction with gmail
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message)
+    
+    return
