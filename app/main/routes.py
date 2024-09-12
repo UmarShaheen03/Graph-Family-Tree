@@ -2,7 +2,7 @@
 
 import os
 from flask import Blueprint, render_template, flash, redirect, url_for, request, session
-from app.forms import BiographyEditForm, CommentForm
+from app.forms import BiographyEditForm, CommentForm, Search_Node
 from app.models import Biography,Comment
 from datetime import datetime
 from flask_login import login_required, current_user
@@ -92,8 +92,14 @@ def signup_request():
 @main_bp.route("/tree")
 def tree_page():
     """A family tree page"""
+    form=Search_Node()
+    with driver.session() as session:
+        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
+        nodes = [(record["name"], record["name"]) for record in result]
+    # Set choices for the FullName dropdown field
+    form.fullname.choices = nodes
     nodes, relationships = fetch_data()
-    return render_template('Tree.html', nodes=nodes, relationships=relationships)
+    return render_template('Tree.html', nodes=nodes, relationships=relationships,form=form)
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):

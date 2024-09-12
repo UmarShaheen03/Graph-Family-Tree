@@ -122,3 +122,11 @@ class BiographyEditForm(FlaskForm):
     phonenumber=IntegerField('Phone Number', validators=[Optional()])
     address=StringField('Address', validators=[Optional()])
     submit=SubmitField('Update')
+
+class Search_Node (FlaskForm):
+      fullname = SelectField(
+        'Search',
+        choices=[]  # Populate this dynamically in your view
+    )
+      submit = SubmitField("Search")
+
