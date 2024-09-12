@@ -14,10 +14,15 @@
 
         <form action="/forgot-form" method="post" class="container px-4">
             <div class="form-group" style="width: 100%">
-                {{ forgotForm.email.label }}<br>
+                <br>
+                <p> Enter the email associated with your account and we will send you a link to reset your password. </p>
+                {{ forgotForm.email.label }}
+                <br>
                 {{ forgotForm.email(class="form-control", placeholder="Enter Email") }}
             </div>
+
             <div>
+                <br>
                 <p>{{ forgotForm.submit(class="btn btn-primary") }}</p>
             </div>
         </form>
@@ -27,8 +32,9 @@
 
 {% if submitted == True %}
 <div class="d-md-flex flex-md-row container">
-    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">    
-        <p>If an account is associated with that email, it should have recevied a link to reset the password. Please also check the spam folder.</p>
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">
+        <h2 class="text-center">Email Sent</h2>   
+        <p>An email has been sent to the provided address, with a link to reset the password. Please also check your spam/junk folder.</p>
     </div>
 </div>
 {% endif %}
