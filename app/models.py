@@ -13,8 +13,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String, unique=True, nullable=False) 
     password_hash = db.Column(db.String, nullable=False)
     admin = db.Column(db.Boolean)
-    reset_token = db.Column(db.Integer)
-    reset_expiry = db.Column(db.DateTime)
+    reset_token = db.Column(db.String)
+    reset_expiry = db.Column(db.Integer) #is a datetime, but i treat it as an int
 
     def get_id(self):
         return (self.user_id)
