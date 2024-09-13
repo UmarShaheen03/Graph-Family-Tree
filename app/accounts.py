@@ -16,6 +16,8 @@ class SignupError(Exception):
 class LoginError(Exception):
     pass
 
+
+
 def init_database():
     #create tables
     db.create_all()
@@ -23,26 +25,38 @@ def init_database():
     User.query.delete()
 
     #create mock accounts
-    test_admin = User(
+    nima = User(
         user_id=0,
-        username="admin_test",
-        email="admin@test.com",
+        username="Nima Dehdashti",
+        email="nima519@gmail.com",
         admin=True,
-        password_hash=str(generate_password_hash("admin1234"))
+        password_hash=str(generate_password_hash("CHANGEME"))
+    )
+
+    group31 = User(
+        user_id=1,
+        username="Group 31",
+        email="cits3200group31@gmail.com",
+        admin=True,
+        password_hash=str(generate_password_hash("CHANGEME"))
     )
 
     test_user = User(
-        user_id=1,
+        user_id=2,
         username="user_test",
         email="user@test.com",
         admin=False,
-        password_hash=str(generate_password_hash("user1234"))
+        password_hash=str(generate_password_hash("test1234"))
     )
+
+  
 
     #add mock accounts to db
     db.session.add(test_admin)
     db.session.add(test_user)
     db.session.commit()
+
+
 
 def signup(email, username, password, repeat, remember):
     if password != repeat:
@@ -73,6 +87,8 @@ def signup(email, username, password, repeat, remember):
 
     login(username, password, remember)
     
+
+
 def login(email_or_username, password, remember):
     user = db.session.query(User).filter((User.username == email_or_username) | (User.email == email_or_username)).first()
 
@@ -84,8 +100,11 @@ def login(email_or_username, password, remember):
     
     login_user(user, remember=remember)
 
+
+
 def reset_email(receiver_email):
     user = db.session.query(User).filter(User.email == receiver_email).first()
+
     if user == None:
         return #return without error if no matching user, vulnerable if it reports when user does/doesn't exist
     
@@ -101,8 +120,8 @@ def reset_email(receiver_email):
     link = url_for("main_bp.reset_page") +"?token=" + token + "&email=" + user.email
 
     port = 465 #ssl port
-    sender_email = "test" #TODO make an official email (using personal email currently)
-    password = "test" #TODO store password securely
+    sender_email = "cits3200group31@gmail.com"
+    password = "MichaelWise#1Fans" #TODO store password securely
     context = ssl.create_default_context()
 
     #create message content
@@ -124,6 +143,8 @@ def reset_email(receiver_email):
     
     return
 
+
+
 def verify_reset(email, token):
     if email == None or token == None: #if missing params
         return False
@@ -141,6 +162,8 @@ def verify_reset(email, token):
     
     return True
 
+
+
 def reset(email, password, repeat):
     if password != repeat:
         raise SignupError("Passwords do not match")
@@ -148,4 +171,5 @@ def reset(email, password, repeat):
     user = db.session.query(User).filter(User.email == email).first()
     
     user.set_password(password)
+    
     return
