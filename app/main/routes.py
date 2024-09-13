@@ -1,8 +1,8 @@
 """Main route views"""
 
 import os
-from app.forms import LoginForm, SignupForm, ForgotPassword, AddNodeForm, UpdateNode, AppendGraph
-from app.accounts import signup, login, SignupError, LoginError, init_database, reset_email
+from app.forms import LoginForm, SignupForm, ForgotPassword, ResetPassword, AddNodeForm, UpdateNode, AppendGraph
+from app.accounts import signup, login, SignupError, LoginError, init_database, reset_email, verify_reset, reset
 from neo4j import GraphDatabase
 from datetime import datetime
 from flask_wtf import CSRFProtect
@@ -98,10 +98,36 @@ def forgot_request():
 
 @main_bp.route("/reset")
 def reset_password_page():
-    #get user token from url params
-    #get token from url params
+    #get email and uuid from url params
+    email = ""
+    token = ""
 
-    if 
+    if not verify_reset(email, token):
+        return url_for("main_bp.home_page")
+    
+    form = ResetPassword()
+    return render_template("reset.html", resetForm=form) #TODO include url params again
+
+@main_bp.route("/reset-form", methods=["POST"])
+def reset_form():
+    #get email and uuid from url params
+    email = ""
+    token = ""
+
+    if not verify_reset(email, token):
+        return url_for("main_bp.home_page")
+    
+    form = ResetPassword()
+    password = request.form.get("password")
+    repeat = request.form.get("repeat")
+
+    try:
+        reset(email, password, repeat)
+    except SignupError as error:
+        return render_template("reset.html", resetForm=form, error=error) #TODO include url params again
+
+    loginForm = LoginForm()
+    return render_template("login.html", loginForm=loginForm) #send user back to login when finished
 
 
 

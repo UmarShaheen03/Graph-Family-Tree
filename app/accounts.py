@@ -98,7 +98,7 @@ def reset_email(receiver_email):
     user.reset_expiry = now.timestamp + (24 * 60 * 60) #now + 24 hours
 
 
-    link = url_for(reset) +"?token="
+    link = url_for("main_bp.reset_page") +"?token="
 
     port = 465 #ssl port
     sender_email = "test" #TODO make an official email (using personal email currently)
@@ -122,4 +122,30 @@ def reset_email(receiver_email):
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, message)
     
+    return
+
+def verify_reset(email, token):
+    if email == None or token == None: #if missing url params
+        return False
+    
+    user = db.session.query(User).filter(User.email == email).first()
+
+    if user == None: #if no account with that email
+        return False
+
+    if user.reset_token != token: #if incorrect token
+        return False
+
+    if datetime.now() > user.reset_expire: #if reset expired
+        return False
+    
+    return True
+
+def reset(email, password, repeat):
+    if password != repeat:
+        raise SignupError("Passwords do not match")
+    
+    user = db.session.query(User).filter(User.email == email).first()
+    
+    user.set_password(password)
     return
