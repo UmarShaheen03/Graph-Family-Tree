@@ -52,7 +52,8 @@ def init_database():
   
 
     #add mock accounts to db
-    db.session.add(test_admin)
+    db.session.add(nima)
+    db.session.add(group31)
     db.session.add(test_user)
     db.session.commit()
 
@@ -68,9 +69,12 @@ def signup(email, username, password, repeat, remember):
     if db.session.query(User).filter(User.username == username).first() != None:
         raise SignupError("Username already exists")
     
-    #get a new user_id, +1 from the last user_id
-    #TODO: make the user ids more random? harder to guess
-    new_id = db.session.query(User).order_by(User.user_id.desc()).first().user_id + 1
+    #get a new user_id, generated from a 128 bit uuid, sliced down to 32 bits
+    while True:
+        new_id = uuid.uuid4()
+        new_id = int(str(new_id.int)[0:8]) #slicing to first 8 characters
+        if db.session.query(User).filter(User.user_id == new_id).first() == None: #if user id is new
+            break
 
     #construct user object
     user = User(
@@ -117,18 +121,18 @@ def reset_email(receiver_email):
     user.reset_expiry = now.timestamp + (24 * 60 * 60) #now + 24 hours
 
 
-    link = url_for("main_bp.reset_page") +"?token=" + token + "&email=" + user.email
+    link = url_for("main_bp.reset_page") +"?token=" + token + "&user_id=" + user.user_id
 
     port = 465 #ssl port
     sender_email = "cits3200group31@gmail.com"
-    password = "MichaelWise#1Fans" #TODO store password securely
+    password = "MichaelWise#1Fans" #TODO store password securely (environment variables?)
     context = ssl.create_default_context()
 
     #create message content
     message = """\
     From: %s
     To: %s
-    Subject: WEBSITE NAME: Password reset request for %s
+    Subject: Dehdashti Family Graph: Password reset request for %s
 
     To reset your password, please visit %s
     This link expires after 24 hours.
@@ -145,11 +149,11 @@ def reset_email(receiver_email):
 
 
 
-def verify_reset(email, token):
-    if email == None or token == None: #if missing params
+def verify_reset(user_id, token):
+    if user_id == None or token == None: #if missing params
         return False
     
-    user = db.session.query(User).filter(User.email == email).first()
+    user = db.session.query(User).filter(User.user_id == user_id).first()
 
     if user == None: #if no account with that email
         return False
@@ -164,12 +168,14 @@ def verify_reset(email, token):
 
 
 
-def reset(email, password, repeat):
+def reset(user_id, password, repeat):
     if password != repeat:
         raise SignupError("Passwords do not match")
     
-    user = db.session.query(User).filter(User.email == email).first()
+    user = db.session.query(User).filter(User.user_id == user_id).first()
+
+    #TODO remove reset token
     
     user.set_password(password)
-    
+
     return

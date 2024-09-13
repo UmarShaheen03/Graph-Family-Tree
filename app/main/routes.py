@@ -98,23 +98,23 @@ def forgot_request():
 
 @main_bp.route("/reset")
 def reset_password_page():
-    #get email and uuid from url params
-    email = ""
+    #get user_id and token from url params
+    user_id = ""
     token = ""
 
-    if not verify_reset(email, token):
+    if not verify_reset(user_id, token):
         return url_for("main_bp.home_page")
     
     form = ResetPassword()
-    return render_template("reset.html", resetForm=form, token=token, email=email)
+    return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
 
 @main_bp.route("/reset-form", methods=["POST"])
 def reset_form():
-    #get email and uuid from url params
-    email = ""
+    #get user_id and token from url params
+    user_id = ""
     token = ""
 
-    if not verify_reset(email, token):
+    if not verify_reset(user_id, token):
         return url_for("main_bp.home_page")
     
     form = ResetPassword()
@@ -122,9 +122,9 @@ def reset_form():
     repeat = request.form.get("repeat")
 
     try:
-        reset(email, password, repeat)
+        reset(user_id, password, repeat)
     except SignupError as error:
-        return render_template("reset.html", resetForm=form, error=error, token=token, email=email)
+        return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
 
     loginForm = LoginForm()
     return render_template("login.html", loginForm=loginForm, reset_success=True) #send user back to login when finished
