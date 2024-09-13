@@ -3,12 +3,15 @@ from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
 from flask import current_app, url_for
+import sys #TODO using for debug printing, remove in final
 
-#libraries for rest password
+#libraries for reset password
 import smtplib
 import ssl
 import uuid
-import datetime
+from datetime import datetime
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 class SignupError(Exception):
     pass
@@ -131,30 +134,58 @@ def reset_email(receiver_email):
     
     #generate a random uuid for the reset password link
     token = uuid.uuid4()
+    now = datetime.now()
+    expiry = int(now.timestamp()) + (24 * 60 * 60) #now + 24 hours
 
-    #add reset token to user in db, expire after 24 hours
-    user.reset_token = token.bytes
-    now = datetime.datetime.now()
-    user.reset_expiry = int(now.timestamp()) + (24 * 60 * 60) #now + 24 hours
+    #commit changes to db
+    db.session.query(User).filter(User.email == receiver_email).\
+        update({"reset_token": token.hex}, synchronize_session = False)
+    db.session.query(User).filter(User.email == receiver_email).\
+        update({"reset_expiry": expiry}, synchronize_session = False)
+    db.session.commit()
 
     website_url = "127.0.0.1:5000" #TODO replace with real url when deploying
-    link = website_url + url_for("main_bp.reset_password_page") +"?token=" + str(token) + "&user_id=" + str(user.user_id)
+    link = website_url + url_for("main_bp.reset_password_page") +"?token=" + str(token.hex) + "&user_id=" + str(user.user_id)
 
-    #create message content
-    message = """\
-    From: %s
-    Subject: Password Reset Request For %s
-    
-    To reset your password, please visit %s
-    This link expires after 24 hours.
-    (If you did not request a password reset, simply ignore this message)
-    """ % (sender_email, user.username, link)
-    consol
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "Password Reset for " + user.username
+    message["From"] = sender_email
+    message["To"] = receiver_email
+
+    #html version of email
+    #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
+    html = """\
+    <html>
+    <body>
+        <p>
+        %s <br>
+        <a href="%s">Click here</a> to reset your password <br>
+        This link will last for 24 hours <br>
+        (If you did not make this request, simply ignore this email)
+        </p>
+    </body>
+    </html>
+    """ % (link, link)
+
+    #plaintext as backup if html doesn't load
+    text = """\
+    %s
+    Click the above link to reset your password
+    This link will last for 24 hours
+    (If you did not make this request, simply ignore this email)
+    """ % (link)
+
+    plaintext_message = MIMEText(text, "plain")
+    html_message = MIMEText(html, "html")
+
+    #second message is attempted first, fallback to first message
+    message.attach(plaintext_message)
+    message.attach(html_message)
 
     #establish ssl conenction with gmail
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
         server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, message)
+        server.sendmail(sender_email, receiver_email, message.as_string())
     
     return
 
@@ -165,6 +196,8 @@ def verify_reset(user_id, token):
         return False
     
     user = db.session.query(User).filter(User.user_id == user_id).first()
+    print(token, file=sys.stderr)
+    print(user.reset_token, file=sys.stderr)
 
     if user == None: #if no account with that email
         return False
@@ -172,7 +205,7 @@ def verify_reset(user_id, token):
     if user.reset_token != token: #if incorrect token
         return False
 
-    if datetime.now() > user.reset_expire: #if reset expired
+    if int(datetime.now().timestamp()) > user.reset_expiry: #if reset expired
         return False
     
     return True

@@ -8,7 +8,7 @@ from datetime import datetime
 from flask_wtf import CSRFProtect
 from flask import Blueprint, Flask, flash, redirect, render_template, request, session, send_file, url_for
 import datetime
-
+import sys #TODO using for debug printing, remove in final
 
 main_bp = Blueprint('main_bp', __name__)
 
@@ -99,11 +99,11 @@ def forgot_request():
 @main_bp.route("/reset")
 def reset_password_page():
     #get user_id and token from url params
-    user_id = ""
-    token = ""
+    user_id = request.args.get("user_id")
+    token = request.args.get("token")
 
     if not verify_reset(user_id, token):
-        return url_for("main_bp.home_page")
+        return home_page()
     
     form = ResetPassword()
     return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
@@ -111,11 +111,11 @@ def reset_password_page():
 @main_bp.route("/reset-form", methods=["POST"])
 def reset_form():
     #get user_id and token from url params
-    user_id = ""
-    token = ""
+    user_id = request.args.get("user_id")
+    token = request.args.get("token")
 
     if not verify_reset(user_id, token):
-        return url_for("main_bp.home_page")
+        return home_page()
     
     form = ResetPassword()
     password = request.form.get("password")
