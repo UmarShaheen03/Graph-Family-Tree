@@ -34,8 +34,14 @@
             <div style="width: 100%; text-align: center">
                 <a href="{{ url_for('main_bp.signup_page') }}">Click here to create an account</a>
             </div>
-            
+
+            {% if error != None %}
             <p style="color:red">{{ error }}</p>
+            {% endif %}
+
+            {% if reset_success %}
+            <p style="color:blueviolet">Password succesfully reset, please login</p>
+            {% endif %}
         </form>
     </div>
 </div>

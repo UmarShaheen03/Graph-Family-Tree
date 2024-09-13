@@ -90,15 +90,15 @@ def reset_email(receiver_email):
         return #return without error if no matching user, vulnerable if it reports when user does/doesn't exist
     
     #generate a random uuid for the reset password link
-    uuid = uuid.uuid4() 
+    token = uuid.uuid4() 
 
     #add reset token to user in db, expire after 24 hours
-    user.reset_token = uuid
+    user.reset_token = token
     now = datetime.now()
     user.reset_expiry = now.timestamp + (24 * 60 * 60) #now + 24 hours
 
 
-    link = url_for("main_bp.reset_page") +"?token="
+    link = url_for("main_bp.reset_page") +"?token=" + token + "&email=" + user.email
 
     port = 465 #ssl port
     sender_email = "test" #TODO make an official email (using personal email currently)
@@ -125,7 +125,7 @@ def reset_email(receiver_email):
     return
 
 def verify_reset(email, token):
-    if email == None or token == None: #if missing url params
+    if email == None or token == None: #if missing params
         return False
     
     user = db.session.query(User).filter(User.email == email).first()

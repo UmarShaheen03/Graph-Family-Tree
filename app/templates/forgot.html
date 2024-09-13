@@ -30,11 +30,11 @@
 </div>
 {% endif %}
 
-{% if submitted == True %}
+{% if submitted %}
 <div class="d-md-flex flex-md-row container">
     <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">
         <h2 class="text-center">Email Sent</h2>   
-        <p>An email has been sent to the provided address, with a link to reset the password. Please also check your spam/junk folder.</p>
+        <p>An email has been sent to the provided address, with a link to reset the password. This link will expire in 24 hours. Please also check your spam/junk folder.</p>
     </div>
 </div>
 {% endif %}

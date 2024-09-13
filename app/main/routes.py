@@ -106,7 +106,7 @@ def reset_password_page():
         return url_for("main_bp.home_page")
     
     form = ResetPassword()
-    return render_template("reset.html", resetForm=form) #TODO include url params again
+    return render_template("reset.html", resetForm=form, token=token, email=email)
 
 @main_bp.route("/reset-form", methods=["POST"])
 def reset_form():
@@ -124,10 +124,10 @@ def reset_form():
     try:
         reset(email, password, repeat)
     except SignupError as error:
-        return render_template("reset.html", resetForm=form, error=error) #TODO include url params again
+        return render_template("reset.html", resetForm=form, error=error, token=token, email=email)
 
     loginForm = LoginForm()
-    return render_template("login.html", loginForm=loginForm) #send user back to login when finished
+    return render_template("login.html", loginForm=loginForm, reset_success=True) #send user back to login when finished
 
 
 
