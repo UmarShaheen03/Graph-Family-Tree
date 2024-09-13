@@ -149,11 +149,12 @@ def reset_email(receiver_email):
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Password Reset for " + user.username
-    message["From"] = sender_email
+    message["From"] = "Dehdashti Family Graph"
     message["To"] = receiver_email
 
     #html version of email
     #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
+    #TODO: style this email better
     html = """\
     <html>
     <body>
@@ -196,8 +197,7 @@ def verify_reset(user_id, token):
         return False
     
     user = db.session.query(User).filter(User.user_id == user_id).first()
-    print(token, file=sys.stderr)
-    print(user.reset_token, file=sys.stderr)
+    #print(token, file=sys.stderr)
 
     if user == None: #if no account with that email
         return False
@@ -218,8 +218,14 @@ def reset(user_id, password, repeat):
     
     user = db.session.query(User).filter(User.user_id == user_id).first()
 
-    #TODO remove reset token
-    
+    #set password to new password    
     user.set_password(password)
+
+    #remove tokens, so they cant be reused
+    db.session.query(User).filter(User.user_id == user_id).\
+        update({"reset_token": None}, synchronize_session = False)
+    db.session.query(User).filter(User.user_id == user_id).\
+        update({"reset_expiry": None}, synchronize_session = False)
+    db.session.commit()
 
     return
