@@ -24,6 +24,13 @@ class ForgotPassword(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email()])
     submit = SubmitField("Submit")
 
+class ResetPassword(FlaskForm):
+    password = PasswordField("Password", validators=[DataRequired()])
+    repeat = PasswordField("Repeat Password", validators=[DataRequired()])
+    submit = SubmitField("Reset")
+
+
+
 class AddNodeForm(FlaskForm):
 
     action = SelectField(

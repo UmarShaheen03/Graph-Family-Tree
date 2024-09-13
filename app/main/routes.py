@@ -7,6 +7,7 @@ from neo4j import GraphDatabase
 from datetime import datetime
 from flask_wtf import CSRFProtect
 from flask import Blueprint, Flask, flash, redirect, render_template, request, session, send_file, url_for
+import datetime
 
 
 main_bp = Blueprint('main_bp', __name__)
@@ -94,6 +95,13 @@ def forgot_request():
     email = request.form.get("email")
     reset_email(email)
     return render_template("forgot.html", forgotForm=form, submitted=True)
+
+@main_bp.route("/reset")
+def reset_password_page():
+    #get user token from url params
+    #get token from url params
+
+    if 
 
 
 

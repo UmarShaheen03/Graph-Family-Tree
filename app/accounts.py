@@ -8,6 +8,7 @@ from flask import current_app, url_for
 import smtplib
 import ssl
 import uuid
+import datetime
 
 class SignupError(Exception):
     pass
@@ -88,9 +89,16 @@ def reset_email(receiver_email):
     if user == None:
         return #return without error if no matching user, vulnerable if it reports when user does/doesn't exist
     
-    uuid = uuid.uuid4() #generate a random uuid for the reset passwordl ink
+    #generate a random uuid for the reset password link
+    uuid = uuid.uuid4() 
 
-    link = url_for()
+    #add reset token to user in db, expire after 24 hours
+    user.reset_token = uuid
+    now = datetime.now()
+    user.reset_expiry = now.timestamp + (24 * 60 * 60) #now + 24 hours
+
+
+    link = url_for(reset) +"?token="
 
     port = 465 #ssl port
     sender_email = "test" #TODO make an official email (using personal email currently)
@@ -101,9 +109,10 @@ def reset_email(receiver_email):
     message = """\
     From: %s
     To: %s
-    Subject: Password reset request for %s
+    Subject: WEBSITE NAME: Password reset request for %s
 
     To reset your password, please visit %s
+    This link expires after 24 hours.
     (If you did not request a password reset, simply ignore this message)
     
     """ % (sender_email, receiver_email, user.username, link)
