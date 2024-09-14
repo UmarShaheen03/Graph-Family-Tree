@@ -11,8 +11,13 @@ class Config:
     #Cryptographic key for signature/tokens to defend web forms against CSRF
     SECRET_KEY = "test1234"
     # SECRET_KEY = os.environ.get('SECRET_KEY')
-
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'app.db')
     
     WTF_CSRF_ENABLED = False
+
+class DeploymentConfig(Config):
+  SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'app.db')
+
+class TestConfig(Config):
+  SQLALCHEMY_DATABASE_URI = "sqlite:///:memory" #store db in memory, not with uri
+  TESTING = True
