@@ -1,10 +1,10 @@
-from flask_wtf import FlaskForm, CSRFProtect
 import sqlalchemy as sa
 from app.models import User
 from flask_login import current_user
 from flask import Flask, flash, render_template, redirect, request, session, url_for
 from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
 from wtforms.validators import DataRequired, NumberRange, Email, ValidationError, EqualTo, Length
+from flask_wtf import CSRFProtect, FlaskForm
 
 class LoginForm(FlaskForm):
     username_or_email = StringField("Username or Email", validators=[DataRequired()])
@@ -57,7 +57,6 @@ class AddNodeForm(FlaskForm):
         'Person to Shift',
         choices=[]  # Populate this dynamically in your view
     )
-
     person_to_delete = SelectField(
         'Person to Delete',
         choices=[]  # Populate this dynamically in your view
@@ -103,9 +102,7 @@ class UpdateNode (FlaskForm):
     relationship_type= StringField("Address")
     relationships = FieldList(FormField(RelationshipForm), min_entries=1, max_entries=10) 
     submit = SubmitField("Add to Family Tree")
-
-
-    
+  
 class AppendGraph(FlaskForm):
     FullName = StringField("Full Name:")
     DateOfBirth = DateField("Date of Birth")
@@ -119,3 +116,27 @@ class AppendGraph(FlaskForm):
     relationship_type= StringField("Address")
     relationships = FieldList(FormField(RelationshipForm), min_entries=1, max_entries=10) 
     submit = SubmitField("Add to Family Tree")
+
+class CommentForm(FlaskForm):
+    comment=TextAreaField('Comment', validators=[DataRequired()])
+    submit=SubmitField('Submit')
+
+class BiographyEditForm(FlaskForm):
+    fullname = SelectField(
+        'Full Name',
+        choices=[]  # Populate this dynamically in your view
+    )
+    dob =DateField('Date of Birth', validators=[Optional()])
+    biography=StringField('Biography', validators=[Optional()])
+    location=StringField('Location', validators=[Optional()])
+    email=EmailField('Email', validators=[Optional()])
+    phonenumber=IntegerField('Phone Number', validators=[Optional()])
+    address=StringField('Address', validators=[Optional()])
+    submit=SubmitField('Update')
+
+class Search_Node (FlaskForm):
+      fullname = SelectField(
+        'Search',
+        choices=[]  # Populate this dynamically in your view
+    )
+      submit = SubmitField("Search")
