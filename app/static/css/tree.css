@@ -1,0 +1,38 @@
+#graph-container {
+    background-color: grey;
+    width: 80vw;
+    height: 80vh;
+    border: 1px solid #ccc;
+    overflow: hidden;
+}
+svg {
+    width: 100%;
+    height: 100%;
+}
+.node {
+    cursor: pointer;
+    stroke: #fff;
+    stroke-width: 2px;
+}
+.link {
+    stroke: #ccc;
+    stroke-width: 2px;
+    stroke-opacity: 0.8;
+    visibility: hidden; /* Hide edges by default */
+}
+.highlighted {
+    stroke: #ff5722; /* Highlight color */
+    stroke-width: 3px;
+    visibility: visible; /* Make edges visible when highlighted */
+}
+#tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 4px;
+    font-size: 12px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    pointer-events: none;
+    opacity: 0;
+}

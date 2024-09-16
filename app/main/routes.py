@@ -174,7 +174,7 @@ def edit_biography():
             )
         
         flash(f'Biography for {person_name} has been updated successfully.')
-        return redirect(url_for('main_bp.tree_page'))
+        return redirect(url_for('main_bp.biography', name=person_name))
 
     return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
 
