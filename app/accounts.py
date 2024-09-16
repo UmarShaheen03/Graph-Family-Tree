@@ -190,18 +190,10 @@ def reset_email(receiver_email):
                 background-color: white;
             }
 
-            #button {
-                text-align: center;
-            }
-
-
-
-
             #btn {
                 border: none;
                 color: white;
                 padding: 0.5rem 1rem;
-                text-align: center;
                 text-decoration: none;
                 display: inline-block;
 
@@ -227,20 +219,19 @@ def reset_email(receiver_email):
     <body>
         <div class="contents">
             <div class="texts">
-                <h1> Oops! </h1>
-                <h3> Looks like you forgot your password</h3>
-                <p> Thats OK. Hit the link below to reset it!</p>
+                <h1>Forgot password?</h1>
+                <p>Click the link below to reset it.</p>
                 <div id="button">
                     <a id='btn' href="%s">Click here</a>
                 </div>
+                <p>TEMPORARY LINK FOR DEVELOPMENT: %s</p>
                 <p class="subtext">This link is only valid for 24 hours</p>
                 <p class="subtext">If you did not make this request, simply ignore this email </p>
-
             </div>
         </div>
     </body>
     </html>
-    """ % link
+    """ % (link, link)
     
 
     #plaintext as backup if html doesn't load
