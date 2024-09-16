@@ -154,19 +154,94 @@ def reset_email(receiver_email):
 
     #html version of email
     #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
-    #TODO: style this email better
     html = """\
-    <html>
+    <!DOCTYPE html>
+    <html lang = "en">
+
+    <head>
+        <style>
+            body {
+                font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+                min-height: 100vh;
+            
+                padding-top: 25px;
+                padding-bottom: 25px;
+                background-repeat: no-repeat;
+            }
+
+            h1 {
+                color: purple;
+            }
+
+            .contents {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                
+            }
+
+            .texts {
+                box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+                border-radius: 1rem;
+                padding-top: 2rem; 
+                padding-right:4rem;
+                padding-left: 4rem;
+                padding-bottom: 2rem;
+                background-color: white;
+            }
+
+            #button {
+                text-align: center;
+            }
+
+
+
+
+            #btn {
+                border: none;
+                color: white;
+                padding: 0.5rem 1rem;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+
+                margin-top: 1rem;
+                margin-bottom: 2rem;
+                cursor: pointer;
+                background-color: purple;
+
+            }
+
+            #btn:hover {
+                background-color: rgb(92, 2, 92);
+            }
+
+            .subtext{
+                font-size: x-small;
+                color: grey;
+            }
+        </style>
+
+    </head>
+
     <body>
-        <p>
-        %s <br>
-        <a href="%s">Click here</a> to reset your password <br>
-        This link will last for 24 hours <br>
-        (If you did not make this request, simply ignore this email)
-        </p>
+        <div class="contents">
+            <div class="texts">
+                <h1> Oops! </h1>
+                <h3> Looks like you forgot your password</h3>
+                <p> Thats OK. Hit the link below to reset it!</p>
+                <div id="button">
+                    <a id='btn' href="%s">Click here</a>
+                </div>
+                <p class="subtext">This link is only valid for 24 hours</p>
+                <p class="subtext">If you did not make this request, simply ignore this email </p>
+
+            </div>
+        </div>
     </body>
     </html>
-    """ % (link, link)
+    """ % link
+    
 
     #plaintext as backup if html doesn't load
     text = """\
