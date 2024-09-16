@@ -1,10 +1,87 @@
 {% extends "base.html" %}
 
-{% block headBlock %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/home.css') }}"/>
-    <title>Home Page</title>
-{% endblock %}
+{%block headBlock %}
+<link rel="stylesheet" href="{{url_for('static', filename='css/home.css')}}">
+<script src="{{url_for('static', filename='js/home.js')}}">s</script>
 
-{% block bodyBlock %}
-    <p>Home page</p>
-{% endblock %}
+{%endblock%}
+
+{%block bodyBlock %}
+
+<div id="back">
+  <div class='welcome'>
+    <h1> Visualise your family tree with </h1>
+    <h1 id="name">"Neo4j"</h1>
+    <p> Discover connections, trace your lineage, and watch your family story come to life in an intuitive,
+      easy-to-navigate interface.</p>
+    <div class='buttons'>
+    <a class="btn", id = 'started' href="{{ url_for('main_bp.login_page') }}"> Get Started</a>
+      <a class="btn", id = 'learnMore'> Learn More</a>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div id="info">
+  <div id="visualise">
+    <div class="text">
+      <h1>Visualise</h1>
+      <p>Our platform leverages Neo4j's graph database to provide a dynamic and visually engaging representation of your
+        family tree</p>
+    </div>
+    <div class="image">
+      <img src="../static/visualise.png" alt="insert image here">
+    </div>
+  </div>
+
+  <div id="navigate">
+    <div class="image">
+      <img src="../static/zooming.gif" alt="insert image here">
+    </div>
+
+    <div class="text">
+      <h1>Navigate</h1>
+      <p>Seamlessly zoom in on specific branches or get a bird's-eye view of your entire ancestory with just a few
+        clicks</p>
+        <p>
+          Be able to track your direct lineage just by hovering over the node
+        </p>
+    </div>
+  </div>
+
+  <div id="discover">
+    <div class="text">
+      <h1>Discover</h1>
+      <p>Add a new family member at the click of a button and watch your family tree automatically update, ensuring your
+        family history remains current and comprehensive</p>
+    </div>
+    <div class="image">
+      <img src="../static/discover.gif" alt="insert image here">
+    </div>
+  </div>
+
+  <div id="learn">
+    <div class="image">
+      <img src="../static/biography.png" alt="insert image here">
+    </div>
+
+    <div class="text">
+      <h1>Learn</h1>
+      <p>Learn more about your family with dedicated biography pages for each node</p>
+    </div>
+    
+  </div>
+</div>
+
+
+{%endblock %}
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+
+</html>
