@@ -2,33 +2,47 @@
 
 {% block headBlock %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}"/>
-    <title>Login Page</title>
+    <title>Login</title>
 {% endblock %}
 
 {% block bodyBlock %}
 
 <!--LOGIN FORM-->
 <div class="d-md-flex flex-md-row container">
-    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%; padding-bottom:10%;" id="login">    
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">    
         <h2 class="text-center">Login</h2>
 
         <form action="/login-form" method="post" class="container px-4">
             <div class="form-group" style="width: 100%">
-                {{ loginForm.username_or_email.label }}<br>
-                {{ loginForm.username_or_email(class="form-control", placeholder="Enter Email or Username") }} <br>
+                {{ loginForm.username_or_email.label }}
+                <br>
+                {{ loginForm.username_or_email(class="form-control", placeholder="Enter Email or Username") }}
             </div>
             <div class="form-group" style="width: 100%">
-                {{ loginForm.password.label }}<br>
-                {{ loginForm.password(class="form-control", placeholder="Enter Password") }} <br>
+                <br>
+                {{ loginForm.password.label }}
+                <br>
+                {{ loginForm.password(class="form-control", placeholder="Enter Password") }}
+                <a href="{{ url_for('main_bp.forgot_password_page') }}">Forgot password?</a> 
+                <br>
             </div>
-            <div style="display: flex; justify-content: space-between">
-            <p>{{ loginForm.remember_me() }} {{ loginForm.remember_me.label }}</p>
-            <p>{{ loginForm.submit(class="btn btn-primary") }}</p>
+            <div style="display: flex; justify-content: space-between; padding-top:5%">
+                <p>{{ loginForm.remember_me() }} {{ loginForm.remember_me.label }}</p>
+                <p>{{ loginForm.submit(class="btn btn-primary") }}</p>
             </div>
-        </form>
+        
+            <div style="width: 100%; text-align: center">
+                <a href="{{ url_for('main_bp.signup_page') }}">Click here to create an account</a>
+            </div>
 
-        <div style="width: 100%; text-align: center"><a href="{{ url_for('main_bp.signup_page') }}">Click here to create an account</a></div>
-        <p style="color:red">{{ error }}</p>
+            {% if error != None %}
+            <p style="color:red">{{ error }}</p>
+            {% endif %}
+
+            {% if reset_success %}
+            <p style="color:#593196">Password succesfully reset, please login</p>
+            {% endif %}
+        </form>
     </div>
 </div>
 
