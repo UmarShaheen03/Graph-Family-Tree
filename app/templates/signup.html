@@ -3,40 +3,52 @@
 {% block headBlock %}
     <!--Shares css page with login-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}"/>
-    <title>Signup Page</title>
+    <title>Signup</title>
 {% endblock %}
 
 {% block bodyBlock %}
 
 <div class="d-md-flex flex-md-row container">
-    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:10%; padding-bottom:10%;" id="signup">    
-        <h2 class="text-center">Sign Up</h2>
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">    
+        <h2 class="text-center">Create An Account</h2>
 
         <form action="/signup-form" method="post" class="container px-4">
             <div class="form-group" style="width: 100%">
-                {{ signupForm.email.label }}<br>
-                {{ signupForm.email(class="form-control", placeholder="Enter Email") }} <br>
+                {{ signupForm.email.label }}
+                <br>
+                {{ signupForm.email(class="form-control", placeholder="Enter Email") }}
             </div>
             <div class="form-group" style="width: 100%">
-                {{ signupForm.username.label }}<br>
-                {{ signupForm.username(class="form-control", placeholder="Enter Username") }} <br>
+                <br>
+                {{ signupForm.username.label }}
+                <br>
+                {{ signupForm.username(class="form-control", placeholder="Enter Username") }}
             </div>
             <div class="form-group" style="width: 100%">
-                {{ signupForm.password.label }}<br>
-                {{ signupForm.password(class="form-control", placeholder="Enter Password") }} <br>
+                <br>
+                {{ signupForm.password.label }}
+                <br>
+                {{ signupForm.password(class="form-control", placeholder="Enter Password") }}
             </div>
             <div class="form-group" style="width: 100%">
-                {{ signupForm.repeat.label }}<br>
-                {{ signupForm.repeat(class="form-control", placeholder="Confirm Password") }} <br>
+                <br>
+                {{ signupForm.repeat.label }}
+                <br>
+                {{ signupForm.repeat(class="form-control", placeholder="Confirm Password") }}
             </div>
-            <div style="display: flex; justify-content: space-between">
-            <p>{{ signupForm.remember_me() }} {{ signupForm.remember_me.label }}</p>
-            <p>{{ signupForm.submit(class="btn btn-primary") }}</p>
+            <div style="display: flex; justify-content: space-between; padding-top:5%">
+                <p>{{ signupForm.remember_me() }} {{ signupForm.remember_me.label }}</p>
+                <p>{{ signupForm.submit(class="btn btn-primary") }}</p>
             </div>
-        </form>
 
-        <div style="width: 100%; text-align: center"><a href="{{ url_for('main_bp.login_page') }}">Click here to login</a></div>
-        <p style="color:red">{{ error }}</p>
+            <div style="width: 100%; text-align: center">
+                <a href="{{ url_for('main_bp.login_page') }}">Click here to login</a>
+            </div>
+
+            {% if error != None %}
+            <p style="color:red">{{ error }}</p>
+            {% endif %}
+        </form>
     </div>
 </div>
 

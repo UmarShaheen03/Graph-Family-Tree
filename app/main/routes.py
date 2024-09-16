@@ -1,18 +1,17 @@
 """Main route views"""
 
 import os
-from flask import Blueprint, render_template, flash, redirect, url_for, request, session
-from app.forms import BiographyEditForm, CommentForm, Search_Node
-from app.models import Biography,Comment
+from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file
+from app.forms import LoginForm, SignupForm, ForgotPassword, ResetPassword, AddNodeForm, UpdateNode, AppendGraph, BiographyEditForm, CommentForm, Search_Node
+from app.models import Biography, Comment
+from app.accounts import signup, login, SignupError, LoginError, init_database, reset_email, verify_reset, reset
+from app import db
+from neo4j import GraphDatabase
+from flask_wtf import CSRFProtect
 from datetime import datetime
 from flask_login import login_required, current_user
-from datetime import datetime
-from flask_wtf import CSRFProtect
-from neo4j import GraphDatabase
-from app.forms import AddNodeForm, UpdateNode, AppendGraph, LoginForm, SignupForm, BiographyEditForm, CommentForm
-from app.accounts import signup, login, SignupError, LoginError, init_database
-from app import db
 
+import sys #TODO using for debug printing, remove in final
 
 
 main_bp = Blueprint('main_bp', __name__)
@@ -85,6 +84,53 @@ def signup_request():
     else:
         return render_template("signup.html", loginForm=form, error="Invalid Form")
    
+
+@main_bp.route("/forgot")
+def forgot_password_page():
+    form = ForgotPassword()
+    return render_template("forgot.html", forgotForm=form, submitted=False)
+
+@main_bp.route("/forgot-form", methods=["POST"])
+def forgot_request():
+    form = ForgotPassword()
+    email = request.form.get("email")
+    reset_email(email)
+    return render_template("forgot.html", forgotForm=form, submitted=True)
+
+@main_bp.route("/reset")
+def reset_password_page():
+    #get user_id and token from url params
+    user_id = request.args.get("user_id")
+    token = request.args.get("token")
+
+    if not verify_reset(user_id, token):
+        return home_page()
+    
+    form = ResetPassword()
+    return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
+
+@main_bp.route("/reset-form", methods=["POST"])
+def reset_form():
+    #get user_id and token from url params
+    user_id = request.args.get("user_id")
+    token = request.args.get("token")
+
+    if not verify_reset(user_id, token):
+        return home_page()
+    
+    form = ResetPassword()
+    password = request.form.get("password")
+    repeat = request.form.get("repeat")
+
+    try:
+        reset(user_id, password, repeat)
+    except SignupError as error:
+        return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
+
+    loginForm = LoginForm()
+    return render_template("login.html", loginForm=loginForm, reset_success=True) #send user back to login when finished
+
+
 
 @main_bp.route("/tree")
 def tree_page():
