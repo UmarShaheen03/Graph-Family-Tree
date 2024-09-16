@@ -4,14 +4,12 @@ import unittest
 
 from neo4j import GraphDatabase
 
-from app import create_app, db
-
 # HOW TO RUN python -m unittest unit.py    
 
 ## FYI my part tests the functional database not the web app itself. It tests for  correct connection to the neo4j driver 
 
 
-NEO4J_URI='neo4j+s://633149e1.databases.neo4j.io'
+NEO4J_URI='neo4j+ssc://633149e1.databases.neo4j.io'
 NEO4J_USERNAME='neo4j'
 NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
 
