@@ -46,48 +46,45 @@ def signup_page():
 def login_request():
     form = LoginForm()
 
-    #form validation isn't working, so commented out
-    #TODO: figure out why it isn't validating
-    #if not form.validate_on_submit():
-    #    return render_template("login.html", loginForm=form, error="Invalid form")
+    if form.validate_on_submit():
+        username_or_email = request.form.get("username_or_email")
+        password = request.form.get("password")
+        remember = request.form.get("remember")
+
+        try:
+            login(username_or_email, password, remember)
+        except LoginError as error:
+            return render_template("login.html", loginForm=form, error=error)
+
+        #send to home page on success
+        return home_page()
     
-    username_or_email = request.form.get("username_or_email")
-    password = request.form.get("password")
-    remember = request.form.get("remember")
-
-    #call login function from other file
-    try:
-        login(username_or_email, password, remember)
-    except LoginError as error:
-        return render_template("login.html", loginForm=form, error=error)
-
-    #currently sends to home page on success
-    return home_page()
-
+    else:
+        return render_template("login.html", loginForm=form, error="Invalid Form")
+    
 #form submissions for signup
 @main_bp.route("/signup-form", methods=["POST"])
 def signup_request():
     form = SignupForm()
 
-    #form validation isn't working, so commented out
-    #TODO: figure out why it isn't validating
-    #if not form.validate_on_submit():
-    #    return render_template("signup.html", signupForm=form, error="Invalid form")
-    
-    email = request.form.get("email")
-    username = request.form.get("username")
-    password = request.form.get("password")
-    repeat = request.form.get("repeat")
-    remember = request.form.get("remember")
+    if form.validate_on_submit():
+        email = request.form.get("email")
+        username = request.form.get("username")
+        password = request.form.get("password")
+        repeat = request.form.get("repeat")
+        remember = request.form.get("remember")
 
-    #call signup function from other file
-    try:
-        signup(email, username, password, repeat, remember)
-    except SignupError as error:
-        return render_template("signup.html", signupForm=form, error=error)
+        try:
+            signup(email, username, password, repeat, remember)
+        except SignupError as error:
+            return render_template("signup.html", signupForm=form, error=error)
+
+        #send to home page on success
+        return home_page()
     
-    #currently sends to home page on success
-    return home_page()
+    else:
+        return render_template("signup.html", loginForm=form, error="Invalid Form")
+   
 
 @main_bp.route("/tree")
 def tree_page():
@@ -205,7 +202,7 @@ def get_person_bio(full_name):
 
 
 
-NEO4J_URI='neo4j+s://633149e1.databases.neo4j.io'
+NEO4J_URI='neo4j+ssc://633149e1.databases.neo4j.io'
 NEO4J_USERNAME='neo4j'
 NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
 
