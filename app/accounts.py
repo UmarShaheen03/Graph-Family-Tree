@@ -220,7 +220,7 @@ def reset_email(receiver_email):
         <div class="contents">
             <div class="texts">
                 <h1>Forgot password?</h1>
-                <p>Click the link below to reset it.</p>
+                <p style="color:black">Click the link below to reset it.</p>
                 <div id="button">
                     <a id='btn' href="%s">Click here</a>
                 </div>

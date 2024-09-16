@@ -54,14 +54,16 @@
 
 <body>
     <div class="contents">
-        <div class="texts">
-            <h1> Oops! </h1>
-            <h3> Looks like you forgot your password</h3>
-            <p> Thats OK. Hit the link below to reset it!</p>
-            <div id="button">
-                <button id='btn' href="%s">Click here</button>
+            <div class="texts">
+                <h1>Forgot password?</h1>
+                <p style="color:black">Click the link below to reset it.</p>
+                <div id="button">
+                    <a id='btn' href="%s">Click here</a>
+                </div>
+                <p>TEMPORARY LINK FOR DEVELOPMENT: %s</p>
+                <p class="subtext">This link is only valid for 24 hours</p>
+                <p class="subtext">If you did not make this request, simply ignore this email </p>
             </div>
-
         </div>
     </div>
 </body>
