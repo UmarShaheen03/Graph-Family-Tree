@@ -1,0 +1,40 @@
+.biography-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding-top: 40px;
+}
+.biography-header {
+    background-color: #343a40;
+    color: #fff;
+    padding: 20px;
+}
+.biography-header h1 {
+    margin-bottom: 0;
+}
+.biography-details {
+    padding: 20px;
+    background-color: #f8f9fa;
+}
+.biography-details p {
+    margin-bottom: 50px;
+    font-size: 1.1rem;
+}
+.comments-section {
+    padding: 20px;
+    background-color: #f8f9fa;
+    margin-top: 40px;
+    margin-bottom: 30px;
+}
+.comments-section h2 {
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+.btn-custom {
+    background-color: #343a40;
+    color: white;
+    border: none;
+}
+.btn-custom:hover {
+    background-color: #1d2124;
+    color: #f8f9fa;
+}
