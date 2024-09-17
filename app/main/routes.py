@@ -473,12 +473,11 @@ def check_login():
         return None
     
 def check_login_admin():
-    if not current_user.is_authenticated:
-        form = LoginForm()
-        logoutForm = LogoutForm()
-        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Please login or create an account to view this page")
+    check = check_login()
+    if check != None:
+        return check
     
-    elif not User.is_admin(current_user): #if user is not an admin
+    if not User.is_admin(current_user): #if user is not an admin
         form = LoginForm()
         logoutForm = LogoutForm()
         return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Admin permissions are required to view this page")

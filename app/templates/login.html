@@ -14,7 +14,7 @@
         <h2 class="text-center">Logout</h2>
         <p>You are already logged in as <b>{{ logged_in_as }}</b>. 
         <br> Please log out before logging in to a different account</p>
-        <form action="/logout-form" method="post" class="container px-4">
+        <form action="/logout-form" method="post">
             <p>{{ logoutForm.submit(class="btn btn-primary") }}</p>
         </form>
 
