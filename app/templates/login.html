@@ -7,6 +7,18 @@
 
 {% block bodyBlock %}
 
+{% if logged_in_as != None %}
+<!--LOGOUT FORM-->
+<div class="d-md-flex flex-md-row container"></div>
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">    
+        <h2 class="text-center">Logout</h2>
+        <p>You are already logged in as <b>{{ logged_in_as }}</b>. 
+        <br> Please log out before logging in to a different account</p>
+        <form action="/logout-form" method="post" class="container px-4">
+            <p>{{ logoutForm.submit(class="btn btn-primary") }}</p>
+        </form>
+
+{% elif logged_in_as == None %}
 <!--LOGIN FORM-->
 <div class="d-md-flex flex-md-row container">
     <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">    
@@ -39,11 +51,12 @@
             <p style="color:red">{{ error }}</p>
             {% endif %}
 
-            {% if reset_success %}
-            <p style="color:#593196">Password succesfully reset, please login</p>
+            {% if info != None %}
+            <p style="color:#593196">{{ info }}</p>
             {% endif %}
         </form>
     </div>
 </div>
+{% endif %}
 
 {% endblock %}

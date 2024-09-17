@@ -61,7 +61,9 @@
             <p><strong>Email:</strong> {{email if email else "None"}}</p>
             <p><strong>Phone Number:</strong> {{phone_number if phone_number else "None"}}</p>
             <p><strong>Address:</strong> {{address if address else "None"}}</p>
-            <button class="btn btn-custom" onclick="location.href='/biography/edit'">Edit Bio</button>
+            {% if admin %}
+                <button class="btn btn-custom" onclick="location.href='/biography/edit'">Edit Bio</button>
+            {% endif %}
         </div>
     </div>
 </div>

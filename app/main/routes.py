@@ -2,14 +2,14 @@
 
 import os
 from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file
-from app.forms import LoginForm, SignupForm, ForgotPassword, ResetPassword, AddNodeForm, UpdateNode, AppendGraph, BiographyEditForm, CommentForm, Search_Node
-from app.models import Biography, Comment
-from app.accounts import signup, login, SignupError, LoginError, init_database, reset_email, verify_reset, reset
+from app.forms import *
+from app.models import Biography, Comment, User
+from app.accounts import *
 from app import db
 from neo4j import GraphDatabase
 from flask_wtf import CSRFProtect
 from datetime import datetime
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 
 import sys #TODO using for debug printing, remove in final
 
@@ -32,8 +32,14 @@ def home_page():
 
 @main_bp.route("/login")
 def login_page():
+    logoutForm = LogoutForm()
     loginForm = LoginForm()
-    return render_template("login.html", loginForm=loginForm, error="")
+
+    if current_user.is_authenticated:
+        print("already logged in", sys.stderr)
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, logged_in_as=None)
 
 @main_bp.route("/signup")
 def signup_page():
@@ -44,6 +50,7 @@ def signup_page():
 @main_bp.route("/login-form", methods=["POST"])
 def login_request():
     form = LoginForm()
+    logoutForm = LogoutForm()
 
     if form.validate_on_submit():
         username_or_email = request.form.get("username_or_email")
@@ -53,13 +60,19 @@ def login_request():
         try:
             login(username_or_email, password, remember)
         except LoginError as error:
-            return render_template("login.html", loginForm=form, error=error)
+            return render_template("login.html", loginForm=form, logoutForm=logoutForm, error=error)
 
         #send to home page on success
-        return home_page()
+        return render_template('home.html')
     
     else:
-        return render_template("login.html", loginForm=form, error="Invalid Form")
+        return render_template("login.html", loginForm=form, logoutForm=logoutForm, error="Invalid Form")
+
+#form submissions for logout
+@main_bp.route("/logout-form", methods=["POST"])
+def logout_request():
+    logout_user()
+    return render_template('home.html')
     
 #form submissions for signup
 @main_bp.route("/signup-form", methods=["POST"])
@@ -79,7 +92,7 @@ def signup_request():
             return render_template("signup.html", signupForm=form, error=error)
 
         #send to home page on success
-        return home_page()
+        return render_template('home.html')
     
     else:
         return render_template("signup.html", loginForm=form, error="Invalid Form")
@@ -104,7 +117,7 @@ def reset_password_page():
     token = request.args.get("token")
 
     if not verify_reset(user_id, token):
-        return home_page()
+        return render_template('home.html')
     
     form = ResetPassword()
     return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
@@ -116,7 +129,7 @@ def reset_form():
     token = request.args.get("token")
 
     if not verify_reset(user_id, token):
-        return home_page()
+        return render_template('home.html')
     
     form = ResetPassword()
     password = request.form.get("password")
@@ -128,12 +141,18 @@ def reset_form():
         return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
 
     loginForm = LoginForm()
-    return render_template("login.html", loginForm=loginForm, reset_success=True) #send user back to login when finished
+    logoutForm = LogoutForm()
+    return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Password reset succesfully, please login") #send user back to login when finished
 
 
 
 @main_bp.route("/tree")
 def tree_page():
+    print(current_user, sys.stderr)
+    if current_user == None:
+        form = LoginForm()
+        return render_template("login.html", loginForm=form, info="Please login or create an account to view this page")
+    
     """A family tree page"""
     form=Search_Node()
     with driver.session() as session:
@@ -146,6 +165,10 @@ def tree_page():
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
+    if current_user == None:
+        form = LoginForm()
+        return render_template("login.html", loginForm=form, info="Please login or create an account to view this page")
+ 
     # Fetch person's biography details from Neo4j
     person = get_person_bio(name)
     
@@ -177,12 +200,22 @@ def biography(name):
                            phone_number=person.get('phone_number', 'No phone number provided'),
                            address=person.get('address', 'No address provided'),
                            comments=comments, 
-                           comment_form=comment_form)
+                           comment_form=comment_form,
+                           admin=User.is_admin(current_user))
 
 
 
 @main_bp.route('/biography/edit', methods=['GET', 'POST'])
 def edit_biography():
+    if current_user == None:
+        form = LoginForm()
+        return render_template("login.html", loginForm=form, info="Please login or create an account to view this page")
+    
+    if not User.is_admin(current_user): #if user is not an admin
+        form = LoginForm()
+        return render_template("login.html", loginForm=form, info="Admin permissions are required to view this page")
+    #TODO: make this return requests page, so user can request to become admin
+    
     biography = Biography.query.first()
     edit_form = BiographyEditForm()
 
