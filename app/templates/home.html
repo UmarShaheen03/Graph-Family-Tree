@@ -9,14 +9,15 @@
 {%block bodyBlock %}
 
 <div id="back">
-  <div class='welcome'>
+  <div class='welcome container-fluid text-center'>
     <h1> Visualise your family tree with </h1>
     <h1 id="name">"Neo4j"</h1>
-    <p> Discover connections, trace your lineage, and watch your family story come to life in an intuitive,
+    <p>Discover connections, trace your lineage, and watch your family story come to life in an intuitive,
       easy-to-navigate interface.</p>
     <div class='buttons'>
     <a class="btn", id = 'started' href="{{ url_for('main_bp.login_page') }}"> Get Started</a>
-      <a class="btn", id = 'learnMore'> Learn More</a>
+    <a class="m-2"></a>
+    <a class="btn", id = 'learnMore'> Learn More</a>
     </div>
   </div>
 </div>
