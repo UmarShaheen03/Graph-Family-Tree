@@ -7,10 +7,9 @@
 
 {% block bodyBlock %}
 <div class="container">
-    <h1>Interactive Family Tree</h1>
     <div id="graph-container">
         {{ form.hidden_tag() }}
-        <label for="fullname" style="font-weight: bold; font-size: 14px; margin-right: 10px;">{{form.fullname.label}}</label>
+        <!-- <label for="fullname" style="font-weight: bold; font-size: 14px; margin-right: 10px;">{{form.fullname.label}}</label> -->
         {{ form.fullname(id="fullname", style="padding: 8px; border: 1px solid #ccc; border-radius: 5px; width: 200px; font-size: 14px;") }}
         {{ form.submit(id="Search", style="background-color: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;") }}
         
