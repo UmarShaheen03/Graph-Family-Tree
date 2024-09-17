@@ -146,7 +146,8 @@
             .attr("y", d => d.y + 5)  // Center vertically to the node
             .text(d => d.name)  // Show node name
             .attr("font-size", "14px")
-            .attr("fill", "#000");
+            .attr("font-weight", "lighter")
+            // .attr("fill", "#000");
 
         // Function to highlight the direct lineage and cascade connections
         function highlightConnections(nodeName) {
