@@ -177,6 +177,19 @@ body{
  #discover> .image{
     height: 500px;
  }
+
+ #usermanual{
+  text-align: center;
+ }
+
+ #usermanual>button{
+  border: none;
+  background-color: purple;
+  color: white;
+  padding: 0.5rem 1rem;
+  margin-bottom: 3rem;
+  font-size: larger;
+ }
  
  /* width */
  ::-webkit-scrollbar {

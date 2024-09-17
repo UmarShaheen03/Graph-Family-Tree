@@ -1,7 +1,7 @@
 """Main route views"""
 
 import os
-from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file
+from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file, send_from_directory
 from app.forms import LoginForm, SignupForm, ForgotPassword, ResetPassword, AddNodeForm, UpdateNode, AppendGraph, BiographyEditForm, CommentForm, Search_Node
 from app.models import Biography, Comment
 from app.accounts import signup, login, SignupError, LoginError, init_database, reset_email, verify_reset, reset
@@ -10,6 +10,7 @@ from neo4j import GraphDatabase
 from flask_wtf import CSRFProtect
 from datetime import datetime
 from flask_login import login_required, current_user
+
 
 import sys #TODO using for debug printing, remove in final
 
@@ -27,6 +28,11 @@ def run_once_on_start():
 def home_page():
     """The landing page"""
     return render_template('home.html')
+
+@main_bp.route("/pdf/<path:filename>")
+def serve_pdf(filename):
+    return send_from_directory('static', filename)
+
 
 """LOGIN AND SIGNUP PAGE/FORMS"""
 
@@ -142,7 +148,7 @@ def tree_page():
     # Set choices for the FullName dropdown field
     form.fullname.choices = nodes
     nodes, relationships = fetch_data()
-    return render_template('Tree.html', nodes=nodes, relationships=relationships,form=form)
+    return render_template('tree.html', nodes=nodes, relationships=relationships,form=form)
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
