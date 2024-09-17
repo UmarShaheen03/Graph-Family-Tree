@@ -9,16 +9,16 @@
 
 <!--LOGIN FORM-->
 <div class="d-md-flex flex-md-row container">
-    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">    
+    <div class="box-grey flex-grow-1 custom-padding">    
         <h2 class="text-center">Login</h2>
 
         <form action="/login-form" method="post" class="container px-4">
-            <div class="form-group" style="width: 100%">
+            <div class="form-group">
                 {{ loginForm.username_or_email.label }}
                 <br>
                 {{ loginForm.username_or_email(class="form-control", placeholder="Enter Email or Username") }}
             </div>
-            <div class="form-group" style="width: 100%">
+            <div class="form-group">
                 <br>
                 {{ loginForm.password.label }}
                 <br>
@@ -26,12 +26,12 @@
                 <a href="{{ url_for('main_bp.forgot_password_page') }}">Forgot password?</a> 
                 <br>
             </div>
-            <div style="display: flex; justify-content: space-between; padding-top:5%">
+            <div class="remember-me">
                 <p>{{ loginForm.remember_me() }} {{ loginForm.remember_me.label }}</p>
-                <p>{{ loginForm.submit(class="btn btn-primary") }}</p>
+                <p>{{ loginForm.submit(class="btn btn-primary rounded-pill") }}</p>
             </div>
         
-            <div style="width: 100%; text-align: center">
+            <div class="create-account">
                 <a href="{{ url_for('main_bp.signup_page') }}">Click here to create an account</a>
             </div>
 
