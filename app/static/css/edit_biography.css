@@ -82,6 +82,10 @@
     border-color: #301a4a;
 }
 
+.btn-lg.rounded-pill {
+    border-radius: 50px;
+}
+
 /* Header styling */
 h1 {
     font-weight: 700;

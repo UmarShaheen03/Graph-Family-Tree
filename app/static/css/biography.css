@@ -3,8 +3,14 @@
     margin: 0 auto;
     padding-top: 40px;
 }
+/* Card styling */
+.card {
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
 .biography-header {
-    background-color: #343a40;
+    background-color: #603494;
     color: #fff;
     padding: 20px;
 }
@@ -30,11 +36,15 @@
     font-size: 1.5rem;
 }
 .btn-custom {
-    background-color: #343a40;
+    background-color: #603494;
     color: white;
-    border: none;
 }
 .btn-custom:hover {
-    background-color: #1d2124;
+    background-color: #432467;
+    border-color: #301a4a;
     color: #f8f9fa;
+}
+
+.btn-lg.rounded-pill {
+    border-radius: 50px;
 }
