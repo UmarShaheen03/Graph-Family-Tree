@@ -45,7 +45,7 @@
                 <a href="{{ url_for('main_bp.login_page') }}">Click here to login</a>
             </div>
 
-            {% if error != None %}
+            {% if error is defined %}
             <p style="color:red">{{ error }}</p>
             {% endif %}
         </form>

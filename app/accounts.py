@@ -56,7 +56,7 @@ def init_database():
         user_id=3,
         username="cooper",
         email="cooptrooper04@gmail.com",
-        admin=False,
+        admin=True,
         password_hash=str(generate_password_hash("test"))
     )
   

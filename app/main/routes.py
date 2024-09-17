@@ -39,7 +39,7 @@ def login_page():
         print("already logged in", sys.stderr)
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, logged_in_as=User.get_username(current_user))
     else:
-        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, logged_in_as=None)
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm)
 
 @main_bp.route("/signup")
 def signup_page():
@@ -148,10 +148,9 @@ def reset_form():
 
 @main_bp.route("/tree")
 def tree_page():
-    print(current_user, sys.stderr)
-    if current_user == None:
-        form = LoginForm()
-        return render_template("login.html", loginForm=form, info="Please login or create an account to view this page")
+    check = check_login()
+    if check != None:
+        return check
     
     """A family tree page"""
     form=Search_Node()
@@ -165,9 +164,9 @@ def tree_page():
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
-    if current_user == None:
-        form = LoginForm()
-        return render_template("login.html", loginForm=form, info="Please login or create an account to view this page")
+    check = check_login()
+    if check != None:
+        return check
  
     # Fetch person's biography details from Neo4j
     person = get_person_bio(name)
@@ -207,14 +206,9 @@ def biography(name):
 
 @main_bp.route('/biography/edit', methods=['GET', 'POST'])
 def edit_biography():
-    if current_user == None:
-        form = LoginForm()
-        return render_template("login.html", loginForm=form, info="Please login or create an account to view this page")
-    
-    if not User.is_admin(current_user): #if user is not an admin
-        form = LoginForm()
-        return render_template("login.html", loginForm=form, info="Admin permissions are required to view this page")
-    #TODO: make this return requests page, so user can request to become admin
+    check = check_login_admin()
+    if check != None:
+        return check
     
     biography = Biography.query.first()
     edit_form = BiographyEditForm()
@@ -342,6 +336,10 @@ def calculate_age(date_of_birth_str):
 @main_bp.route("/modify_graph", methods=['GET', 'POST'])
 def modify_graph():
     """The Add node page"""
+    check = check_login_admin()
+    if check != None:
+        return check
+    
     form = AddNodeForm()
     
     # Fetch nodes for the select box for form 
@@ -463,3 +461,28 @@ def modify_graph():
             print("Person shifted and hierarchy updated. Redirecting to index.")
             return redirect(url_for("main_bp.tree_page"))
     return render_template('modify_graph.html', form=form)
+
+#functions for checking if the user is logged in, and if they are an admin
+def check_login():
+    if not current_user.is_authenticated:
+        form = LoginForm()
+        logoutForm = LogoutForm()
+        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Please login or create an account to view this page")
+    
+    else:
+        return None
+    
+def check_login_admin():
+    if not current_user.is_authenticated:
+        form = LoginForm()
+        logoutForm = LogoutForm()
+        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Please login or create an account to view this page")
+    
+    elif not User.is_admin(current_user): #if user is not an admin
+        form = LoginForm()
+        logoutForm = LogoutForm()
+        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Admin permissions are required to view this page")
+        #TODO: make this return requests page, so user can request to become admin
+    
+    else:
+        return None
