@@ -2,49 +2,8 @@
 
 {% block headBlock %}
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/pulse/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/biography.css') }}">
 <title>Biography Page</title>
-<style>
-    .biography-container {
-        max-width: 800px;
-        margin: 0 auto;
-        padding-top: 40px;
-    }
-    .biography-header {
-        background-color: #343a40;
-        color: #fff;
-        padding: 20px;
-    }
-    .biography-header h1 {
-        margin-bottom: 0;
-    }
-    .biography-details {
-        padding: 20px;
-        background-color: #f8f9fa;
-    }
-    .biography-details p {
-        margin-bottom: 50px;
-        font-size: 1.1rem;
-    }
-    .comments-section {
-        padding: 20px;
-        background-color: #f8f9fa;
-        margin-top: 40px;
-        margin-bottom: 30px;
-    }
-    .comments-section h2 {
-        margin-bottom: 20px;
-        font-size: 1.5rem;
-    }
-    .btn-custom {
-        background-color: #343a40;
-        color: white;
-        border: none;
-    }
-    .btn-custom:hover {
-        background-color: #1d2124;
-        color: #f8f9fa;
-    }
-</style>
 {% endblock %}
 
 {% block bodyBlock %}
@@ -61,7 +20,7 @@
             <p><strong>Email:</strong> {{email if email else "None"}}</p>
             <p><strong>Phone Number:</strong> {{phone_number if phone_number else "None"}}</p>
             <p><strong>Address:</strong> {{address if address else "None"}}</p>
-            <button class="btn btn-custom" onclick="location.href='/biography/edit'">Edit Bio</button>
+            <button class="btn btn-primary btn-lg btn-custom rounded-pill" onclick="location.href='/biography/edit'">Edit Bio</button>
         </div>
     </div>
 </div>
@@ -91,7 +50,7 @@
             <div class="form-group">
                 <textarea class="form-control" name="comment" rows="4" placeholder="Write your comment here..." required></textarea>
             </div>
-            <button type="submit" class="btn btn-custom">Submit</button>
+            <button type="submit" class="btn btn-primary btn-lg btn-custom rounded-pill">Submit</button>
         </form>
     </div>
 </div>
