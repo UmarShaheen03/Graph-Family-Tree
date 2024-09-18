@@ -170,7 +170,7 @@ def reset_email(receiver_email):
             }
 
             h1 {
-                color: purple;
+                color: #593196;
             }
 
             .contents {
@@ -200,12 +200,12 @@ def reset_email(receiver_email):
                 margin-top: 1rem;
                 margin-bottom: 2rem;
                 cursor: pointer;
-                background-color: purple;
+                background-color: #593196;
 
             }
 
             #btn:hover {
-                background-color: rgb(92, 2, 92);
+                background-color: #664993;
             }
 
             .subtext{
