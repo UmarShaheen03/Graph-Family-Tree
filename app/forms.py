@@ -11,6 +11,9 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired()])
     remember_me = BooleanField("Stay logged in?")
     submit = SubmitField("Log In")
+
+class LogoutForm(FlaskForm):
+    submit = SubmitField("Log Out")
     
 class SignupForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email()])

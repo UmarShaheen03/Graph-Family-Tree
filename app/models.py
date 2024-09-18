@@ -19,6 +19,9 @@ class User(UserMixin, db.Model):
     def get_id(self):
         return (self.user_id)
     
+    def get_username(self):
+        return (self.username)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -29,6 +32,9 @@ class User(UserMixin, db.Model):
     def load_user(user_id):
         return User.query.get(int(user_id))
     comments = db.relationship('Comment', back_populates='user', lazy=True)
+
+    def is_admin(self):
+        return (self.admin)
     
 
 class Biography(db.Model):
