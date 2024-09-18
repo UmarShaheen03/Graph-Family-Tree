@@ -480,7 +480,7 @@ def check_login_admin():
     if not User.is_admin(current_user): #if user is not an admin
         form = LoginForm()
         logoutForm = LogoutForm()
-        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Admin permissions are required to view this page")
+        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Admin permissions are required to view this page", logged_in_as=User.get_username(current_user))
         #TODO: make this return requests page, so user can request to become admin
     
     else:
