@@ -208,6 +208,16 @@ document.getElementById('Search').addEventListener('click', function(event) {
         alert("Node not found");
     }
 });
+
+
+document.getElementById('Download').addEventListener('click', function() {
+
+
+svg.transition()
+    .duration(750)
+    .call(zoom.transform, d3.zoomIdentity.translate(358.8716264148768,204.33467916468913).scale(0.20164607857544262))
+})
+
 </script>
 
 {% endblock %}
