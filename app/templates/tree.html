@@ -19,6 +19,7 @@
     <div id="tooltip"></div>
     
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
     var nodes = {{ nodes|tojson }};
@@ -30,6 +31,7 @@
     const centerY = height / 2;
     const radiusStep = 200;
 
+    
     // Filter out links where the hierarchy difference is not 1
     links = links.filter(link => {
         const sourceNode = nodes.find(n => n.name === link.source);
@@ -209,14 +211,27 @@ document.getElementById('Search').addEventListener('click', function(event) {
     }
 });
 
-
 document.getElementById('Download').addEventListener('click', function() {
-
-
-svg.transition()
-    .duration(750)
-    .call(zoom.transform, d3.zoomIdentity.translate(358.8716264148768,204.33467916468913).scale(0.20164607857544262))
-})
+  
+    const currentTransform = d3.zoomTransform(svg.node());
+    
+    
+    svg.transition()
+        .duration(750)
+        .call(zoom.transform, d3.zoomIdentity
+        .translate(358.8716264148768, 204.33467916468913)
+        .scale(0.20164607857544262)
+        )
+        .on('end', function() {
+            triggerDownload(); 
+        });
+});
+function triggerDownload() {
+    const graph = document.getElementById('graph');
+    const data = new XMLSerializer().serializeToString(graph);
+    const image = new Blob([data], { type: 'image/svg+xml;charset=utf-8' });
+    saveAs(image, 'FamilyTree.svg'); 
+}
 
 </script>
 
