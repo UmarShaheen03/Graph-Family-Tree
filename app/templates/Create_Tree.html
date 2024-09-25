@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block headBlock %}
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/pulse/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tree.css') }}">
+<title>Create Tree Page</title>
+{% endblock %}
+
+{% block bodyBlock %}
+
+<div class="card">
+    <div class="card-body p-5">
+        <h2 class="text-center mb-4">Upload CSV File to a Family Tree</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.file.label(class="font-weight-bold") }}
+                {{ form.file(class="form-control") }}
+                <small class="form-text text-muted">Please upload a CSV file.</small>
+            </div>
+
+            <div class="text-center">
+                {{ form.submit(class="btn btn-primary btn-lg") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+   
+{% endblock %}

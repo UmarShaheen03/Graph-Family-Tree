@@ -13,13 +13,12 @@ class TreePageLoadingTest(unittest.TestCase):
     def Tree_Loading_Test(self):
         # find the chart page
         self.driver.get("http://127.0.0.1:5000/tree")
-        #get  bar chart by ID
+        #get  chart by ID
         TreeGraph = self.driver.find_element(By.ID,"graph")
         # check if displayed 
         self.assertTrue(TreeGraph.is_displayed())
 
     def test_Form_Loads(self):
-        # same as before but for the existing feedback
         self.driver.get("http://127.0.0.1:5000/modify_graph")
         
         Form = self.driver.find_element(By.CLASS_NAME,"Form")

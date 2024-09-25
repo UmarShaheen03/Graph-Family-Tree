@@ -40,3 +40,33 @@ svg {
     pointer-events: none;
     opacity: 0;
 }
+
+.card {
+    border: 1px solid #603494; /* Customize border color */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.card-body {
+    background-color: #f8f9fa; /* Light grey background */
+}
+
+h2 {
+    color: #603494; /* Title color */
+}
+
+.btn-primary {
+    background-color: #603494; 
+    border: none; 
+    transition: background-color 0.3s ease; 
+}
+
+.btn-primary:hover {
+    background-color: #4e2a6d; 
+}
+
+.form-control {
+    border-radius: 5px; 
+    border: 1px solid #ced4da; 
+}
+

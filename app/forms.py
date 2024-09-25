@@ -2,7 +2,7 @@ import sqlalchemy as sa
 from app.models import User
 from flask_login import current_user
 from flask import Flask, flash, render_template, redirect, request, session, url_for
-from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
+from wtforms import EmailField, FieldList, FileField, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
 from wtforms.validators import DataRequired, NumberRange, Email, ValidationError, EqualTo, Length, Optional
 from flask_wtf import CSRFProtect, FlaskForm
 
@@ -143,3 +143,8 @@ class Search_Node (FlaskForm):
         choices=[]  # Populate this dynamically in your view
     )
       submit = SubmitField("Search")
+
+
+class submit_File (FlaskForm):
+    file=FileField("Upload Your CSV file")
+    submit=SubmitField('Submit')

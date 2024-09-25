@@ -485,3 +485,9 @@ def check_login_admin():
     
     else:
         return None
+    
+
+@main_bp.route("/Create_Tree", methods=['GET', 'POST'])
+def Create_Tree():
+    form=submit_File()
+    return render_template("Create_Tree.html",form=form)
