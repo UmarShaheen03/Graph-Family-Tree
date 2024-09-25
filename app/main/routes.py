@@ -1,6 +1,7 @@
 """Main route views"""
 
 import os
+import io
 from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file
 from app.forms import *
 from app.models import Biography, Comment, User
@@ -487,7 +488,48 @@ def check_login_admin():
         return None
     
 
+
 @main_bp.route("/Create_Tree", methods=['GET', 'POST'])
 def Create_Tree():
-    form=submit_File()
-    return render_template("Create_Tree.html",form=form)
+    form = submit_File()
+    if form.validate_on_submit():
+        file = form.file.data
+        if file:
+            
+            file_data = file.read().decode('utf-8')
+            DATA = []
+            Nodes = ""
+            Relationships = ""
+
+          
+            for row in file_data.splitlines():
+                List_Of_Families = row.split(",")
+                DATA.append(List_Of_Families)
+
+            
+            for Family_lines in DATA:
+                for people in Family_lines:
+                    Nodes += f"CREATE (p:Person {{FullName:'{people.strip()}'}})\n"
+
+            
+            for Family_lines in DATA:
+                for i in range(len(Family_lines) - 1):
+                    Relationships += f"MERGE (p:Person {{FullName:'{Family_lines[i].strip()}'}})-[:PARENT_OF]->(c:Person {{FullName:'{Family_lines[i + 1].strip()}'}})\n"
+
+            
+            CONTENT = Nodes + "\n" + Relationships
+
+            
+            buffer = io.StringIO()
+            buffer.write(CONTENT)
+            buffer.seek(0)  
+
+            
+            return send_file(
+                io.BytesIO(buffer.getvalue().encode('utf-8')),
+                as_attachment=True,
+                download_name="family_tree_output.txt",
+                mimetype='text/plain'
+            )
+
+    return render_template("Create_Tree.html", form=form)

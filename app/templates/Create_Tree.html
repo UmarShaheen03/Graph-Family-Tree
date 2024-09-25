@@ -10,14 +10,14 @@
 
 <div class="card">
     <div class="card-body p-5">
-        <h2 class="text-center mb-4">Upload CSV File to a Family Tree</h2>
-        <form method="POST">
+        <h2 class="text-center mb-4">Upload CSV File to Create a Family Tree</h2>
+        <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
 
             <div class="form-group">
                 {{ form.file.label(class="font-weight-bold") }}
                 {{ form.file(class="form-control") }}
-                <small class="form-text text-muted">Please upload a CSV file.</small>
+                <small class="form-text text-muted">Please upload a CSV file (e.g. John_Doe,Father,Mother).</small>
             </div>
 
             <div class="text-center">
@@ -26,6 +26,7 @@
         </form>
     </div>
 </div>
+
 
    
 {% endblock %}
