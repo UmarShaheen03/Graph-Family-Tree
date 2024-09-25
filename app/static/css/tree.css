@@ -40,3 +40,27 @@ svg {
     pointer-events: none;
     opacity: 0;
 }
+
+#Download {
+    background-color: #603494; 
+    color: #ffffff; 
+    padding: 5px 22px;
+    border: none;
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.5s ease;
+    cursor: pointer;
+
+  }
+  
+  #Download:hover {
+    background-color: #ac7ee9; 
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px);
+  }
+  
+  
