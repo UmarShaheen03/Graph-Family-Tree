@@ -160,7 +160,130 @@ def tree_page():
     # Set choices for the FullName dropdown field
     form.fullname.choices = nodes
     nodes, relationships = fetch_data()
-    return render_template('Tree.html', nodes=nodes, relationships=relationships,form=form)
+    # return render_template('Tree.html', nodes=nodes, relationships=relationships,form=form)
+
+    
+    form = AddNodeForm()
+    
+    # Fetch nodes for the select box for form 
+    with driver.session() as session:
+        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
+        nodesChoices = [(record["name"], record["name"]) for record in result]
+        
+    form.parent.choices = nodesChoices
+    form.new_parent.choices = nodesChoices
+    form.person_to_delete.choices = nodesChoices
+    form.person_to_shift.choices = nodesChoices
+    form.old_name.choices = nodesChoices
+
+    if form.validate_on_submit():
+        if form.action.data == "add":
+            with driver.session() as session:
+                # Retrieve the parent's hierarchy
+                parent_hierarchy_query = """
+                MATCH (p:Person {FullName: $Parent})
+                RETURN p.Hierarchy AS parent_hierarchy
+                """
+                parent_result = session.run(
+                    parent_hierarchy_query, Parent=form.parent.data
+                )
+                
+                parent_hierarchy = parent_result.single()["parent_hierarchy"]
+
+                # Add new node with hierarchy as parent's hierarchy + 1
+                session.run(
+                    """
+                    CREATE (n:Person {FullName: $full_name, Hierarchy: $new_hierarchy})
+                    """,
+                    full_name=form.name.data,
+                    new_hierarchy=parent_hierarchy + 1  # Child's hierarchy is parent's + 1
+                )
+
+                # Build the dynamic query string to add a relationship
+                query = """
+                MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
+                MERGE (a)-[r:PARENT_OF]->(b)
+                """
+
+                # Create or update relationship
+                session.run(
+                    query,
+                    full_name=form.name.data,
+                    Parent=form.parent.data
+                )
+
+            print("Data processed. Redirecting to index.")
+            return redirect(url_for("main_bp.tree_page"))
+        else:
+            print("Selected action is not 'Add Person'.")
+    else:
+        # Add debugging output
+        print("Form validation failed.")
+        print(form.errors)  # Print form validation errors if any
+
+    
+    
+    if form.action.data == "edit":
+            with driver.session() as session:
+                # Add node
+                session.run(
+                    """
+                   MATCH (n:Person {FullName: $old_name})
+                   SET n.FullName = $new_name
+                   """,
+    old_name=form.old_name.data,
+    new_name=form.new_name.data
+                )
+            return redirect(url_for("main_bp.tree_page"))
+    
+
+    if form.action.data == "delete":
+        with driver.session() as session:
+        # Delete person logic
+           session.run(
+            """
+            MATCH (n:Person {FullName: $person_to_delete})
+            DETACH DELETE n
+            """,
+            person_to_delete=form.person_to_delete.data
+        )
+        return redirect(url_for("main_bp.tree_page"))
+    
+    if form.action.data == "shift":
+        with driver.session() as session:
+        # Retrieve the new parent's hierarchy
+            parent_hierarchy_query = """
+        MATCH (p:Person {FullName: $Parent})
+        RETURN p.Hierarchy AS parent_hierarchy
+        """
+            parent_result = session.run(parent_hierarchy_query, Parent=form.new_parent.data)
+            parent_hierarchy = parent_result.single()["parent_hierarchy"]
+
+        # Update the hierarchy of the person being shifted
+            update_hierarchy_query = """
+            MATCH (b:Person {FullName: $full_name})
+            SET b.Hierarchy = $new_hierarchy
+            """
+            session.run(
+            update_hierarchy_query,
+            full_name=form.person_to_shift.data,
+            new_hierarchy=parent_hierarchy + 1  # New hierarchy is parent's hierarchy + 1
+        )
+
+        # Create or update the relationship between the new parent and the person being shifted
+            update_relationship_query = """
+        MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
+        MERGE (a)-[r:PARENT_OF]->(b)
+        """
+            session.run(
+                update_relationship_query,
+                full_name=form.person_to_shift.data,
+                Parent=form.new_parent.data
+        )
+
+            print("Person shifted and hierarchy updated. Redirecting to index.")
+            return redirect(url_for("main_bp.tree_page"))
+    return render_template('tree.html', nodes=nodes, relationships=relationships,form=form)
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
