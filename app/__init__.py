@@ -17,6 +17,7 @@ from .main import main_bp
 def create_app():
     """Create and configure app"""
     flask_app = Flask(__name__)
+    flask_app.secret_key = 'your_secret_key'
     flask_app.config.from_object(Config)
     csrf = CSRFProtect(flask_app)
 

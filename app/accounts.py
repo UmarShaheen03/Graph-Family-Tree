@@ -2,7 +2,7 @@ from app.models import User
 from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
-from flask import current_app, url_for
+from flask import current_app, url_for, session
 import sys #TODO using for debug printing, remove in final
 
 #libraries for reset password
@@ -106,7 +106,7 @@ def signup(email, username, password, repeat, remember):
 
 def login(email_or_username, password, remember):
     user = db.session.query(User).filter((User.username == email_or_username) | (User.email == email_or_username)).first()
-
+    session['user_email'] = user.email
     if not user:
         raise LoginError("User does not exist")
     
@@ -114,6 +114,7 @@ def login(email_or_username, password, remember):
         raise LoginError("Incorrect password")
     
     login_user(user, remember=remember)
+    
 
 
 
@@ -293,5 +294,45 @@ def reset(user_id, password, repeat):
     db.session.query(User).filter(User.user_id == user_id).\
         update({"reset_expiry": None}, synchronize_session = False)
     db.session.commit()
+
+    return
+
+
+
+def send_email_to_admin(token):
+    approval_link = f"127.0.0.1:5000/approve_admin?token={token}"
+    port = 465 #ssl port
+    website_email = 'cits3200group31@gmail.com'
+    password = "pzdm bcbj hjkv wewt" #TODO store password securely (environment variables?)
+    context = ssl.create_default_context()
+
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "Admin Request"
+    message["From"] = "Dehdashti Family Graph"
+    message["To"] = 'umar.shaheen93@gmail.com'
+
+    text = """\
+    %s
+    Click the above link to approve admin
+    This link will last for 24 hours
+    """ % (approval_link)
+    html = """\
+    %s
+    Click the above link to approve admin
+    This link will last for 24 hours
+    """ % (approval_link)
+
+    plaintext_message = MIMEText(text, "plain")
+    html_message = MIMEText(html, "html")
+
+    #second message is attempted first, fallback to first message
+    message.attach(plaintext_message)
+    message.attach(html_message)
+
+    
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+        server.login(website_email, password)
+        server.sendmail(website_email, 'umar.shaheen93@gmail.com', message.as_string())
 
     return
