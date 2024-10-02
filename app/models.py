@@ -15,7 +15,9 @@ class User(UserMixin, db.Model):
     admin = db.Column(db.Boolean)
     reset_token = db.Column(db.String)
     reset_expiry = db.Column(db.Integer) #is a datetime, but i treat it as an int
+    comments = db.relationship('Comment', back_populates='user', lazy=True)
     email_preference = db.Column(db.String) #values of "None", "Daily" or "Weekly"
+
 
     def get_id(self):
         return (self.user_id)
@@ -29,10 +31,12 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password) 
     
+    def unsubscribe(self):
+        self.email_preference = "None"
+    
     @login.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
-    comments = db.relationship('Comment', back_populates='user', lazy=True)
 
     def is_admin(self):
         return (self.admin)

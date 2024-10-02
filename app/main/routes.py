@@ -462,11 +462,25 @@ def modify_graph():
             return redirect(url_for("main_bp.tree_page"))
     return render_template('modify_graph.html', form=form)
 
+#NOTIFICATION ROUTES
+@main_bp.route("/unsubscribe/<user_id>", methods=['GET', 'POST'])
+def unsubscribe(user_id):
+    loginForm = LoginForm()
+    logoutForm = LogoutForm()
+
+    if not current_user.is_authenticated: #if not logged in
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
+    elif (user_id != User.get_id(current_user)): #if logged in as a different user
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
+
+    User.unsubscribe(current_user)
+    return render_template("unsubscribe.html") #TODO return page confirming unsubsribed
+
 #functions for checking if the user is logged in, and if they are an admin
 def check_login():
     if not current_user.is_authenticated:
         form = LoginForm()
-        logoutForm = LogoutForm()
+        logoutForm  = LogoutForm()
         return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Please login or create an account to view this page")
     
     else:
