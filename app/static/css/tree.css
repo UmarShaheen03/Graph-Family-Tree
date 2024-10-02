@@ -70,3 +70,13 @@ h2 {
     border: 1px solid #ced4da; 
 }
 
+#Multi_Tree{
+    
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+    font-size: 32px;
+    color: #593196;
+    margin-top: 40px; /* Adjust this value to move the title lower */
+  
+     
+}

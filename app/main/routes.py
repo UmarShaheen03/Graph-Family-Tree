@@ -521,52 +521,86 @@ def Create_Tree():
                 for i in range(len(Family_lines) - 1):
                     Relationships += f"MERGE (p:{name} {{FullName: '{Family_lines[i].strip()}'}})-[:PARENT_TO]->(c:{name} {{FullName: '{Family_lines[i + 1].strip()}'}});\n"
 
-            CONTENT = Nodes + "\n" + Relationships
-             # Execute nodes and relationships creation in the Neo4j database
+            # Execute nodes and relationships creation in the Neo4j database
             with driver.session() as session:
-    
-               for node_query in Nodes.splitlines():
-                   session.run(node_query)
+                for node_query in Nodes.splitlines():
+                    session.run(node_query)
 
-    
-               for relationship_query in Relationships.splitlines():
-                   session.run(relationship_query)
+                for relationship_query in Relationships.splitlines():
+                    session.run(relationship_query)
 
-
-
-            buffer = io.StringIO()
-            buffer.write(CONTENT)
-            buffer.seek(0)
-
-            return send_file(
-                io.BytesIO(buffer.getvalue().encode('utf-8')),
-                as_attachment=True,
-                download_name="family_tree_output.txt",
-                mimetype='text/plain'
-            )
+            # Redirect to the newly created tree in the Multiple_Tree route
+            return redirect(url_for('main_bp.Multiple_Tree', tree_name=name))
 
     return render_template("Create_Tree.html", form=form, error_message=error_message)
 
 
-
-
 @main_bp.route("/Multiple_Tree")
 def Multiple_Tree():
-    return "Hello World"
+    tree_name = request.args.get('tree_name')  # Get the tree name from the URL parameter
+    form=Search_Node()
+    with driver.session() as session:
+        query=f"""
+    MATCH (p:{tree_name})
+    RETURN p.FullName AS name"""
+        result = session.run(query)
+        nodes = [(record["name"], record["name"]) for record in result]
+    # Set choices for the FullName dropdown field
+    form.fullname.choices = nodes
+    
+    
 
-@main_bp.route("/Request_Tree")
+    node_query = f"""
+    MATCH (p:{tree_name})
+    RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
+    """
+
+    relationship_query = f"""
+    MATCH (p:{tree_name})-[r:PARENT_TO]->(c:{tree_name})
+    RETURN p.FullName AS parent, c.FullName AS child
+    """
+
+    nodes = []
+    links = []
+
+    # Fetch all nodes
+    with driver.session() as session:
+        node_result = session.run(node_query)
+        for record in node_result:
+            name = record["name"]
+            hierarchy = record["hierarchy"]
+            lineage = record["lineage"]  # Fetch the lineage property
+
+            # Add node if not already in the list (to avoid duplicates)
+            if not any(node['name'] == name for node in nodes):
+                nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
+
+    # Fetch all relationships
+    with driver.session() as session:
+        relationship_result = session.run(relationship_query)
+        for record in relationship_result:
+            parent_name = record["parent"]
+            child_name = record["child"]
+
+            # Add link from parent to child
+            links.append({'source': parent_name, 'target': child_name})
+
+    return render_template('Multiple_Trees.html', nodes=nodes, relationships=links,form=form,tree_name=tree_name)
+
+
+@main_bp.route("/Request_Tree", methods=['GET', 'POST'])
 def Request_Multiple_Tree():
     form = Request_Tree()
     with driver.session() as session:
-        # PERSON LABEL REMOVED SINCE IT IS THE ORIGINAL TABLE BY NIMA 
+        # Retrieve distinct labels except for 'Person'
         result = session.run("MATCH (n) WHERE NOT 'Person' IN labels(n) RETURN DISTINCT labels(n) AS labels")
-        
-        
         choices = [(label, label) for record in result for label in record["labels"]]
      
     form.Tree_Name.choices = choices
 
+    if form.validate_on_submit():
+        # Redirect to Multiple_Tree with the selected tree name as a parameter
+        return redirect(url_for('main_bp.Multiple_Tree', tree_name=form.Tree_Name.data))
+
     return render_template("Request_Tree.html", form=form)
-
-
 
