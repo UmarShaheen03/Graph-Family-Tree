@@ -487,44 +487,42 @@ def check_login_admin():
     else:
         return None
     
-
-
 @main_bp.route("/Create_Tree", methods=['GET', 'POST'])
 def Create_Tree():
     form = submit_File()
+    error_message = None  # Initialize an error message variable
     if form.validate_on_submit():
         file = form.file.data
+        name = form.name.data
         if file:
-            
+            # Check if the file is a CSV
+            if not file.filename.endswith('.csv'):
+                error_message = 'Invalid file format. Please upload a CSV file.'
+                return render_template("Create_Tree.html", form=form, error_message=error_message)
+
             file_data = file.read().decode('utf-8')
             DATA = []
             Nodes = ""
             Relationships = ""
 
-          
             for row in file_data.splitlines():
                 List_Of_Families = row.split(",")
                 DATA.append(List_Of_Families)
 
-            
             for Family_lines in DATA:
                 for people in Family_lines:
-                    Nodes += f"CREATE (p:Person {{FullName:'{people.strip()}'}})\n"
+                    Nodes += f"CREATE (p:{name} {{FullName:'{people.strip()}'}})\n"
 
-            
             for Family_lines in DATA:
                 for i in range(len(Family_lines) - 1):
-                    Relationships += f"MERGE (p:Person {{FullName:'{Family_lines[i].strip()}'}})-[:PARENT_OF]->(c:Person {{FullName:'{Family_lines[i + 1].strip()}'}})\n"
+                    Relationships += f"MERGE (p:{name} {{FullName:'{Family_lines[i].strip()}'}})-[:PARENT_OF]->(c:{name} {{FullName:'{Family_lines[i + 1].strip()}'}})\n"
 
-            
             CONTENT = Nodes + "\n" + Relationships
 
-            
             buffer = io.StringIO()
             buffer.write(CONTENT)
             buffer.seek(0)  
 
-            
             return send_file(
                 io.BytesIO(buffer.getvalue().encode('utf-8')),
                 as_attachment=True,
@@ -532,4 +530,4 @@ def Create_Tree():
                 mimetype='text/plain'
             )
 
-    return render_template("Create_Tree.html", form=form)
+    return render_template("Create_Tree.html", form=form, error_message=error_message)

@@ -11,8 +11,17 @@
 <div class="card">
     <div class="card-body p-5">
         <h2 class="text-center mb-4">Upload CSV File to Create a Family Tree</h2>
+        {% if error_message %}
+  <p style="color: red;">{{ error_message }}</p>
+{% endif %}
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.name.label(class="font-weight-bold") }}
+                {{ form.name(class="form-control") }}
+                <small class="form-text text-muted">Please name your tree with 1 word (e.g. Smith ).</small>
+            </div>
 
             <div class="form-group">
                 {{ form.file.label(class="font-weight-bold") }}

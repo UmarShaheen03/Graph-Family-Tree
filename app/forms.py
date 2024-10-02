@@ -147,4 +147,5 @@ class Search_Node (FlaskForm):
 
 class submit_File (FlaskForm):
     file=FileField("Upload Your CSV file")
+    name=StringField("Name of the tree")
     submit=SubmitField('Submit')
