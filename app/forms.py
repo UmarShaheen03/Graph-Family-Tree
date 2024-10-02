@@ -149,3 +149,12 @@ class submit_File (FlaskForm):
     file=FileField("Upload Your CSV file")
     name=StringField("Name of the tree")
     submit=SubmitField('Submit')
+
+
+
+class Request_Tree (FlaskForm):
+    Tree_Name = SelectField(
+        'Tree Name',
+        choices=[]  # Populate this dynamically in your view
+    )
+    submit = SubmitField("Submit")

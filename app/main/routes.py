@@ -515,7 +515,7 @@ def Create_Tree():
 
             for Family_lines in DATA:
                 for i in range(len(Family_lines) - 1):
-                    Relationships += f"MERGE (p:{name} {{FullName:'{Family_lines[i].strip()}'}})-[:PARENT_OF]->(c:{name} {{FullName:'{Family_lines[i + 1].strip()}'}})\n"
+                    Relationships += f"MERGE (p:{name} {{FullName:'{Family_lines[i].strip()}'}})-[:PARENT_TO]->(c:{name} {{FullName:'{Family_lines[i + 1].strip()}'}})\n"
 
             CONTENT = Nodes + "\n" + Relationships
 
@@ -531,3 +531,25 @@ def Create_Tree():
             )
 
     return render_template("Create_Tree.html", form=form, error_message=error_message)
+
+
+@main_bp.route("/Multiple_Tree")
+def Multiple_Tree():
+    return "Hello World"
+
+@main_bp.route("/Request_Tree")
+def Request_Multiple_Tree():
+    form = Request_Tree()
+    with driver.session() as session:
+        # PERSON LABEL REMOVED SINCE IT IS THE ORIGINAL TABLE BY NIMA 
+        result = session.run("MATCH (n) WHERE NOT 'Person' IN labels(n) RETURN DISTINCT labels(n) AS labels")
+        
+        
+        choices = [(label, label) for record in result for label in record["labels"]]
+     
+    form.Tree_Name.choices = choices
+
+    return render_template("Request_Tree.html", form=form)
+
+
+
