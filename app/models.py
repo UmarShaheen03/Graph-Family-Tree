@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     admin = db.Column(db.Boolean)
     reset_token = db.Column(db.String)
     reset_expiry = db.Column(db.Integer) #is a datetime, but i treat it as an int
+    email_preference = db.Column(db.String) #values of "None", "Daily" or "Weekly"
 
     def get_id(self):
         return (self.user_id)
@@ -55,3 +56,32 @@ class Comment(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', back_populates='comments') 
 
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
+    bio_id = db.Column(db.Integer, db.ForeignKey('biography.id'), nullable=True)
+    tree_id = db.Column(db.Integer) #TODO link to tree model
+    text = db.Column(db.Text, nullable=False)
+    admin = db.Column(db.Boolean)
+    acknowledged = db.Column(db.Boolean)
+
+#what to log:
+#   - account creation (viewable to admins, linked to user)
+#   - logins (viewable to admins, linked to user)
+#   - admin requests (viewable to admins, linked to user)
+#   - tree requests (viewable to admins, linked to user)
+
+#   - request acceptance (viewavle to users, linked to user)
+#   - tree edits (viewable to users, linked to tree)
+#   - biography edits (viewable to users, linked to bio)
+#   - comments (viewable to users, linked to bio)
+
+# options
+#   - toggles for each type of notification
+#   - toggles for how often to email (daily, weekly, monthly?, none)
+
+
+
+#   - put all on the email? or just a few
+#   - have how often be per type or overall
+#   - unsubscribe link on email
