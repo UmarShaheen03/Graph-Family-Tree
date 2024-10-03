@@ -474,7 +474,7 @@ def unsubscribe(user_id):
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
 
     User.unsubscribe(current_user)
-    return render_template("unsubscribe.html") #TODO return page confirming unsubsribed
+    return render_template("unsubscribe.html", email=User.get_email(current_user))
 
 #functions for checking if the user is logged in, and if they are an admin
 def check_login():

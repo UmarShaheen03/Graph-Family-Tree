@@ -14,7 +14,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String, nullable=False)
     admin = db.Column(db.Boolean)
     reset_token = db.Column(db.String)
-    reset_expiry = db.Column(db.Integer) #is a datetime, but i treat it as an int
+    reset_expiry = db.Column(db.Integer) #is a datetime, but i store it as an int
     comments = db.relationship('Comment', back_populates='user', lazy=True)
     email_preference = db.Column(db.String) #values of "None", "Daily" or "Weekly"
 
@@ -24,6 +24,9 @@ class User(UserMixin, db.Model):
     
     def get_username(self):
         return (self.username)
+
+    def get_email(self):
+        return (self.email)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
