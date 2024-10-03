@@ -504,24 +504,27 @@ def Create_Tree():
             Nodes = ""
             Relationships = ""
 
-            # Read the file and store rows in DATA
+            
             for row in file_data.splitlines():
-                List_Of_Families = row.strip().split(",")  # Use strip() to remove any trailing newlines
+                List_Of_Families = row.strip().split(",")  
                 DATA.append(List_Of_Families)
 
-            # Create nodes with hierarchy and lineage properties
+# Create nodes with hierarchy and lineage properties
             for row_index, Family_lines in enumerate(DATA):
-                for column_index, people in enumerate(Family_lines):
-                    hierarchy = column_index + 1  # Column number (1-based indexing)
-                    lineage = row_index + 1       # Row number (1-based indexing)
-                    Nodes += f"CREATE (p:{name} {{FullName: '{people.strip()}', Hierarchy: {hierarchy}, Lineage: {lineage}}});\n"
+               for column_index, people in enumerate(Family_lines):
+                   if people.strip():  # Ignore empty nodes
+                      hierarchy = column_index + 1  # Hierarchy is the column number
+                      lineage = row_index + 1       #Lineage is row number
+                      Nodes += f"CREATE (p:{name} {{FullName: '{people.strip()}', Hierarchy: {hierarchy}, Lineage: {lineage}}});\n"
 
-            # Create relationships between nodes
+# Create relationships between nodes
             for Family_lines in DATA:
                 for i in range(len(Family_lines) - 1):
-                    Relationships += f"MERGE (p:{name} {{FullName: '{Family_lines[i].strip()}'}})-[:PARENT_TO]->(c:{name} {{FullName: '{Family_lines[i + 1].strip()}'}});\n"
+        # Check if both current and next nodes are non-empty
+                    if Family_lines[i].strip() and Family_lines[i + 1].strip():
+                       Relationships += f"MERGE (p:{name} {{FullName: '{Family_lines[i].strip()}'}})-[:PARENT_TO]->(c:{name} {{FullName: '{Family_lines[i + 1].strip()}'}});\n"
 
-            # Execute nodes and relationships creation in the Neo4j database
+            # Added them to the neo4j Database + Redirection
             with driver.session() as session:
                 for node_query in Nodes.splitlines():
                     session.run(node_query)
@@ -529,7 +532,7 @@ def Create_Tree():
                 for relationship_query in Relationships.splitlines():
                     session.run(relationship_query)
 
-            # Redirect to the newly created tree in the Multiple_Tree route
+            
             return redirect(url_for('main_bp.Multiple_Tree', tree_name=name))
 
     return render_template("Create_Tree.html", form=form, error_message=error_message)
