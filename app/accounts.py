@@ -24,7 +24,7 @@ class LoginError(Exception):
 def init_database():
     #create tables
     db.create_all()
-    #clear any existing info (for testing DO NOT KEEP IN FINAL)
+    #clear any existing info (for testing TODO DO NOT KEEP IN FINAL)
     User.query.delete()
 
     #create mock accounts

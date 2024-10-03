@@ -65,30 +65,6 @@ class Comment(db.Model):
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=True)
-    bio_id = db.Column(db.Integer, db.ForeignKey('biography.id'), nullable=True)
-    tree_id = db.Column(db.Integer) #TODO link to tree model
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False) #user_id notif is sent to, -1 for master log
     text = db.Column(db.Text, nullable=False)
-    admin = db.Column(db.Boolean)
-    acknowledged = db.Column(db.Boolean)
-
-#what to log:
-#   - account creation (viewable to admins, linked to user)
-#   - logins (viewable to admins, linked to user)
-#   - admin requests (viewable to admins, linked to user)
-#   - tree requests (viewable to admins, linked to user)
-
-#   - request acceptance (viewavle to users, linked to user)
-#   - tree edits (viewable to users, linked to tree)
-#   - biography edits (viewable to users, linked to bio)
-#   - comments (viewable to users, linked to bio)
-
-# options
-#   - toggles for each type of notification
-#   - toggles for how often to email (daily, weekly, monthly?, none)
-
-
-
-#   - put all on the email? or just a few
-#   - have how often be per type or overall
-#   - unsubscribe link on email
+    time = db.Column(db.Integer) #is a datetime, but i store it as an int
