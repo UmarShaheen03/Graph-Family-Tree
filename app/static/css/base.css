@@ -4,12 +4,13 @@
 
 .notif_content {
     display: none;
-    height: 150px;
-    width: 20%;
+    height: 200px;
+    width: 25%;
     position: absolute;
     right: 0;
     z-index: 1;
     overflow: auto;
+    background-color: white;
 }
 
 .dropdown {

@@ -60,8 +60,13 @@
             </div>
         </nav>
 
-        <div id="notifications" class="notif_content" style=">
-            As you can see, once there's enough text in this box, the box will grow scroll bars... that's why we call it a scroll box! You could also place an image into the scroll box. As you can see, once there's enough text in this box, the box will grow scroll bars... that's why we call it a scroll box! You could also place an image into the scroll box.
+        <div id="notifications" class="notif_content">
+            {% for notif in notifications %}
+                {% with %}
+                    {% set notif=notif %}
+                    {% include "article_full.html"%}
+                {% endwith %}
+            {% endfor %}
         </div>
 
         <script> //script for notifications drop down
@@ -70,14 +75,8 @@
             }
 
             window.onclick = function(event) { //close dropdown when click anywhere else
-                if(!event.target.matches("#notif_bell")) {
-                    dropdowns = document.getElementsByClassName("notif_content");
-                    for (i = 0; i < notif_content.length; i++) {
-                        notif = notif_content[i]
-                        if (notif.classList.contains("show")) {
-                            notif.classlist.remove("show")
-                        }
-                    }
+                if (!event.target.matches("#notif_bell") && !event.target.matches("#notifications")) {
+                    document.getElementById("notifications").classList.remove("show");
                 }
             }
         </script>
