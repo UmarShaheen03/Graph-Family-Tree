@@ -1,3 +1,23 @@
 .navbar-brand {
     margin-left: 2rem !important;
 }
+
+.notif_content {
+    display: none;
+    height: 150px;
+    width: 20%;
+    position: absolute;
+    right: 0;
+    z-index: 1;
+    overflow: auto;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.show {
+    display:block;
+}
+

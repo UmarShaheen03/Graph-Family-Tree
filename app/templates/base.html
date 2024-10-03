@@ -50,13 +50,37 @@
                     <li>
                         <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.modify_graph') }}">Modify</a>
                     </li>
-                    <li>
-                        <p><i class="bi bi-bell"></i></p>
-                    </li>
-                    
+                    <div class="dropdown">
+                        <a id="home-nav-link" class="nav-link" onclick="clickNotifications()">
+                            <!-- TODO: add different bell/count for having notifications-->
+                            <i id="notif_bell" class="bi bi-bell" style="color:white"></i>
+                        </a>
+                    </div>
                 </ul>
             </div>
         </nav>
+
+        <div id="notifications" class="notif_content" style=">
+            As you can see, once there's enough text in this box, the box will grow scroll bars... that's why we call it a scroll box! You could also place an image into the scroll box. As you can see, once there's enough text in this box, the box will grow scroll bars... that's why we call it a scroll box! You could also place an image into the scroll box.
+        </div>
+
+        <script> //script for notifications drop down
+            function clickNotifications() { //open dropdown when clicked
+                document.getElementById("notifications").classList.toggle("show");
+            }
+
+            window.onclick = function(event) { //close dropdown when click anywhere else
+                if(!event.target.matches("#notif_bell")) {
+                    dropdowns = document.getElementsByClassName("notif_content");
+                    for (i = 0; i < notif_content.length; i++) {
+                        notif = notif_content[i]
+                        if (notif.classList.contains("show")) {
+                            notif.classlist.remove("show")
+                        }
+                    }
+                }
+            }
+        </script>
 
         {% block bodyBlock %}{% endblock %}
     </body>
