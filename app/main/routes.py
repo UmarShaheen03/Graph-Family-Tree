@@ -470,7 +470,7 @@ def unsubscribe(user_id):
 
     if not current_user.is_authenticated: #if not logged in
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
-    elif (user_id != User.get_id(current_user)): #if logged in as a different user
+    elif (int(user_id) != User.get_id(current_user)): #if logged in as a different user
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
 
     User.unsubscribe(current_user)
