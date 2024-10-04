@@ -1,2 +1,4 @@
-<p style="color: gray;">{{ notif.time }}</p>
-<p>{{ notif.text }}</p>
+<div style="border-color:black">
+    <p style="color: gray;">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
+    <p>{{ notif.text }}</p>
+</div>

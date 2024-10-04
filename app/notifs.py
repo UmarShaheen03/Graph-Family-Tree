@@ -23,7 +23,7 @@ def log_notif(text, users): #users is a list of ids to send the notif to
             id = new_id,
             user_id = user_id,
             text = text,
-            time = int(datetime.now().timestamp())
+            time = datetime.now()
         )
         db.session.add(notif)
     db.session.commit()

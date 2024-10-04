@@ -67,4 +67,4 @@ class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False) #user_id notif is sent to, -1 for master log
     text = db.Column(db.Text, nullable=False)
-    time = db.Column(db.Integer) #is a datetime, but i store it as an int
+    time = db.Column(db.DateTime, default=datetime.utcnow)

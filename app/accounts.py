@@ -66,7 +66,7 @@ def init_database():
         id=0,
         user_id=-1,
         text="Databases initialised",
-        time=int(datetime.now().timestamp())
+        time=datetime.now()
     )
   
 
