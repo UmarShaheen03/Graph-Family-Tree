@@ -10,9 +10,6 @@ def get_users_notifs(user): #check through notif db for all notifs with user id
     return notifications
 
 
-def mark_as_seen(notif_id):
-    pass
-
 def log_notif(text, users): #users is a list of ids to send the notif to
     new_id = db.session.query(Notification).order_by(Notification.id.desc()).first().id
     users.append(-1) #master log, send backup of all notifs to it

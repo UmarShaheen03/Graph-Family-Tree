@@ -510,6 +510,16 @@ def unsubscribe(user_id):
     User.unsubscribe(current_user)
     return render_template("unsubscribe.html", email=User.get_email(current_user))
 
+@main_bp.route("/mark_as_seen/<notif_id>", methods=['POST'])
+def seen_notif(notif_id):
+    notif = db.session.query(Notification).filter(Notification.id == notif_id).first()
+    if notif == None:
+        return home_page()
+    if notif.user_id != User.get_id(current_user): #failsafe so cant delete other users notifs
+        return home_page()
+    db.session.query(Notification).filter(Notification.id == notif_id).delete()
+    db.session.commit()
+    return home_page()
 
 
 #functions for checking if the current user is logged in, and if they are an admin

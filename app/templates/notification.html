@@ -1,4 +1,18 @@
-<div style="border-color:black">
-    <p style="color: gray;">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
-    <p>{{ notif.text }}</p>
+<div id="notif_{{ notif.id }}" style="border-color:black; border-width: 2px;">
+    <div style="justify-content:space-between; display:flex;" onclick="redirect()">
+        <p style="color: gray; margin: 0px">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
+        <button class="seen_button" onclick="seen()">X</button>
+    </div>
+    <p style="margin-bottom:5px">{{ notif.text }}</p>
 </div>
+
+<script>
+    function seen() {
+        $.post("/mark_as_seen/{{ notif.id }}", function(){}) //remove from db
+        document.getElementById("notif_{{ notif.id }}").remove(); //remove from page
+    }
+
+    function redirect() {
+
+    }
+</script>
