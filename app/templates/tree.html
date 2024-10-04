@@ -83,7 +83,7 @@
 </div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script>
+<!-- <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
 
@@ -269,7 +269,107 @@
             alert("Node not found");
         }
     });
+</script> -->
+<script>
+    var nodes = {{ nodes|tojson }};
+    var links = {{ relationships|tojson }};
+
+    // Find all root nodes (nodes that don't have any parent)
+    function findRootNodes(nodes, links) {
+        var childIds = new Set(links.map(link => link.target));
+        return nodes.filter(node => !childIds.has(node.id));
+    }
+
+    // Create a virtual root and connect it to all the actual root nodes
+    function addVirtualRoot(nodes, links) {
+        var rootNodes = findRootNodes(nodes, links);
+        var virtualRoot = { id: "virtual_root", name: "Virtual Root", children: [] };
+        nodes.push(virtualRoot);
+
+        // Add links from the virtual root to all root nodes
+        rootNodes.forEach(rootNode => {
+            links.push({ source: "virtual_root", target: rootNode.id });
+        });
+
+        return virtualRoot;
+    }
+
+    // Convert the flat nodes and links into a hierarchy suitable for D3's radial tree
+    function buildHierarchy(nodes, links) {
+        var nodeById = {};
+        nodes.forEach(node => nodeById[node.id] = node);
+
+        links.forEach(link => {
+            var parent = nodeById[link.source];
+            var child = nodeById[link.target];
+            if (!parent.children) parent.children = [];
+            parent.children.push(child);
+        });
+
+        return nodeById["virtual_root"]; // Return the virtual root node
+    }
+
+    // Add the virtual root to handle multiple root nodes
+    var virtualRoot = addVirtualRoot(nodes, links);
+
+    var root = buildHierarchy(nodes, links);
+
+    // Set up the dimensions of the container
+    const width = document.getElementById('graph-container').clientWidth;
+    const height = document.getElementById('graph-container').clientHeight;
+
+    // Set up the D3 tree layout
+    const radius = Math.min(width, height) / 2;
+    const treeLayout = d3.tree()
+        .size([2 * Math.PI, radius - 100]); // Radial size
+
+    // Create an SVG to draw the tree in
+    const svg = d3.select("#graph-container").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width / 2},${height / 2})`);
+
+    // Create the root hierarchy using D3's hierarchy function
+    const hierarchyRoot = d3.hierarchy(root);
+    treeLayout(hierarchyRoot);
+
+    // Draw links between nodes
+    svg.selectAll('path')
+        .data(hierarchyRoot.links())
+        .enter()
+        .append('path')
+        .attr('d', d3.linkRadial()
+            .angle(d => d.x)
+            .radius(d => d.y))
+        .style("fill", "none")
+        .style("stroke", "#ccc")
+        .style("stroke-width", 2);
+
+    // Draw nodes as circles
+    svg.selectAll('circle')
+        .data(hierarchyRoot.descendants())
+        .enter()
+        .append('circle')
+        .attr('transform', d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
+        .attr('r', 5)
+        .style("fill", "#69b3a2");
+
+    // Add labels to nodes
+    svg.selectAll('text')
+        .data(hierarchyRoot.descendants())
+        .enter()
+        .append('text')
+        .attr('transform', d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
+        .attr('dx', d => d.x < Math.PI ? 8 : -8)
+        .attr('dy', ".31em")
+        .attr('text-anchor', d => d.x < Math.PI ? "start" : "end")
+        .attr('transform', d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
+        .text(d => d.data.name)
+        .style("font-size", "10px")
+        .style("fill", "#000");
 </script>
+
 
 <!-- Modify graph script -->
 <script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
