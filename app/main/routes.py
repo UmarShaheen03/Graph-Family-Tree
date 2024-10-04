@@ -191,6 +191,10 @@ def biography(name):
         )
         db.session.add(new_comment)
         db.session.commit()
+
+        log_notif(f"User {User.get_username(current_user)} just commented on person {person} from the family TODO", 
+        get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about moved person
+
         flash('Comment added successfully')
         return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
 

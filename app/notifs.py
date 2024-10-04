@@ -47,13 +47,14 @@ def get_all_ids_with_tree(id): #returns list of all users with access to this tr
 #   X account creation (viewable to admins, linked to user)
 #   X logins (viewable to admins, linked to user)
 #   X password resets (viewable to admins, linked to user)
+# waiting on requests to be done:
 #   - admin requests (viewable to admins, linked to user)
 #   - tree requests (viewable to admins, linked to user)
-
 #   - request acceptance (viewable to users, linked to user)
-#   - tree edits (viewable to users, linked to tree)
-#   ~ biography edits (viewable to users, linked to bio)
-#   - comments (viewable to users, linked to bio)
+# waiting on multi tree support to be done:
+#   ~ tree edits [CRUD] (viewable to users, linked to tree)
+#   ~ biography edits (viewable to users, linked to tree)
+#   ~ comments (viewable to users, linked to tree)
 
 # options
 #   - toggles for each type of notification
