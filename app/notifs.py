@@ -1,12 +1,14 @@
 from app.models import User, Notification
 from app.databases import db
 from datetime import datetime
+import sys
 
 
-
-def get_users_notifs(user):
+def get_users_notifs(user): #check through notif db for all notifs with user id
     id = User.get_id(user)
-    #check through notif db for all notifs with user id
+    notifications = db.session.query(Notification).filter(Notification.user_id == id).all()
+    return notifications
+
 
 def mark_as_seen(notif_id):
     pass
@@ -19,12 +21,12 @@ def log_notif(text, users): #users is a list of ids to send the notif to
         new_id += 1
         notif = Notification(
             id = new_id,
-            for_user_id = user_id,
+            user_id = user_id,
             text = text,
-            time = datetime.now()
+            time = int(datetime.now().timestamp())
         )
         db.session.add(notif)
-    db.commit()
+    db.session.commit()
 
 def get_all_admin_ids(): #returns list of all admin users' ids
     admin_ids = []
@@ -44,6 +46,7 @@ def get_all_ids_with_tree(id): #returns list of all users with access to this tr
         
 
 #what is logged:
+#   X website starting (only master log)
 #   X account creation (viewable to admins, linked to user)
 #   X logins (viewable to admins, linked to user)
 #   X password resets (viewable to admins, linked to user)

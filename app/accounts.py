@@ -1,4 +1,4 @@
-from app.models import User
+from app.models import *
 from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
@@ -27,6 +27,7 @@ def init_database():
     db.create_all()
     #clear any existing info (for testing TODO DO NOT KEEP IN FINAL)
     User.query.delete()
+    Notification.query.delete()
 
     #create mock accounts
     nima = User(
@@ -60,6 +61,13 @@ def init_database():
         admin=True,
         password_hash=str(generate_password_hash("test"))
     )
+
+    first_notif = Notification(
+        id=0,
+        user_id=-1,
+        text="Databases initialised",
+        time=int(datetime.now().timestamp())
+    )
   
 
     #add mock accounts to db
@@ -67,6 +75,8 @@ def init_database():
     db.session.add(group31)
     db.session.add(test_user)
     db.session.add(cooper)
+    #add first notification to db
+    db.session.add(first_notif)
     db.session.commit()
 
 

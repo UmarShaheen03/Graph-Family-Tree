@@ -27,8 +27,13 @@ def run_once_on_start():
 @main_bp.route("/")
 def home_page():
     """The landing page"""
-    print(get_all_admin_ids(), sys.stderr)
-    return render_template('home.html')
+    print(get_users_notifs(current_user))
+    if current_user.is_authenticated:
+        return render_template('home.html', 
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template('home.html')
 
 """LOGIN AND SIGNUP PAGE/FORMS"""
 
@@ -38,7 +43,6 @@ def login_page():
     loginForm = LoginForm()
 
     if current_user.is_authenticated:
-        print("already logged in", sys.stderr)
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, logged_in_as=User.get_username(current_user))
     else:
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm)
