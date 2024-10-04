@@ -5,6 +5,7 @@ from flask import Blueprint, Flask, render_template, flash, redirect, url_for, r
 from app.forms import *
 from app.models import Biography, Comment, User
 from app.accounts import *
+from app.notifs import *
 from app import db
 from neo4j import GraphDatabase
 from flask_wtf import CSRFProtect
@@ -26,6 +27,7 @@ def run_once_on_start():
 @main_bp.route("/")
 def home_page():
     """The landing page"""
+    print(get_all_admin_ids(), sys.stderr)
     return render_template('home.html')
 
 """LOGIN AND SIGNUP PAGE/FORMS"""
@@ -140,6 +142,9 @@ def reset_form():
     except SignupError as error:
         return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
 
+    user = db.session.query(User).filter(User.user_id == user_id).first()
+    log_notif(f"User {User.get_username(user)} just reset their password", get_all_admin_ids()) #notify all admins of password reset
+
     loginForm = LoginForm()
     logoutForm = LogoutForm()
     return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Password reset succesfully, please login") #send user back to login when finished
@@ -247,6 +252,9 @@ def edit_biography():
             )
         
         flash(f'Biography for {person_name} has been updated successfully.')
+        log_notif(f"User {User.get_username(current_user)} just edited the bio of {person_name} from family TODO", 
+                  get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about bio edit
+        
         return redirect(url_for('main_bp.biography', name=person_name))
 
     return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
@@ -390,6 +398,10 @@ def modify_graph():
                 )
 
             print("Data processed. Redirecting to index.")
+
+            log_notif(f"User {User.get_username(current_user)} just added a new person, {form.name.data}, to family TODO", 
+            get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about new person
+
             return redirect(url_for("main_bp.tree_page"))
         else:
             print("Selected action is not 'Add Person'.")
@@ -411,6 +423,10 @@ def modify_graph():
     old_name=form.old_name.data,
     new_name=form.new_name.data
                 )
+
+            log_notif(f"User {User.get_username(current_user)} just changed the name of person {form.old_name.data} to {form.new_name.data}, in the family TODO", 
+            get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
+
             return redirect(url_for("main_bp.tree_page"))
     
 
@@ -424,6 +440,10 @@ def modify_graph():
             """,
             person_to_delete=form.person_to_delete.data
         )
+           
+        log_notif(f"User {User.get_username(current_user)} just removed the person {form.person_to_delete.data} from the family TODO", 
+        get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
+
         return redirect(url_for("main_bp.tree_page"))
     
     if form.action.data == "shift":
@@ -459,8 +479,14 @@ def modify_graph():
         )
 
             print("Person shifted and hierarchy updated. Redirecting to index.")
+
+            log_notif(f"User {User.get_username(current_user)} moved person {form.person_to_shift.data} to be under {form.new_parent.data} in family TODO", 
+            get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about moved person
+
             return redirect(url_for("main_bp.tree_page"))
     return render_template('modify_graph.html', form=form)
+
+
 
 #NOTIFICATION ROUTES
 @main_bp.route("/unsubscribe/<user_id>", methods=['GET', 'POST'])
@@ -476,7 +502,9 @@ def unsubscribe(user_id):
     User.unsubscribe(current_user)
     return render_template("unsubscribe.html", email=User.get_email(current_user))
 
-#functions for checking if the user is logged in, and if they are an admin
+
+
+#functions for checking if the current user is logged in, and if they are an admin
 def check_login():
     if not current_user.is_authenticated:
         form = LoginForm()

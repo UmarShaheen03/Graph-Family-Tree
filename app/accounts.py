@@ -3,7 +3,7 @@ from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
 from flask import current_app, url_for
-from notifs import log_notif, get_all_admin_ids
+from app.notifs import log_notif, get_all_admin_ids
 import sys #TODO using for debug printing, remove in final
 
 #libraries for reset password
@@ -101,7 +101,7 @@ def signup(email, username, password, repeat, remember):
     db.session.add(user)
     db.session.commit()
 
-    log_notif(f"New account created: {User.get_username(user)}", get_all_admin_ids()) #notify all admins of new account
+    log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids()) #notify all admins of new account
     login(username, password, remember)
     
 
@@ -116,7 +116,7 @@ def login(email_or_username, password, remember):
         raise LoginError("Incorrect password")
     
     login_user(user, remember=remember)
-    log_notif(f"New login from: {User.get_username(user)}", get_all_admin_ids()) #notify all admins of succesful login
+    log_notif(f"User {User.get_username(user)} just logged in", get_all_admin_ids()) #notify all admins of succesful login
 
 
 
