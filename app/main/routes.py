@@ -148,11 +148,11 @@ def reset_form():
 
 @main_bp.route("/tree")
 def tree_page():
+    """A family tree page"""
     check = check_login()
     if check != None:
         return check
     
-    """A family tree page"""
     form_search=Search_Node()
     form_modify=AddNodeForm()
 
@@ -169,7 +169,9 @@ def tree_page():
     form_modify.person_to_shift.choices = nodes
     form_modify.old_name.choices = nodes
 
-    if form_modify.validate_on_submit():
+    nodes, relationships = fetch_data()
+
+    if form_modify.validate_on_submit()  and form_modify.submit.data:
         if form_modify.action.data == "add":
             with driver.session() as session:
                 # Retrieve the parent's hierarchy
@@ -214,70 +216,66 @@ def tree_page():
         print("Form validation failed.")
         print(form_modify.errors)  # Print form validation errors if any
 
-    
-    
     if form_modify.action.data == "edit":
-            with driver.session() as session:
-                # Add node
-                session.run(
-                    """
-                   MATCH (n:Person {FullName: $old_name})
-                   SET n.FullName = $new_name
-                   """,
-    old_name=form_modify.old_name.data,
-    new_name=form_modify.new_name.data
-                )
-            return redirect(url_for("main_bp.tree_page"))
+        with driver.session() as session:
+            # Add node
+            session.run(
+                """
+                MATCH (n:Person {FullName: $old_name})
+                SET n.FullName = $new_name
+                """,
+                old_name=form_modify.old_name.data,
+                new_name=form_modify.new_name.data
+            )
+        return redirect(url_for("main_bp.tree_page"))
     
-
     if form_modify.action.data == "delete":
         with driver.session() as session:
         # Delete person logic
-           session.run(
-            """
-            MATCH (n:Person {FullName: $person_to_delete})
-            DETACH DELETE n
-            """,
-            person_to_delete=form_modify.person_to_delete.data
-        )
+            session.run(
+                """
+                MATCH (n:Person {FullName: $person_to_delete})
+                DETACH DELETE n
+                """,
+                person_to_delete=form_modify.person_to_delete.data
+            )
         return redirect(url_for("main_bp.tree_page"))
     
     if form_modify.action.data == "shift":
         with driver.session() as session:
-        # Retrieve the new parent's hierarchy
+            # Retrieve the new parent's hierarchy
             parent_hierarchy_query = """
-        MATCH (p:Person {FullName: $Parent})
-        RETURN p.Hierarchy AS parent_hierarchy
-        """
+            MATCH (p:Person {FullName: $Parent})
+            RETURN p.Hierarchy AS parent_hierarchy
+            """
             parent_result = session.run(parent_hierarchy_query, Parent=form_modify.new_parent.data)
             parent_hierarchy = parent_result.single()["parent_hierarchy"]
 
-        # Update the hierarchy of the person being shifted
+            # Update the hierarchy of the person being shifted
             update_hierarchy_query = """
             MATCH (b:Person {FullName: $full_name})
             SET b.Hierarchy = $new_hierarchy
             """
             session.run(
-            update_hierarchy_query,
-            full_name=form_modify.person_to_shift.data,
-            new_hierarchy=parent_hierarchy + 1  # New hierarchy is parent's hierarchy + 1
-        )
+                update_hierarchy_query,
+                full_name=form_modify.person_to_shift.data,
+                new_hierarchy=parent_hierarchy + 1  # New hierarchy is parent's hierarchy + 1
+            )
 
-        # Create or update the relationship between the new parent and the person being shifted
+            # Create or update the relationship between the new parent and the person being shifted
             update_relationship_query = """
-        MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
-        MERGE (a)-[r:PARENT_OF]->(b)
-        """
+            MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
+            MERGE (a)-[r:PARENT_OF]->(b)
+            """
             session.run(
                 update_relationship_query,
                 full_name=form_modify.person_to_shift.data,
                 Parent=form_modify.new_parent.data
-        )
+            )
 
             print("Person shifted and hierarchy updated. Redirecting to index.")
             return redirect(url_for("main_bp.tree_page"))
-        
-    nodes, relationships = fetch_data()
+
     return render_template('tree.html', nodes=nodes, relationships=relationships,form_search=form_search, form_modify=form_modify)
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
