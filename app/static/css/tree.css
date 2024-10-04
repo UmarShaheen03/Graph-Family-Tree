@@ -40,3 +40,23 @@ svg {
     pointer-events: none;
     opacity: 0;
 }
+
+#fullname {
+    margin-left: 10px; 
+    padding: 8px; 
+    border: 1px solid #ccc; 
+    border-radius: 5px; 
+    width: 200px; 
+    font-size: 14px;
+}
+
+#Search {
+    background-color: #593196; 
+    color: white; 
+    padding: 8px 16px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-size: 14px; 
+    margin-left: 10px;"
+}
