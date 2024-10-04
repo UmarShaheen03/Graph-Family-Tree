@@ -8,23 +8,29 @@ def get_users_notifs(user):
     id = User.get_id(user)
     #check through notif db for all notifs with user id
 
-def mark_as_seen(user):
+def mark_as_seen(notif_id):
     pass
 
 def log_notif(text, users): #users is a list of ids to send the notif to
-    new_id = db.session.query(Notification).order_by(Notification.id.desc()).first().id + 1
+    new_id = db.session.query(Notification).order_by(Notification.id.desc()).first().id
+    users.append(-1)
 
-    notif = Notification(
-        id = new_id,
-        for_user_id = -1, #creating the master log notif
-        text = text,
-        time = datetime.now()
-    )
+    for user_id in users:
+        new_id += 1
+        notif = Notification(
+            id = new_id,
+            for_user_id = user_id, #creating the master log notif
+            text = text,
+            time = datetime.now()
+        )
+        db.session.add(notif)
+    db.commit()
 
-    db.commit(notif)
-
-    for user in users:
-
+def get_all_admin_ids():
+    admin_ids = []
+    results = db.session.query(User).filter(User.admin == True)
+    for row in results:
+        admin_ids.append(row)
     
         
 
