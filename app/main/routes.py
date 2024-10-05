@@ -42,14 +42,23 @@ def login_page():
     loginForm = LoginForm()
 
     if current_user.is_authenticated:
-        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, logged_in_as=User.get_username(current_user))
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
     else:
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm)
 
 @main_bp.route("/signup")
 def signup_page():
     signupForm = SignupForm()
-    return render_template("signup.html", signupForm=signupForm, error="")
+
+    if current_user.is_authenticated:
+        return render_template("signup.html", signupForm=signupForm,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("signup.html", signupForm=signupForm)
+    
 
 #form submissions for login
 @main_bp.route("/login-form", methods=["POST"])
@@ -67,8 +76,8 @@ def login_request():
         except LoginError as error:
             return render_template("login.html", loginForm=form, logoutForm=logoutForm, error=error)
 
-        #send to home page on success
-        return render_template('home.html')
+        #send to home page on success TODO change to account page?
+        return redirect(url_for("main_bp.home_page"))
     
     else:
         return render_template("login.html", loginForm=form, logoutForm=logoutForm, error="Invalid Form")
@@ -78,7 +87,7 @@ def login_request():
 def logout_request():
     log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids()) #notify all admins of logout
     logout_user()
-    return render_template('home.html')
+    return redirect(url_for("main_bp.home_page"))
     
 #form submissions for signup
 @main_bp.route("/signup-form", methods=["POST"])
@@ -95,26 +104,49 @@ def signup_request():
         try:
             signup(email, username, password, repeat, remember)
         except SignupError as error:
-            return render_template("signup.html", signupForm=form, error=error)
+            if current_user.is_authenticated:
+                return render_template("signup.html", signupForm=form, error=error,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+            else:
+                return render_template("signup.html", signupForm=form, error=error)
+
 
         #send to home page on success
-        return render_template('home.html')
+        return redirect(url_for("main_bp.home_page"))
     
     else:
-        return render_template("signup.html", loginForm=form, error="Invalid Form")
+        if current_user.is_authenticated:
+            return render_template("signup.html", loginForm=form, error="Invalid Form",
+                    notifications=get_users_notifs(current_user), 
+                    logged_in_as=User.get_username(current_user))
+        else:
+            return render_template("signup.html", loginForm=form, error="Invalid Form")
    
 
 @main_bp.route("/forgot")
 def forgot_password_page():
     form = ForgotPassword()
-    return render_template("forgot.html", forgotForm=form, submitted=False)
+
+    if current_user.is_authenticated:
+        return render_template("forgot.html", forgotForm=form, submitted=False,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("forgot.html", forgotForm=form, submitted=False)
 
 @main_bp.route("/forgot-form", methods=["POST"])
 def forgot_request():
     form = ForgotPassword()
     email = request.form.get("email")
     reset_email(email)
-    return render_template("forgot.html", forgotForm=form, submitted=True)
+
+    if current_user.is_authenticated:
+        return render_template("forgot.html", forgotForm=form, submitted=True,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("forgot.html", forgotForm=form, submitted=True)
 
 @main_bp.route("/reset")
 def reset_password_page():
@@ -123,10 +155,15 @@ def reset_password_page():
     token = request.args.get("token")
 
     if not verify_reset(user_id, token):
-        return render_template('home.html')
+        return redirect(url_for("main_bp.home_page"))
     
     form = ResetPassword()
-    return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
+    if current_user.is_authenticated:
+        return render_template("reset.html", resetForm=form, token=token, user_id=user_id,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
 
 @main_bp.route("/reset-form", methods=["POST"])
 def reset_form():
@@ -135,7 +172,7 @@ def reset_form():
     token = request.args.get("token")
 
     if not verify_reset(user_id, token):
-        return render_template('home.html')
+        return redirect(url_for("main_bp.home_page"))
     
     form = ResetPassword()
     password = request.form.get("password")
@@ -144,14 +181,25 @@ def reset_form():
     try:
         reset(user_id, password, repeat)
     except SignupError as error:
-        return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
+        if current_user.is_authenticated:
+            return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id,
+                    notifications=get_users_notifs(current_user), 
+                    logged_in_as=User.get_username(current_user))
+        else:
+            return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
+
 
     user = db.session.query(User).filter(User.user_id == user_id).first()
     log_notif(f"User {User.get_username(user)} just reset their password", get_all_admin_ids()) #notify all admins of password reset
 
     loginForm = LoginForm()
     logoutForm = LogoutForm()
-    return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Password reset succesfully, please login") #send user back to login when finished
+
+    if current_user.is_authenticated: #if they're already logged in, send them to home
+        return redirect(url_for("main_bp.home_page"))   
+    else: #otherwise, send user back to login when finished
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Password reset succesfully, please login") 
+
 
 
 
@@ -169,7 +217,11 @@ def tree_page():
     # Set choices for the FullName dropdown field
     form.fullname.choices = nodes
     nodes, relationships = fetch_data()
-    return render_template('Tree.html', nodes=nodes, relationships=relationships,form=form)
+
+    #no user check, as need to be logged in to visit this page
+    return render_template('tree.html', nodes=nodes, relationships=relationships,form=form,
+            notifications=get_users_notifs(current_user), 
+            logged_in_as=User.get_username(current_user))
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
@@ -200,7 +252,11 @@ def biography(name):
         get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about moved person
 
         flash('Comment added successfully')
-        return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
+
+        #no user check, as need to be logged in to visit this page            
+        return redirect(url_for('main_bp.biography', name=name, 
+            notifications=get_users_notifs(current_user), 
+            logged_in_as=User.get_username(current_user)))  # Pass 'name' to redirect properly
 
     # Pass the fetched biography details and comments to the template
     return render_template('biography.html', 
@@ -213,7 +269,9 @@ def biography(name):
                            address=person.get('address', 'No address provided'),
                            comments=comments, 
                            comment_form=comment_form,
-                           admin=User.is_admin(current_user))
+                           admin=User.is_admin(current_user),
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
 
 
 
@@ -263,91 +321,15 @@ def edit_biography():
         log_notif(f"User {User.get_username(current_user)} just edited the bio of {person_name} from family TODO", 
                   get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about bio edit
         
-        return redirect(url_for('main_bp.biography', name=person_name))
+        return redirect(url_for('main_bp.biography', name=person_name,
+                                notifications=get_users_notifs(current_user), 
+                                logged_in_as=User.get_username(current_user)))
 
-    return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
-
+    return render_template('edit_biography.html', biography=biography, edit_form=edit_form,
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
     
     
-    
-# Function to fetch biography from Neo4j
-def get_person_bio(full_name):
-    query = """
-    MATCH (p:Person {FullName: $full_name})
-    RETURN p.FullName AS name, 
-           p.Hierarchy AS hierarchy, 
-           p.Date_Of_Birth AS dob, 
-           p.Biography AS biography, 
-           p.Location AS location, 
-           p.Email AS email, 
-           p.PhoneNumber AS phone_number, 
-           p.Address AS address
-    """
-    with driver.session() as session:
-        result = session.run(query, full_name=full_name)
-        return result.single()
-
-
-
-
-
-NEO4J_URI='neo4j+ssc://633149e1.databases.neo4j.io'
-NEO4J_USERNAME='neo4j'
-NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
-
-
-# Connect to Neo4j
-driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
-
-
-def fetch_data():
-    # Query all nodes, including their Lineage property
-    node_query = """
-        MATCH (p:Person)
-        RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
-    """
-
-    # Query all relationships
-    relationship_query = """
-        MATCH (p:Person)-[r:PARENT_OF]->(c:Person)
-        RETURN p.FullName AS parent, c.FullName AS child
-    """
-
-    nodes = []
-    links = []
-
-    # Fetch all nodes
-    with driver.session() as session:
-        node_result = session.run(node_query)
-        for record in node_result:
-            name = record["name"]
-            hierarchy = record["hierarchy"]
-            lineage = record["lineage"]  # Fetch the lineage property
-
-            # Add node if not already in the list (to avoid duplicates)
-            if not any(node['name'] == name for node in nodes):
-                nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
-
-    # Fetch all relationships
-    with driver.session() as session:
-        relationship_result = session.run(relationship_query)
-        for record in relationship_result:
-            parent_name = record["parent"]
-            child_name = record["child"]
-
-            # Add link from parent to child
-            links.append({'source': parent_name, 'target': child_name})
-
-    return nodes, links
-
-def calculate_age(date_of_birth_str):
-    # Assuming date_of_birth_str is in the format 'YYYY-MM-DD'
-    date_of_birth = datetime.strptime(date_of_birth_str, '%Y-%m-%d')
-    today = datetime.today()
-    age = today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
-    if age is not None:
-            print(f"Calculated Age: {age}",date_of_birth_str)
-    return age
 
 @main_bp.route("/modify_graph", methods=['GET', 'POST'])
 def modify_graph():
@@ -410,7 +392,9 @@ def modify_graph():
             log_notif(f"User {User.get_username(current_user)} just added a new person, {form.name.data}, to family TODO", 
             get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about new person
 
-            return redirect(url_for("main_bp.tree_page"))
+            return redirect(url_for("main_bp.tree_page"), 
+                            notifications=get_users_notifs(current_user), 
+                            logged_in_as=User.get_username(current_user))
         else:
             print("Selected action is not 'Add Person'.")
     else:
@@ -435,7 +419,9 @@ def modify_graph():
             log_notif(f"User {User.get_username(current_user)} just changed the name of person {form.old_name.data} to {form.new_name.data}, in the family TODO", 
             get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
 
-            return redirect(url_for("main_bp.tree_page"))
+            return redirect(url_for("main_bp.tree_page"), 
+                            notifications=get_users_notifs(current_user), 
+                            logged_in_as=User.get_username(current_user))
     
 
     if form.action.data == "delete":
@@ -452,7 +438,9 @@ def modify_graph():
         log_notif(f"User {User.get_username(current_user)} just removed the person {form.person_to_delete.data} from the family TODO", 
         get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
 
-        return redirect(url_for("main_bp.tree_page"))
+        return redirect(url_for("main_bp.tree_page"),
+                        notifications=get_users_notifs(current_user), 
+                        logged_in_as=User.get_username(current_user))
     
     if form.action.data == "shift":
         with driver.session() as session:
@@ -491,8 +479,13 @@ def modify_graph():
             log_notif(f"User {User.get_username(current_user)} moved person {form.person_to_shift.data} to be under {form.new_parent.data} in family TODO", 
             get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about moved person
 
-            return redirect(url_for("main_bp.tree_page"))
-    return render_template('modify_graph.html', form=form)
+            return redirect(url_for("main_bp.tree_page"),
+                            notifications=get_users_notifs(current_user), 
+                            logged_in_as=User.get_username(current_user))
+        
+    return render_template('modify_graph.html', form=form,
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
 
 
 
@@ -505,21 +498,25 @@ def unsubscribe(user_id):
     if not current_user.is_authenticated: #if not logged in
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
     elif (int(user_id) != User.get_id(current_user)): #if logged in as a different user
-        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe",
+                                notifications=get_users_notifs(current_user), 
+                                logged_in_as=User.get_username(current_user))
 
     User.unsubscribe(current_user)
-    return render_template("unsubscribe.html", email=User.get_email(current_user))
+    return render_template("unsubscribe.html", email=User.get_email(current_user),
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
 
 @main_bp.route("/mark_as_seen/<notif_id>", methods=['POST'])
 def seen_notif(notif_id):
     notif = db.session.query(Notification).filter(Notification.id == notif_id).first()
     if notif == None:
-        return home_page()
+        return redirect(url_for("main_bp.home_page"))
     if notif.user_id != User.get_id(current_user): #failsafe so cant delete other users notifs
-        return home_page()
+        return redirect(url_for("main_bp.home_page"))
     db.session.query(Notification).filter(Notification.id == notif_id).delete()
     db.session.commit()
-    return home_page()
+    return redirect(url_for("main_bp.home_page"))
 
 
 #functions for checking if the current user is logged in, and if they are an admin
@@ -545,3 +542,78 @@ def check_login_admin():
     
     else:
         return None
+    
+# Function to fetch biography from Neo4j
+def get_person_bio(full_name):
+    query = """
+    MATCH (p:Person {FullName: $full_name})
+    RETURN p.FullName AS name, 
+           p.Hierarchy AS hierarchy, 
+           p.Date_Of_Birth AS dob, 
+           p.Biography AS biography, 
+           p.Location AS location, 
+           p.Email AS email, 
+           p.PhoneNumber AS phone_number, 
+           p.Address AS address
+    """
+    with driver.session() as session:
+        result = session.run(query, full_name=full_name)
+        return result.single()
+
+NEO4J_URI='neo4j+ssc://633149e1.databases.neo4j.io'
+NEO4J_USERNAME='neo4j'
+NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
+
+
+# Connect to Neo4j
+driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+
+
+def fetch_data():
+    # Query all nodes, including their Lineage property
+    node_query = """
+        MATCH (p:Person)
+        RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
+    """
+
+    # Query all relationships
+    relationship_query = """
+        MATCH (p:Person)-[r:PARENT_OF]->(c:Person)
+        RETURN p.FullName AS parent, c.FullName AS child
+    """
+
+    nodes = []
+    links = []
+
+    # Fetch all nodes
+    with driver.session() as session:
+        node_result = session.run(node_query)
+        for record in node_result:
+            name = record["name"]
+            hierarchy = record["hierarchy"]
+            lineage = record["lineage"]  # Fetch the lineage property
+
+            # Add node if not already in the list (to avoid duplicates)
+            if not any(node['name'] == name for node in nodes):
+                nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
+
+    # Fetch all relationships
+    with driver.session() as session:
+        relationship_result = session.run(relationship_query)
+        for record in relationship_result:
+            parent_name = record["parent"]
+            child_name = record["child"]
+
+            # Add link from parent to child
+            links.append({'source': parent_name, 'target': child_name})
+
+    return nodes, links
+
+def calculate_age(date_of_birth_str):
+    # Assuming date_of_birth_str is in the format 'YYYY-MM-DD'
+    date_of_birth = datetime.strptime(date_of_birth_str, '%Y-%m-%d')
+    today = datetime.today()
+    age = today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
+    if age is not None:
+            print(f"Calculated Age: {age}",date_of_birth_str)
+    return age

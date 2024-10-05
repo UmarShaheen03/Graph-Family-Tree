@@ -24,7 +24,7 @@
 <div class="notif_box" id="notif_{{ notif.id }}">
     <div style="justify-content:space-between; display:flex;" onclick="redirect()">
         <p class="notif_timestamp">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
-        <button class="seen_button btn btn-default" onclick="seen({{ notif.id }})">X</button>
+        <button class="seen_button btn btn-default" onclick="seen('{{ notif.id }}')">X</button>
     </div>
     <p class="notif_text">{{ notif.text }}</p>
 </div>
