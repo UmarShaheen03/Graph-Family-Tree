@@ -1,15 +1,38 @@
-<div id="notif_{{ notif.id }}" style="border-color:black; border-width: 2px;">
+<style>
+    .notif_box {
+        border-color: gray; 
+        border-bottom-width: 2px;
+        border-bottom-style: solid;
+    }
+
+    .notif_timestamp {
+        color: gray; 
+        margin: 0px;
+    }
+
+    .seen_button {
+        padding: 0;
+        padding-right: 5px;
+    }
+
+    .notif_text {
+        margin-bottom: 5px
+    }
+    
+</style>
+
+<div class="notif_box" id="notif_{{ notif.id }}">
     <div style="justify-content:space-between; display:flex;" onclick="redirect()">
-        <p style="color: gray; margin: 0px">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
-        <button class="seen_button" onclick="seen()">X</button>
+        <p class="notif_timestamp">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
+        <button class="seen_button btn btn-default" onclick="seen({{ notif.id }})">X</button>
     </div>
-    <p style="margin-bottom:5px">{{ notif.text }}</p>
+    <p class="notif_text">{{ notif.text }}</p>
 </div>
 
 <script>
-    function seen() {
-        $.post("/mark_as_seen/{{ notif.id }}", function(){}) //remove from db
-        document.getElementById("notif_{{ notif.id }}").remove(); //remove from page
+    function seen(id) {
+        $.post("/mark_as_seen/" + id, function(){}) //remove from db
+        document.getElementById("notif_" + id).remove(); //remove from page
     }
 
     function redirect() {

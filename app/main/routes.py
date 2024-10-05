@@ -27,7 +27,6 @@ def run_once_on_start():
 @main_bp.route("/")
 def home_page():
     """The landing page"""
-    print(get_users_notifs(current_user))
     if current_user.is_authenticated:
         return render_template('home.html', 
                                notifications=get_users_notifs(current_user), 
@@ -77,6 +76,7 @@ def login_request():
 #form submissions for logout
 @main_bp.route("/logout-form", methods=["POST"])
 def logout_request():
+    log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids()) #notify all admins of logout
     logout_user()
     return render_template('home.html')
     

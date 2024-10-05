@@ -47,6 +47,7 @@ def get_all_ids_with_tree(id): #returns list of all users with access to this tr
 #   X account creation (viewable to admins, linked to user)
 #   X logins (viewable to admins, linked to user)
 #   X password resets (viewable to admins, linked to user)
+#   - logouts (viewable to admins, linked to user)
 # waiting on requests to be done:
 #   - admin requests (viewable to admins, linked to user)
 #   - tree requests (viewable to admins, linked to user)
