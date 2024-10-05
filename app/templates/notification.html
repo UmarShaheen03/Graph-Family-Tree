@@ -33,6 +33,14 @@
     function seen(id) {
         $.post("/mark_as_seen/" + id, function(){}) //remove from db
         document.getElementById("notif_" + id).remove(); //remove from page
+        document.getElementById("notif_count").innerText -= 1; //decrease count
+
+        if (document.getElementById("notif_count").innerText == 0) { //if count hits 0
+            document.getElementById("notif_count").remove(); //remove count
+            document.getElementById("notif_bell").style.color = "var(--bs-nav-link-color)"; //change to empty gray bell
+            document.getElementById("notif_bell").classList.remove("bi-bell-full");
+            document.getElementById("notif_bell").classList.add("bi-bell"); 
+        }
     }
 
     function redirect() {

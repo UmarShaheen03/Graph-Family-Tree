@@ -13,6 +13,25 @@
     background-color: white;
 }
 
+#notif_bell {
+    padding-right: 2px;
+}
+
+#notif_bell:hover {
+    color: var(--bs-navbar-hover-color);
+}
+
+#notif_count {
+    color: var(--bs-navbar-hover-color);
+    margin-bottom: 0px;
+}
+
+.bell_box {
+    justify-content:space-between; 
+    display:flex;
+}
+
+
 .dropdown {
     position: relative;
     display: inline-block;
