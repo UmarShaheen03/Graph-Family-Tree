@@ -77,10 +77,13 @@
         <script> //script for notifications drop down
             function clickNotifications() { //toggle dropdown when clicked
                 document.getElementById("notifications").classList.toggle("show");
-                if (document.getElementById("notif_bell").style.color == "var(--bs-navbar-hover-color)") { //toggle color of bell
-                    document.getElementById("notif_bell").style.color = "var(--bs-nav-link-color)"
-                } else {
-                    document.getElementById("notif_bell").style.color = "var(--bs-navbar-hover-color)" 
+                const bell = document.getElementsByClassName("bi-bell");
+                if (bell.length != 0) {
+                    if (bell[0].style.color == "var(--bs-navbar-hover-color)") { //toggle color of bell
+                        bell[0].style.color = "var(--bs-nav-link-color)";
+                    } else {
+                        bell[0].style.color = "var(--bs-navbar-hover-color)" ;
+                    }
                 }
             }
 
@@ -89,7 +92,10 @@
                     && !event.target.matches("#notifications") 
                     && !event.target.matches(".seen_button")) {
                     document.getElementById("notifications").classList.remove("show");
-                    document.getElementById("notif_bell").style.color = "var(--bs-nav-link-color)"; //change color of bell
+                    const bell = document.getElementsByClassName("bi-bell");
+                    if (bell.length != 0) {
+                        bell[0].style.color = "var(--bs-nav-link-color)"; //change color of bell
+                    }
                 }
             }
         </script>

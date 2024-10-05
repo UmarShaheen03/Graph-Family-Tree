@@ -37,8 +37,9 @@
 
         if (document.getElementById("notif_count").innerText == 0) { //if count hits 0
             document.getElementById("notif_count").remove(); //remove count
-            document.getElementById("notif_bell").classList.remove("bi-bell-full"); //change to empty bell
+            document.getElementById("notif_bell").classList.remove("bi-bell-full"); //change to white empty bell
             document.getElementById("notif_bell").classList.add("bi-bell"); 
+            document.getElementById("notif_bell").style.color = "var(--bs-navbar-hover-color)";
         }
     }
 
