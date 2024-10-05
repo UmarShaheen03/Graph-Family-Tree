@@ -5,12 +5,13 @@
 .notif_content {
     display: none;
     height: 200px;
-    width: 25%;
+    width: 400px;
     position: absolute;
     right: 0;
     z-index: 1;
     overflow: auto;
     background-color: white;
+    box-shadow: 0 4px 16px 0 rgb(0,0,0,0.25); 
 }
 
 .bi-bell {

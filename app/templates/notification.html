@@ -1,18 +1,28 @@
 <style>
     .notif_box {
-        border-color: gray; 
+        border-color: var(--bs-secondary-color);
         border-bottom-width: 2px;
         border-bottom-style: solid;
     }
 
     .notif_timestamp {
-        color: gray; 
+        color: var(--bs-secondary-color);
+        font-size: smaller;
         margin: 0px;
     }
 
     .seen_button {
         padding: 0;
-        padding-right: 5px;
+        width: 20px;
+        height: 20px;
+        font-size: smaller;
+    }
+
+    .go_to_button {
+        padding: 0;
+        width: 60px;
+        height: 20px;
+        font-size: smaller;
     }
 
     .notif_text {
@@ -22,11 +32,16 @@
 </style>
 
 <div class="notif_box" id="notif_{{ notif.id }}">
-    <div style="justify-content:space-between; display:flex;" onclick="redirect()">
-        <p class="notif_timestamp">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
-        <button class="seen_button btn btn-default" onclick="seen('{{ notif.id }}')">X</button>
+    <div style="justify-content:space-between; display:flex;">
+        <div style="width: 300px">
+            <p class="notif_timestamp">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
+            <p class="notif_text">{{ notif.text }}</p>
+        </div>
+        <div style="width: 100px">
+            <button class="go_to_button btn btn-secondary" onclick="go_to('{{ notif.id }}')">Go To</button>
+            <button class="seen_button btn btn-secondary" onclick="seen('{{ notif.id }}')">X</button>
+        </div>
     </div>
-    <p class="notif_text">{{ notif.text }}</p>
 </div>
 
 <script>
