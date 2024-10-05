@@ -51,13 +51,13 @@
                     <div class="dropdown">
                         <a id="home-nav-link" class="nav-link bell_box" onclick="clickNotifications()">
                             {% if notifications|length > 0 %} <!-- if user has notifcations, make icon white and add num -->
-                                <i id="notif_bell" class="bi bi-bell-fill" style="color:var(--bs-navbar-hover-color);"></i> 
+                                <i id="notif_bell" class="bi bi-bell-fill"></i> 
                                 <p id="notif_count">{{ notifications|length }}</p>
                             {% elif notifications|length > 99 %}
-                                <i id="notif_bell" class="bi bi-bell-fill" style="color:var(--bs-navbar-hover-color)"></i>
+                                <i id="notif_bell" class="bi bi-bell-fill"></i>
                                 <p id="notif_count">99+</p>
                             {% else %}
-                                <i id="notif_bell" class="bi bi-bell" style="color:var(--bs-nav-link-color)"></i>
+                                <i id="notif_bell" class="bi bi-bell"></i>
                             {% endif %}
                         </a>
                     </div>
@@ -75,8 +75,13 @@
         </div>
 
         <script> //script for notifications drop down
-            function clickNotifications() { //open dropdown when clicked
+            function clickNotifications() { //toggle dropdown when clicked
                 document.getElementById("notifications").classList.toggle("show");
+                if (document.getElementById("notif_bell").style.color == "var(--bs-navbar-hover-color)") { //toggle color of bell
+                    document.getElementById("notif_bell").style.color = "var(--bs-nav-link-color)"
+                } else {
+                    document.getElementById("notif_bell").style.color = "var(--bs-navbar-hover-color)" 
+                }
             }
 
             window.onclick = function(event) { //close dropdown when click anywhere else
@@ -84,6 +89,7 @@
                     && !event.target.matches("#notifications") 
                     && !event.target.matches(".seen_button")) {
                     document.getElementById("notifications").classList.remove("show");
+                    document.getElementById("notif_bell").style.color = "var(--bs-nav-link-color)"; //change color of bell
                 }
             }
         </script>

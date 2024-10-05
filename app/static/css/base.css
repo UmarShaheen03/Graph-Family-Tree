@@ -13,12 +13,18 @@
     background-color: white;
 }
 
-#notif_bell {
+.bi_bell {
+    color: var(--bs-nav-link-color);
     padding-right: 2px;
 }
 
-#notif_bell:hover {
+#bi_bell:hover {
     color: var(--bs-navbar-hover-color);
+}
+
+.bi_bell_fill {
+    color: var(--bs-navbar-hover-color);
+    padding-right: 2px;
 }
 
 #notif_count {
