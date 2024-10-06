@@ -107,6 +107,7 @@ def signup(email, username, password, repeat, remember):
 def login(email_or_username, password, remember):
     user = db.session.query(User).filter((User.username == email_or_username) | (User.email == email_or_username)).first()
     session['user_email'] = user.email
+    session['username'] = user.username
     if not user:
         raise LoginError("User does not exist")
     
@@ -306,6 +307,8 @@ def send_email_to_admin(token):
     password = "pzdm bcbj hjkv wewt" #TODO store password securely (environment variables?)
     context = ssl.create_default_context()
 
+    user_email= session['user_email']
+    username = session['username']
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Admin Request"
@@ -318,10 +321,84 @@ def send_email_to_admin(token):
     This link will last for 24 hours
     """ % (approval_link)
     html = """\
-    %s
-    Click the above link to approve admin
-    This link will last for 24 hours
-    """ % (approval_link)
+    <!DOCTYPE html>
+    <html lang = "en">
+
+    <head>
+        <style>
+            body {
+                font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+                min-height: 100vh;
+            
+                padding-top: 25px;
+                padding-bottom: 25px;
+                background-repeat: no-repeat;
+            }
+
+            h1 {
+                color: purple;
+            }
+
+            .contents {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                
+            }
+
+            .texts {
+                box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+                border-radius: 1rem;
+                padding-top: 2rem; 
+                padding-right:4rem;
+                padding-left: 4rem;
+                padding-bottom: 2rem;
+                background-color: white;
+            }
+
+            #btn {
+                border: none;
+                color: white;
+                padding: 0.5rem 1rem;
+                text-decoration: none;
+                display: inline-block;
+
+                margin-top: 1rem;
+                margin-bottom: 2rem;
+                cursor: pointer;
+                background-color: purple;
+
+            }
+
+            #btn:hover {
+                background-color: rgb(92, 2, 92);
+            }
+
+            .subtext{
+                font-size: x-small;
+                color: grey;
+            }
+        </style>
+
+    </head>
+
+    <body>
+        <div class="contents">
+            <div class="texts">
+                <h1>Admin Request</h1>
+                <p style="color:black">%s (%s) is requesting admin privileges, click the button below to approve.</p>
+
+                <div id="button">
+                    <a id='btn' href="%s">Click here</a>
+                </div>
+                <p>TEMPORARY LINK FOR DEVELOPMENT: %s</p>
+                <p class="subtext">This link is only valid for 24 hours</p>
+                <p class="subtext">If you do not wish to approve, simply ignore this email </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """ % (user_email,username,approval_link,approval_link)
 
     plaintext_message = MIMEText(text, "plain")
     html_message = MIMEText(html, "html")
@@ -336,3 +413,15 @@ def send_email_to_admin(token):
         server.sendmail(website_email, 'umar.shaheen93@gmail.com', message.as_string())
 
     return
+
+
+
+def make_user_admin(user_email):
+    user = db.session.query(User).filter_by(email=user_email).first()
+
+    if user:
+        user.admin = 1
+        db.session.commit()
+        return f"{user_email} is now an admin."
+    else:
+        return f"User with email {user_email} not found."

@@ -4,7 +4,7 @@ import os
 from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file, send_from_directory
 from app.forms import LoginForm, SignupForm, ForgotPassword, ResetPassword, AddNodeForm, UpdateNode, AppendGraph, BiographyEditForm, CommentForm, Search_Node
 from app.models import Biography, Comment
-from app.accounts import signup, login, SignupError, LoginError, init_database, reset_email, verify_reset, reset, send_email_to_admin
+from app.accounts import signup, login, SignupError, LoginError, init_database, reset_email, verify_reset, reset, send_email_to_admin, make_user_admin
 from app import db
 from neo4j import GraphDatabase
 from flask_wtf import CSRFProtect
@@ -451,3 +451,6 @@ def request_admin():
     send_email_to_admin(token)
 
     return "Admin privileges requested! Please wait for admin approval."
+
+
+
