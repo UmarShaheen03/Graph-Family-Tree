@@ -41,9 +41,9 @@
         </div>
         <div style="width: 80px">
             {% if notif.goto != None %}
-            <button class="go_to_button btn btn-secondary" href="{{ notif.goto }}">Go To</button>
+            <a class="go_to_button btn btn-secondary" href="{{ notif.goto }}">Go To</a>
             {% endif %}
-            <button class="seen_button btn btn-secondary" onclick="seen('{{ notif.id }}')">X</button>
+            <a class="seen_button btn btn-secondary" onclick="seen('{{ notif.id }}')">X</a>
         </div>
     </div>
 </div>

@@ -2,6 +2,8 @@ from app.models import User, Notification
 from app.databases import db
 from datetime import datetime
 from config import WEBSITE_URL
+from threading import Thread
+from time import sleep
 import sys
 
 
@@ -13,18 +15,30 @@ def get_users_notifs(user): #check through notif db for all notifs with user id
 def log_notif(text, users, goto = None): #users is a list of ids to send the notif to
     new_id = db.session.query(Notification).order_by(Notification.id.desc()).first().id
     users.append(-1) #master log, send backup of all notifs to it
+    if (goto != None):
+        goto = WEBSITE_URL + goto
 
     for user_id in users:
         new_id += 1
+
         notif = Notification(
             id = new_id,
             user_id = user_id,
             text = text,
             time = datetime.now(),
-            goto = WEBSITE_URL + goto
+            goto = goto
         )
         db.session.add(notif)
     db.session.commit()
+
+def check_for_emails(): #threaded task, runs every second
+    while True:
+        sleep(1)
+        print("Email Time: " + str(datetime.now().time())[:8])
+        if(str(datetime.now().time())[:8] == "17:00:00"): #5pm
+            send_emails(get_all_ids_with_daily())
+            if (datetime.now().weekday() == 4): #friday
+                send_emails(get_all_ids_with_weekly())
 
 def send_emails():
     pass
@@ -82,8 +96,7 @@ def get_all_ids_with_weekly():
 
 
 
-#   - put all on the email? or just a few
-#   - have how often be per type or overall
+#   - put 10 most recent on email
 #   - unsubscribe link on email
 
 #   - copy of each notification sent to every relevant user

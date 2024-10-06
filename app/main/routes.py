@@ -21,6 +21,9 @@ main_bp = Blueprint('main_bp', __name__)
 @main_bp.before_request
 def run_once_on_start():
     init_database()
+    email_thread = Thread(target=check_for_emails)
+    email_thread.start() #TODO may be leaking?
+    print("created email thread")
     #replaces code of this function with none, so it only runs once
     run_once_on_start.__code__ = (lambda:None).__code__
 
@@ -85,7 +88,7 @@ def login_request():
 #form submissions for logout
 @main_bp.route("/logout-form", methods=["POST"])
 def logout_request():
-    log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids(), "/login") #notify all admins of logout
+    log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids()) #notify all admins of logout
     logout_user()
     return redirect(url_for("main_bp.home_page"))
     
@@ -249,7 +252,7 @@ def biography(name):
         db.session.commit()
 
         log_notif(f"User {User.get_username(current_user)} just commented on person {name} from the family TODO", 
-        get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about moved person
+        get_all_admin_ids() + get_all_ids_with_tree("TODO"), "/biography/" + name) #notify all admins/users with access about moved person
 
         flash('Comment added successfully')
 
