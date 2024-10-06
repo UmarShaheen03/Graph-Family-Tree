@@ -453,4 +453,15 @@ def request_admin():
     return "Admin privileges requested! Please wait for admin approval."
 
 
+@main_bp.route('/approve_admin', methods=['GET'])
+def approve_admin():
+    token = request.args.get('token')
 
+    try:
+        user_email = serializer.loads(token, salt="admin-privilege-request", max_age=86400)
+    except Exception as e:
+        return "Invalid or expired token."
+
+    make_user_admin(user_email)
+    
+    return f"User {user_email} is now an admin!"
