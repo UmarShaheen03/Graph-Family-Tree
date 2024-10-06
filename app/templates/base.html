@@ -90,7 +90,8 @@
             window.onclick = function(event) { //close dropdown when click anywhere else
                 if (!event.target.matches("#notif_bell") 
                     && !event.target.matches("#notifications") 
-                    && !event.target.matches(".seen_button")) {
+                    && !event.target.matches(".seen_button")
+                    && !event.target.matches(".go_to_button")) {
                     document.getElementById("notifications").classList.remove("show");
                     const bell = document.getElementsByClassName("bi-bell");
                     if (bell.length != 0) {

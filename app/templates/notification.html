@@ -16,13 +16,15 @@
         width: 20px;
         height: 20px;
         font-size: smaller;
+        float: right;
     }
 
     .go_to_button {
         padding: 0;
-        width: 60px;
+        width: 50px;
         height: 20px;
         font-size: smaller;
+        float: left;
     }
 
     .notif_text {
@@ -33,12 +35,14 @@
 
 <div class="notif_box" id="notif_{{ notif.id }}">
     <div style="justify-content:space-between; display:flex;">
-        <div style="width: 300px">
+        <div style="width: 320px">
             <p class="notif_timestamp">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
             <p class="notif_text">{{ notif.text }}</p>
         </div>
-        <div style="width: 100px">
-            <button class="go_to_button btn btn-secondary" onclick="go_to('{{ notif.id }}')">Go To</button>
+        <div style="width: 80px">
+            {% if notif.goto != None %}
+            <button class="go_to_button btn btn-secondary" href="{{ notif.goto }}">Go To</button>
+            {% endif %}
             <button class="seen_button btn btn-secondary" onclick="seen('{{ notif.id }}')">X</button>
         </div>
     </div>

@@ -1,6 +1,7 @@
 from app.models import User, Notification
 from app.databases import db
 from datetime import datetime
+from config import WEBSITE_URL
 import sys
 
 
@@ -9,8 +10,7 @@ def get_users_notifs(user): #check through notif db for all notifs with user id
     notifications = db.session.query(Notification).filter(Notification.user_id == id).all()
     return notifications
 
-
-def log_notif(text, users): #users is a list of ids to send the notif to
+def log_notif(text, users, goto = None): #users is a list of ids to send the notif to
     new_id = db.session.query(Notification).order_by(Notification.id.desc()).first().id
     users.append(-1) #master log, send backup of all notifs to it
 
@@ -20,10 +20,14 @@ def log_notif(text, users): #users is a list of ids to send the notif to
             id = new_id,
             user_id = user_id,
             text = text,
-            time = datetime.now()
+            time = datetime.now(),
+            goto = WEBSITE_URL + goto
         )
         db.session.add(notif)
     db.session.commit()
+
+def send_emails():
+    pass
 
 def get_all_admin_ids(): #returns list of all admin users' ids
     admin_ids = []
@@ -39,7 +43,22 @@ def get_all_ids_with_tree(id): #returns list of all users with access to this tr
     for user in results:
         ids.append(User.get_id(user))
     return ids
-    
+
+def get_all_ids_with_daily():
+    ids = []
+    results = db.session.query(User).filter(User.email_preference == "Daily").all()
+    for user in results:
+        ids.append(User.get_id(user))
+    return ids
+
+def get_all_ids_with_weekly():
+    ids = []
+    results = db.session.query(User).filter(User.email_preference == "Weekly").all()
+    for user in results:
+        ids.append(User.get_id(user))
+    return ids
+
+
         
 
 #what is logged:

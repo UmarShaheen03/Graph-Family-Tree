@@ -2,6 +2,7 @@
 
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
+WEBSITE_URL = "http://127.0.0.1:5000/" #TODO change when deploying
 
 class Config:
     """General base config class"""

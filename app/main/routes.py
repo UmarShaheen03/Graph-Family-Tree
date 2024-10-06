@@ -85,7 +85,7 @@ def login_request():
 #form submissions for logout
 @main_bp.route("/logout-form", methods=["POST"])
 def logout_request():
-    log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids()) #notify all admins of logout
+    log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids(), "/login") #notify all admins of logout
     logout_user()
     return redirect(url_for("main_bp.home_page"))
     
