@@ -1,0 +1,79 @@
+/* Center the dashboard and limit its width */
+#dashboard {
+    max-width: 900px; /* Slightly larger width to accommodate floating boxes */
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* General form styling */
+form {
+    margin-top: 10px;
+}
+
+form .form-group {
+    margin-bottom: 1.2rem; /* Adds space between form fields */
+}
+
+/* Styles for the floating boxes */
+.box {
+    background-color: #fff;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Floating effect */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.box:hover {
+    transform: translateY(-5px); /* Slight floating effect on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
+}
+
+.box h3 {
+    margin-bottom: 15px;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+/* Input and select styles */
+form input, form select, form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    background-color: #fdfdfd;
+    margin-bottom: 10px;
+}
+
+/* Button styles */
+form button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #0056b3;
+}
+
+/* Make sure the boxes are responsive */
+@media (max-width: 768px) {
+    #dashboard {
+        padding: 15px;
+    }
+
+    .box {
+        margin-bottom: 20px;
+    }
+
+    form button {
+        width: 100%;
+    }
+}

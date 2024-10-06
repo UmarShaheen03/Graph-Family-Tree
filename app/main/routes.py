@@ -485,3 +485,13 @@ def check_login_admin():
     
     else:
         return None
+    
+    
+@main_bp.route('/my_dashboard', methods=['GET', 'POST'])
+def my_dashboard():
+    
+    check = check_login()
+    if check is not None:
+        return check 
+    return render_template('my_dashboard.html')
+
