@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select a Family Tree.');
             return;
         }
-
+        console.log('Tree Access Form Submitted');
         // Show a confirmation alert with the tree and message
         alert('Tree Access Requested for: ' + treeId + '\nMessage: ' + (message ? message : 'No message provided'));
 

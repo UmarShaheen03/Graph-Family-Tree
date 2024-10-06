@@ -6,71 +6,99 @@
 {% endblock %}
 
 {% block bodyBlock %}
-<div id="dashboard" class="container-fluid">
-  <!-- Request Access to Family Tree -->
-  <div class="box">
-    <h3>Request Access to a Family Tree</h3>
-    <form id="requestTreeAccessForm">
-      <div class="form-group">
-        <label for="tree_id">Select Family Tree:</label>
-        <select id="tree_id" name="tree_id" class="form-control" required>
-          <option value="">-- Select a Family Tree --</option>
-          <option value="tree_1">Family Tree A</option>
-          <option value="tree_2">Family Tree B</option>
-          <option value="tree_3">Family Tree C</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="message">Add a message with your request (optional):</label>
-        <textarea id="message" name="message" class="form-control" placeholder="Enter your message here..."></textarea>
-      </div>
-
-      <button type="submit" class="btn btn-primary">Request Tree Access</button>
-    </form>
+<div class="container-fluid">
+  <!-- Welcome Message -->
+  <div class="intro-text text-center">
+    <h2>Welcome to Your Dashboard</h2>
+    <p>Here you can view and request access to family trees, manage your admin rights, and enable email notifications.</p>
   </div>
 
- <!-- Request Admin Access -->
- <div class="box">
-  <h3>Request Admin Access</h3>
-  <form id="requestAdminAccessForm">
-    <div class="form-group">
-      <label for="admin_tree_id">Select Family Tree:</label>
-      <select id="admin_tree_id" name="admin_tree_id" class="form-control" required>
-        <option value="">-- Select a Family Tree --</option>
-        <option value="tree_1">Family Tree A</option>
-        <option value="tree_2">Family Tree B</option>
-        <option value="tree_3">Family Tree C</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="reason">Reason for Admin Access:</label>
-      <textarea id="reason" name="reason" class="form-control" placeholder="Provide a reason for admin access" required></textarea>
-    </div>
-
-    <button type="submit" class="btn btn-warning">Request Admin Access</button>
-  </form>
-</div>
-
-
-  <!-- Enable Email Notifications -->
-  <div class="box">
-    <h3>Email Notifications</h3>
-    <form id="emailNotificationsForm">
-      <div class="form-check">
-        <input type="checkbox" class="form-check-input" id="email_notifications" name="email_notifications">
-        <label class="form-check-label" for="email_notifications">Enable Email Notifications</label>
+  <!-- Row for columns -->
+  <div class="row justify-content-center mt-4">
+    <!-- Left Column: Accessible Family Trees -->
+    <div class="col-md-4">
+      <div class="box">
+        <h3>Your Family Trees</h3>
+        <ul class="list-group">
+          <!-- Default Dehdashti Family Tree -->
+          <li class="list-group-item">
+            <a href="{{ url_for('main_bp.tree_page') }}" class="tree-link">Dehdashti Family Tree</a>
+          </li>
+      
+          <!-- Accessible Trees for the User -->
+          {% for tree in accessible_trees %}
+          <li class="list-group-item">
+            <a href="{{ url_for('tree_page', tree_id=tree.id) }}" class="tree-link">{{ tree.name }}</a>
+          </li>
+          {% else %}
+          <p>You do not have access to any other family trees yet.<p>
+          {% endfor %}
+        </ul>
       </div>
-      <button type="submit" class="btn btn-success mt-3">Save Preferences</button>
-    </form>
+    </div>
+
+    <!-- Right Column: Forms -->
+    <div class="col-md-8">
+      <div class="box mb-4">
+        <h3>Request Access to a Family Tree</h3>
+        <form id="requestTreeAccessForm">
+          <div class="form-group">
+            <label for="tree_id">Select Family Tree:</label>
+            <select id="tree_id" name="tree_id" class="form-control" required>
+              <option value="">-- Select a Family Tree --</option>
+              <option value="tree_1">Family Tree A</option>
+              <option value="tree_2">Family Tree B</option>
+              <option value="tree_3">Family Tree C</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Add a message with your request (optional):</label>
+            <textarea id="message" name="message" class="form-control" placeholder="Enter your message here..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Request Tree Access</button>
+        </form>
+      </div>
+
+      <div class="box mb-4">
+        <h3>Request Admin Access</h3>
+        <form id="requestAdminAccessForm">
+          <div class="form-group">
+            <label for="admin_tree_id">Select Family Tree:</label>
+            <select id="admin_tree_id" name="admin_tree_id" class="form-control" required>
+              <option value="">-- Select a Family Tree --</option>
+              <option value="tree_1">Family Tree A</option>
+              <option value="tree_2">Family Tree B</option>
+              <option value="tree_3">Family Tree C</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="reason">Reason for Admin Access:</label>
+            <textarea id="reason" name="reason" class="form-control" placeholder="Provide a reason for admin access" required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-warning">Request Admin Access</button>
+        </form>
+      </div>
+
+      <div class="box mb-4">
+        <h3>Email Notifications</h3>
+        <form id="emailNotificationsForm">
+          <div class="form-check form-switch">
+            <input type="checkbox" class="form-check-input" id="email_notifications" name="email_notifications">
+            <label class="form-check-label" for="email_notifications">Enable Email Notifications</label>
+          </div>
+          <button type="submit" class="btn btn-success mt-3">Save Preferences</button>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
-
-{% endblock %}
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <!-- Custom JS to handle form submissions -->
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+{% endblock %}
