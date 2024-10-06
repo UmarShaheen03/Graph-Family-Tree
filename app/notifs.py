@@ -4,12 +4,17 @@ from datetime import datetime
 from config import WEBSITE_URL
 from threading import Thread
 from time import sleep
+import smtplib
+import ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from sqlalchemy import desc
 import sys
 
 
 def get_users_notifs(user): #check through notif db for all notifs with user id
     id = User.get_id(user)
-    notifications = db.session.query(Notification).filter(Notification.user_id == id).all()
+    notifications = db.session.query(Notification).filter(Notification.user_id == id).order_by(desc(Notification.time)).all()
     return notifications
 
 def log_notif(text, users, goto = None): #users is a list of ids to send the notif to
@@ -34,14 +39,55 @@ def log_notif(text, users, goto = None): #users is a list of ids to send the not
 def check_for_emails(): #threaded task, runs every second
     while True:
         sleep(1)
-        print("Email Time: " + str(datetime.now().time())[:8])
+        #print("Email Time: " + str(datetime.now().time())[:8])
         if(str(datetime.now().time())[:8] == "17:00:00"): #5pm
             send_emails(get_all_ids_with_daily())
             if (datetime.now().weekday() == 4): #friday
                 send_emails(get_all_ids_with_weekly())
 
-def send_emails():
-    pass
+def send_emails(ids):
+    for id in ids:
+        user = db.session.query(User).filter(User.user_id == id).first()
+
+        #smtp ssl info
+        port = 465 #ssl port
+        sender_email = "cits3200group31@gmail.com"
+        receiver_email = User.get_email(user)
+        password = "pzdm bcbj hjkv wewt" #TODO store password securely (environment variables?)
+        context = ssl.create_default_context()
+
+        notifications = get_users_notifs(user)
+        notif_amount = len(notifications)
+        if (notif_amount > 10):
+            notifications = notifications[:10] #slice to just first 10 notifications
+
+        message = MIMEMultipart("alternative")
+        message["Subject"] = "Notifications from Dehdashti Family Graph for " + user.username
+        message["From"] = "Dehdashti Family Graph"
+        message["To"] = receiver_email
+
+        #html version of email
+        #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
+        html = ""
+        
+
+        #plaintext as backup if html doesn't load
+        text = ""
+
+        plaintext_message = MIMEText(text, "plain")
+        html_message = MIMEText(html, "html")
+
+        #second message is attempted first, fallback to first message
+        message.attach(plaintext_message)
+        message.attach(html_message)
+
+        #establish ssl conenction with gmail
+        with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+            server.login(sender_email, password)
+            server.sendmail(sender_email, receiver_email, message.as_string())
+        
+        return
+    
 
 def get_all_admin_ids(): #returns list of all admin users' ids
     admin_ids = []

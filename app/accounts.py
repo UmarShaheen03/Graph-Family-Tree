@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash
 from flask import current_app, url_for
 from app.notifs import log_notif, get_all_admin_ids
 import sys #TODO using for debug printing, remove in final
+from config import WEBSITE_URL
 
 #libraries for reset password
 import smtplib
@@ -157,8 +158,7 @@ def reset_email(receiver_email):
         update({"reset_expiry": expiry}, synchronize_session = False)
     db.session.commit()
 
-    website_url = "127.0.0.1:5000" #TODO replace with real url when deploying
-    link = website_url + url_for("main_bp.reset_password_page") +"?token=" + str(token.hex) + "&user_id=" + str(user.user_id)
+    link = WEBSITE_URL + url_for("main_bp.reset_password_page") +"?token=" + str(token.hex) + "&user_id=" + str(user.user_id)
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Password Reset for " + user.username
