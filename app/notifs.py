@@ -13,6 +13,7 @@ import sys
 
 
 def get_users_notifs(user): #check through notif db for all notifs with user id
+    #TODO auto remove notifs user doesn't want to see
     id = User.get_id(user)
     notifications = db.session.query(Notification).filter(Notification.user_id == id).order_by(desc(Notification.time)).all()
     return notifications

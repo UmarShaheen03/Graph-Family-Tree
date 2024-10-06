@@ -17,6 +17,7 @@ class User(UserMixin, db.Model):
     reset_expiry = db.Column(db.Integer) #is a datetime, but i store it as an int
     comments = db.relationship('Comment', back_populates='user', lazy=True)
     email_preference = db.Column(db.String) #values of "None", "Daily" or "Weekly"
+    notifs_ignored = db.Column(db.String) #big string treated as list of notifications to ignore
 
 
     def get_id(self):
@@ -69,3 +70,9 @@ class Notification(db.Model):
     text = db.Column(db.Text, nullable=False)
     time = db.Column(db.DateTime, default=datetime.utcnow)
     goto = db.Column(db.String, nullable=True) #optional, url to go to when clicked
+    type = db.Column(db.String) #what type of notif it is
+    #type values are: 
+    # "Login", "Logout", "Reset", "Signup" (account related) 
+    # "Admin Request", "Tree Request", "Request" (request related)
+    # "Comment", "Bio Edit" (bio related)
+    # "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)
