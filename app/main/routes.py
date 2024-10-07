@@ -23,6 +23,9 @@ def run_once_on_start():
     init_database()
     email_thread = Thread(target=check_for_emails)
     email_thread.start() #TODO may be leaking?
+    log_notif("test notif 1", [3])
+    log_notif("test notif 2", [3])
+    log_notif("test notif 3", [3])
     send_emails([3])
     print("created email thread")
     #replaces code of this function with none, so it only runs once

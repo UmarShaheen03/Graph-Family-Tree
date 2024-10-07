@@ -9,7 +9,7 @@ import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from sqlalchemy import desc
-from jinja2 import Template
+from jinja2 import Template, Environment, BaseLoader, FileSystemLoader
 from flask import url_for
 import sys
 
@@ -17,13 +17,14 @@ import sys
 def get_users_notifs(user): #check through notif db for all notifs with user id
     #TODO auto remove notifs user doesn't want to see
     id = User.get_id(user)
-    ignored = User.get
+    ignored = User.get_ignored(user)
     notifications = db.session.query(Notification).filter(Notification.user_id == id).order_by(desc(Notification.time)).all()
     
     #clear any ignored notifs automatically
     for notif in notifications:
-        if notif.type in ignored:
-            db.session.query(Notification).filter(Notification.id == notif.id).delete()
+        if notif.type != None:
+            if notif.type in ignored:
+                db.session.query(Notification).filter(Notification.id == notif.id).delete()
         
     db.session.commit()
     return notifications
@@ -80,10 +81,12 @@ def send_emails(ids):
         #html version of email
         #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
         file = open("app/templates/email_notif.html", "r").read()
-        html = Template(file).render(notifications=notifications, 
-                                     home_url=url_for("main_bp.home_page"),
-                                     unsub_url=url_for("main_bp.unsubscribe") + "/" + str(id),
-                                     account_url=url_for("main_bp.unsubscribe") + "/" + str(id)) #TODO make this url work
+        loader = FileSystemLoader(searchpath="./")
+        template = Environment(loader=loader).from_string(file)
+        html = template.render(notifications=notifications, 
+                                     home_url = WEBSITE_URL + url_for("main_bp.home_page"),
+                                     unsub_url = WEBSITE_URL + url_for("main_bp.unsubscribe", user_id=id),
+                                     account_url = WEBSITE_URL + url_for("main_bp.unsubscribe", user_id=id)) #TODO make this url work
 
         #plaintext as backup if html doesn't load
         text = """\
@@ -94,9 +97,9 @@ def send_emails(ids):
 
         for notif in notifications:
             if notif.goto != None:
-                text += notif.time + " " + notif.goto + "\n" + notif.text
+                text += str(notif.time) + " " + notif.goto + "\n" + notif.text
             else:
-                text += notif.time + "\n" + notif.text
+                text += str(notif.time) + "\n" + notif.text
 
         text += """\
         To unsubscribe from all emails, visit: %s

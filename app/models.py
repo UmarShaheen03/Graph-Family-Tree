@@ -29,6 +29,9 @@ class User(UserMixin, db.Model):
     def get_email(self):
         return (self.email)
     
+    def get_ignored(self):
+        return (self.notifs_ignored)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
