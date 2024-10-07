@@ -143,3 +143,27 @@ class Search_Node (FlaskForm):
         choices=[]  # Populate this dynamically in your view
     )
       submit = SubmitField("Search")
+
+class IgnoreNotifs (FlaskForm):
+    login=BooleanField("Logins", default=True)
+    logout=BooleanField("Logouts", default=True)
+    reset=BooleanField("Password Resets", default=True)
+    signup=BooleanField("Sign Ups", default=True)
+
+    admin_req=BooleanField("Admin Requests", default=True)
+    tree_req=BooleanField("Tree Access Requests", default=True)
+    req_accepted=BooleanField("Request Acceptance", default=True)
+
+    comment=BooleanField("New Comments", default=True)
+    bio_edit=BooleanField("Biography Edits", default=True)
+
+    tree_create=BooleanField("New People On Tree", default=True)
+    tree_move=BooleanField("Person Moved On Tree", default=True)
+    tree_update=BooleanField("Person Renamed On Tree", default=True)
+    tree_delete=BooleanField("Person Removed From Tree", default=True)
+
+    submit=SubmitField("Submit")
+    # "Login", "Logout", "Reset", "Signup" (account related) 
+    # "Admin Request", "Tree Request", "Request" (request related)
+    # "Comment", "Bio Edit" (bio related)
+    # "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)
