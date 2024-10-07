@@ -9,6 +9,7 @@ import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from sqlalchemy import desc
+from jinja2 import Template
 import sys
 
 
@@ -69,7 +70,8 @@ def send_emails(ids):
 
         #html version of email
         #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
-        html = ""
+        file = open("app/templates/email_notif.html", "r").read()
+        html = Template(file).render()
         
 
         #plaintext as backup if html doesn't load
@@ -91,7 +93,7 @@ def send_emails(ids):
     
 def create_notifs_string(request):
     string = ""
-    
+
     if (request.form.get("login")):
         string.append(" Login")
     if (request.form.get("logout")):
