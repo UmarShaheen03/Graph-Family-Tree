@@ -18,7 +18,44 @@
     </div>
     <div id="tooltip"></div>
 </div>
+
+ <!-- Request Other Tree Button -->
+<div class="text-center my-4">
+    <button type="button" class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#requestTreeModal">
+        Request Other Tree
+    </button>
+</div>
+
+<!-- Request Other Tree Modal Structure -->
+<div class="modal fade" id="requestTreeModal" tabindex="-1" aria-labelledby="requestTreeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="requestTreeModalLabel">Request Other Family Tree</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="requestTreeForm" action="/request-tree" method="post">
+                    <div class="form-group">
+                        <label for="tree_name">Family Tree Name</label>
+                        <input type="text" class="form-control rounded-pill" id="tree_name" name="tree_name" placeholder="Enter the tree name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="request_message">Message (optional)</label>
+                        <textarea class="form-control rounded-lg" id="request_message" name="message" rows="3" placeholder="Additional details"></textarea>
+                    </div>
+                    <div class="form-group mt-3">
+                        <button type="submit" class="btn btn-primary rounded-pill">Submit Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="{{ url_for('static', filename='js/request_tree.js') }}"></script> <!-- Link for request modal JS -->
 <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
