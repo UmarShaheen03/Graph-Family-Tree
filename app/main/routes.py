@@ -445,9 +445,10 @@ def modify_graph():
 
 @main_bp.route('/request_admin', methods=['POST'])
 def request_admin():
-    user_email = session['user_email']
+    user_email = session.get('user_email')
     token = serializer.dumps(user_email, salt="admin-privilege-request")
-
+    if not user_email:
+        return jsonify({'error': 'User email not found in session'}), 400
     send_email_to_admin(token)
 
     return jsonify({"message": user_email})
