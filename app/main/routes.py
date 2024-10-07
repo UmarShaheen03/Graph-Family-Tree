@@ -521,6 +521,26 @@ def seen_notif(notif_id):
     db.session.commit()
     return redirect(url_for("main_bp.home_page"))
 
+@main_bp.route("/ignore_notifs/<user_id>", methods=["POST"])
+def ignore_notifs(user_id):
+    loginForm = LoginForm()
+    logoutForm = LogoutForm()
+
+    if not current_user.is_authenticated: #if not logged in
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
+    elif (int(user_id) != User.get_id(current_user)): #if logged in as a different user
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe",
+                                notifications=get_users_notifs(current_user), 
+                                logged_in_as=User.get_username(current_user))
+    
+    preferences = create_notifs_string()
+    User.change_ignore_notifs(current_user, preferences)
+    
+    #TODO return to account page
+    return redirect(url_for("main_bp.home_page"))
+
+
+
 
 #functions for checking if the current user is logged in, and if they are an admin
 def check_login():

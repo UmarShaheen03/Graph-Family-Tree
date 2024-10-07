@@ -89,6 +89,40 @@ def send_emails(ids):
         
         return
     
+def create_notifs_string(request):
+    string = ""
+    
+    if (request.form.get("login")):
+        string.append(" Login")
+    if (request.form.get("logout")):
+        string.append(" Logout")
+    if (request.form.get("reset")):
+        string.append(" Reset")
+    if (request.form.get("signup")):
+        string.append(" Signup")
+
+    if (request.form.get("admin_req")):
+        string.append(" Admin Req")
+    if (request.form.get("tree_req")):
+        string.append(" Tree Req")
+    if (request.form.get("req_accepted")):
+        string.append(" Request")
+
+    if (request.form.get("comment")):
+        string.append(" Comment")
+    if (request.form.get("bio_edit")):
+        string.append(" Bio Edit")
+
+    if (request.form.get("tree_create")):
+        string.append(" Tree Create")
+    if (request.form.get("tree_move")):
+        string.append(" Tree Move")
+    if (request.form.get("tree_update")):
+        string.append(" Tree Delete")
+    if (request.form.get("tree_delete")):
+        string.append(" Tree Delete")
+    
+    return string
 
 def get_all_admin_ids(): #returns list of all admin users' ids
     admin_ids = []

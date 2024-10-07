@@ -45,6 +45,9 @@ class User(UserMixin, db.Model):
     def is_admin(self):
         return (self.admin)
     
+    def change_ignore_notifs(self, preferences):
+        self.notifs_ignored = preferences
+    
 
 class Biography(db.Model):
     id = db.Column(db.Integer, primary_key=True)
