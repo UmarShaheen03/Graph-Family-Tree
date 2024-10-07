@@ -161,7 +161,12 @@ def tree_page():
     # Set choices for the FullName dropdown field
     form.fullname.choices = nodes
     nodes, relationships = fetch_data()
-    return render_template('Tree.html', nodes=nodes, relationships=relationships,form=form)
+    request=RequestTreeForm()
+    with driver.session() as session:
+        result = session.run("MATCH (n) WHERE NOT 'Person' IN labels(n) RETURN DISTINCT labels(n) AS labels")
+        choices = [(label, label) for record in result for label in record["labels"]]
+    request.tree_name.choices=choices
+    return render_template('Tree.html', nodes=nodes, relationships=relationships,form=form,request=request)
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
@@ -598,8 +603,7 @@ def Request_Multiple_Tree():
         # Retrieve distinct labels except for 'Person'
         result = session.run("MATCH (n) WHERE NOT 'Person' IN labels(n) RETURN DISTINCT labels(n) AS labels")
         choices = [(label, label) for record in result for label in record["labels"]]
-     
-    form.Tree_Name.choices = choices
+    form.Tree_Name.choices=choices
 
     if form.validate_on_submit():
         # Redirect to Multiple_Tree with the selected tree name as a parameter

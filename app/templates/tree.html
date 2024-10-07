@@ -35,19 +35,21 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="requestTreeForm" action="/request-tree" method="post">
+                <form id="requestTreeForm" method="post">
                     <div class="form-group">
-                        <label for="tree_name">Family Tree Name</label>
-                        <input type="text" class="form-control rounded-pill" id="tree_name" name="tree_name" placeholder="Enter the tree name" required>
+                        {{ request.hidden_tag() }}
+                        {{ request.tree_name.label }}
+                        {{ request.tree_name(class_="form-control rounded-pill") }}
                     </div>
                     <div class="form-group">
-                        <label for="request_message">Message (optional)</label>
-                        <textarea class="form-control rounded-lg" id="request_message" name="message" rows="3" placeholder="Additional details"></textarea>
+                        {{ request.message.label }}
+                        {{ request.message }}
                     </div>
                     <div class="form-group mt-3">
-                        <button type="submit" class="btn btn-primary rounded-pill">Submit Request</button>
+                        {{ request.submit }}
                     </div>
                 </form>
+                
             </div>
         </div>
     </div>

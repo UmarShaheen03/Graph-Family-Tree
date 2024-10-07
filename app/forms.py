@@ -158,3 +158,17 @@ class Request_Tree (FlaskForm):
         choices=[]  # Populate this dynamically in your view
     )
     submit = SubmitField("Submit")
+
+
+class RequestTreeForm(FlaskForm):
+    tree_name = SelectField(
+        'Tree Name',
+        choices=[],  # This can be populated dynamically in your view
+        validators=[DataRequired()],
+        render_kw={"class": "form-control rounded-pill"}
+    )
+    message = TextAreaField(
+        'Message (optional)', 
+        render_kw={"class": "form-control rounded-lg", "rows": 3, "placeholder": "Additional details"}
+    )
+    submit = SubmitField('Submit Request', render_kw={"class": "btn btn-primary rounded-pill"})
