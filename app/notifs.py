@@ -78,33 +78,41 @@ def send_emails(ids):
         message["From"] = "Dehdashti Family Graph"
         message["To"] = receiver_email
 
+        home_url = WEBSITE_URL + url_for("main_bp.home_page")
+        unsub_url = WEBSITE_URL + url_for("main_bp.unsubscribe", user_id=id)
+        account_url = WEBSITE_URL + url_for("main_bp.unsubscribe", user_id=id) #TODO set this to accounts once done
+
         #html version of email
         #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
         file = open("app/templates/email_notif.html", "r").read()
         loader = FileSystemLoader(searchpath="./")
         template = Environment(loader=loader).from_string(file)
         html = template.render(notifications=notifications, 
-                                     home_url = WEBSITE_URL + url_for("main_bp.home_page"),
-                                     unsub_url = WEBSITE_URL + url_for("main_bp.unsubscribe", user_id=id),
-                                     account_url = WEBSITE_URL + url_for("main_bp.unsubscribe", user_id=id)) #TODO make this url work
-
+                               home_url=home_url, 
+                               unsub_url=unsub_url, 
+                               account_url=account_url, 
+                               notif_amount=notif_amount)
+                                     
         #plaintext as backup if html doesn't load
         text = """\
         Notifications\n
-        Here are the most recent notifications from Dehdashti Family Graph
-        %s
-        """
+        Here are the most recent notifications from Dehdashti Family Graph\n
+        %s\n
+        """ % (home_url)
 
         for notif in notifications:
             if notif.goto != None:
-                text += str(notif.time) + " " + notif.goto + "\n" + notif.text
+                text += str(notif.time) + " " + notif.goto + "\n" + notif.text + "\n"
             else:
-                text += str(notif.time) + "\n" + notif.text
+                text += str(notif.time) + "\n" + notif.text + "\n"
+
+        if (notif_amount > 10):
+            text += "and " + notif_amount-10 + " more...\n"
 
         text += """\
-        To unsubscribe from all emails, visit: %s
-        Or to edit your email preferences, visit: %s
-        """
+        To unsubscribe from all emails, visit: %s\n
+        Or to edit your email preferences, visit: %s\n
+        """ % (unsub_url, account_url)
 
         plaintext_message = MIMEText(text, "plain")
         html_message = MIMEText(html, "html")
@@ -206,17 +214,11 @@ def get_all_ids_with_weekly():
 #   - toggles for each type of notification
 #   - toggles for how often to email (daily, weekly, monthly?, none)
 
-
-
-#   - put 10 most recent on email
-#   - unsubscribe link on email
-
-#   - copy of each notification sent to every relevant user
-#   - when seen, delete to save space
-#   - have a master log table that never gets deleted
-
 #TODO
-# - design a full notification template
-# - create the master log page
-# - finish the emails
 # - add types to every notif
+# - full notification template for master log/email
+# - polish email
+# - create master log
+# - email preference form
+# - add all the tree/account stuff once thats done
+# - testing! yay!

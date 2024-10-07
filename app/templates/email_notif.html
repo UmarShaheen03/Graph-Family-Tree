@@ -70,6 +70,9 @@
                     {% include "app/templates/notification.html" %}
                 {% endwith %}
                 {% endfor %}
+                {% if notif_amount > 10 %}
+                <p class="texts">and {{ notif_amount - 10}} more...</p>
+                {% endif %}
                 <p class="subtext">To unsubscribe from all emails, <a href="{{ unsub_url}}">click here</a></p>
                 <p class="subtext">Or to edit your email preferences, <a href="{{ account_url}}">click here</a></p>
             </div>
