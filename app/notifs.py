@@ -10,13 +10,22 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from sqlalchemy import desc
 from jinja2 import Template
+from flask import url_for
 import sys
 
 
 def get_users_notifs(user): #check through notif db for all notifs with user id
     #TODO auto remove notifs user doesn't want to see
     id = User.get_id(user)
+    ignored = User.get
     notifications = db.session.query(Notification).filter(Notification.user_id == id).order_by(desc(Notification.time)).all()
+    
+    #clear any ignored notifs automatically
+    for notif in notifications:
+        if notif.type in ignored:
+            db.session.query(Notification).filter(Notification.id == notif.id).delete()
+        
+    db.session.commit()
     return notifications
 
 def log_notif(text, users, goto = None): #users is a list of ids to send the notif to
@@ -71,11 +80,28 @@ def send_emails(ids):
         #html version of email
         #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
         file = open("app/templates/email_notif.html", "r").read()
-        html = Template(file).render()
-        
+        html = Template(file).render(notifications=notifications, 
+                                     home_url=url_for("main_bp.home_page"),
+                                     unsub_url=url_for("main_bp.unsubscribe") + "/" + str(id),
+                                     account_url=url_for("main_bp.unsubscribe") + "/" + str(id)) #TODO make this url work
 
         #plaintext as backup if html doesn't load
-        text = ""
+        text = """\
+        Notifications\n
+        Here are the most recent notifications from Dehdashti Family Graph
+        %s
+        """
+
+        for notif in notifications:
+            if notif.goto != None:
+                text += notif.time + " " + notif.goto + "\n" + notif.text
+            else:
+                text += notif.time + "\n" + notif.text
+
+        text += """\
+        To unsubscribe from all emails, visit: %s
+        Or to edit your email preferences, visit: %s
+        """
 
         plaintext_message = MIMEText(text, "plain")
         html_message = MIMEText(html, "html")
@@ -185,3 +211,9 @@ def get_all_ids_with_weekly():
 #   - copy of each notification sent to every relevant user
 #   - when seen, delete to save space
 #   - have a master log table that never gets deleted
+
+#TODO
+# - design a full notification template
+# - create the master log page
+# - finish the emails
+# - add types to every notif

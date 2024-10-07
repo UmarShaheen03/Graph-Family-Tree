@@ -23,6 +23,7 @@ def run_once_on_start():
     init_database()
     email_thread = Thread(target=check_for_emails)
     email_thread.start() #TODO may be leaking?
+    send_emails([3])
     print("created email thread")
     #replaces code of this function with none, so it only runs once
     run_once_on_start.__code__ = (lambda:None).__code__
@@ -535,7 +536,7 @@ def ignore_notifs(user_id):
     
     preferences = create_notifs_string()
     User.change_ignore_notifs(current_user, preferences)
-    
+
     #TODO return to account page
     return redirect(url_for("main_bp.home_page"))
 
