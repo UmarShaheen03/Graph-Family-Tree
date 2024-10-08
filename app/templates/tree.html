@@ -95,7 +95,8 @@
 </ul>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script>
+<!-- original tree script -->
+<!-- <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
     var selectedNode = null;
@@ -171,7 +172,7 @@
     const centerX = width / 2;
     const centerY = height / 2;
     const radiusStep = 200;
-    
+
     // Group nodes by hierarchy level
     function groupNodesByHierarchy(nodes) {
         return d3.group(nodes, d => d.hierarchy);
@@ -198,37 +199,6 @@
                 node.angle = angle;
             });
         });
-
-        // // ALL CLUMPS TO ONE ONE LAYER 2 - Place nodes in a circular fashion by hierarchy, but children directly outward from their parents
-        // groupedNodes.forEach((group, hierarchy) => {
-        //     // Sort nodes in each hierarchy group by their lineage
-        //     const sortedGroup = Array.from(group).sort((a, b) => d3.ascending(a.lineage, b.lineage));
-
-        //     const angleStep = (2 * Math.PI) / sortedGroup.length;
-        //     const radius = hierarchy * radiusStep;
-
-        //     sortedGroup.forEach((node, i) => {
-        //         const parentLink = links.find(link => link.target === node.name);
-        //         if (parentLink) {
-        //             // Get parent node's coordinates and angle
-        //             const parentNode = nodes.find(n => n.name === parentLink.source);
-        //             const parentAngle = parentNode.angle;
-
-        //             // Place the child directly outward from the parent
-        //             const childRadius = radius + radiusStep; // Increase distance for child
-        //             node.x = centerX + Math.cos(parentAngle) * childRadius;
-        //             node.y = centerY + Math.sin(parentAngle) * childRadius;
-        //             node.angle = parentAngle;
-        //         } else {
-        //             // For root nodes (those without a parent), use circular layout
-        //             const angle = i * angleStep;
-        //             node.x = centerX + Math.cos(angle) * radius;
-        //             node.y = centerY + Math.sin(angle) * radius;
-        //             node.angle = angle;
-        //         }
-        //     });
-        // });
-
 
         // Add links (hidden by default)
         const linkElements = svg.selectAll(".link")
@@ -375,8 +345,124 @@
             alert("Node not found");
         }
     });
-</script>
+</script> -->
 
+<script>
+    var nodes = {{ nodes|tojson }};
+    var links = {{ relationships|tojson }};
+    var selectedNode = null;
+
+    const width = document.getElementById('graph-container').clientWidth;
+    const height = document.getElementById('graph-container').clientHeight;
+    const radius = Math.min(width, height) / 2 - 30;
+
+    // Setup zoom
+    const zoom = d3.zoom()
+        .scaleExtent([0.01, 4])
+        .on("zoom", (event) => {
+            svg.attr("transform", event.transform);
+        });
+
+    const svg = d3.select("#graph")
+        .attr("width", width)
+        .attr("height", height)
+        .call(zoom)
+        .append("g")
+        .attr("transform", `translate(${width / 2},${height / 2})`);  // Centering the radial layout
+
+    const tree = d3.tree()
+        .size([2 * Math.PI, radius])
+        .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
+
+    const root = tree(d3.hierarchy({name: "root", children: nodes})
+        .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
+
+    // Tooltip setup
+    const tooltip = d3.select("#tooltip")
+        .style("opacity", 0);  // Initially hidden
+
+    // Color scale based on hierarchy
+    const color = d3.scaleOrdinal()
+        .domain([1, 2, 3])
+        .range(['Mauve', 'Violet', 'MediumOrchid', 'Orchid', 'Plum', 'Thistle', 'Lavender']);
+
+    // Add links
+    svg.append("g")
+        .attr("fill", "none")
+        .attr("stroke", "#555")
+        .attr("stroke-opacity", 0.4)
+        .attr("stroke-width", 1.5)
+        .selectAll("path")
+        .data(root.links())
+        .join("path")
+        .attr("d", d3.linkRadial()
+            .angle(d => d.x)
+            .radius(d => d.y));
+
+    // Add nodes
+    const node = svg.append("g")
+        .selectAll("g")
+        .data(root.descendants())
+        .join("g")
+        .attr("transform", d => `
+            rotate(${d.x * 180 / Math.PI - 90}) 
+            translate(${d.y},0)`);
+
+    node.append("circle")
+        .attr("fill", d => d.children ? "#555" : "#999")
+        .attr("r", 5)
+        .on("mouseover", function (event, d) {
+            tooltip.transition().duration(200).style("opacity", 0.9);
+            tooltip.html(d.data.name)  // Display node name in tooltip
+                .style("left", (event.pageX + 5) + "px")
+                .style("top", (event.pageY - 28) + "px");
+
+            highlightConnections(d.data.name);  // Custom function for highlighting
+        })
+        .on("mouseout", function () {
+            tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
+            unhighlightConnections();
+        })
+        .on("contextmenu", function(event, d) {
+            event.preventDefault();
+            selectedNode = d.data;
+
+            // Show custom context menu
+            const menu = document.getElementById('context-menu');
+            menu.style.left = event.pageX + 'px';
+            menu.style.top = event.pageY + 'px';
+            menu.style.display = 'block';
+
+            menu.dataset.nodeName = d.data.name;
+        });
+
+    node.append("text")
+        .attr("dy", "0.31em")
+        .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+        .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+        .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+        .text(d => d.data.name);
+
+    // Highlighting functionality
+    function highlightConnections(nodeName) {
+        svg.selectAll("path")
+            .filter(link => link.source.data.name === nodeName || link.target.data.name === nodeName)
+            .classed("highlighted", true);
+
+        svg.selectAll("circle")
+            .filter(d => d.data.name === nodeName)
+            .attr("fill", "#ff5722"); // Change color of highlighted nodes
+    }
+
+    function unhighlightConnections() {
+        svg.selectAll("path").classed("highlighted", false);
+        svg.selectAll("circle").attr("fill", d => d.children ? "#555" : "#999");
+    }
+
+    document.addEventListener('click', function () {
+        document.getElementById('context-menu').style.display = 'none';
+    });
+</script>
 
 
 <!-- Modify graph script -->
