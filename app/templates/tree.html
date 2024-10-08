@@ -360,17 +360,22 @@
         nodeMap[node.name] = { ...node, children: [] };
     });
 
-    // Step 2: Build the hierarchy by linking child nodes to their parents
+    // Step 2: Track added nodes to prevent duplicates
+    var addedNodes = new Set();
+
+    // Step 3: Build the hierarchy by linking child nodes to their parents
     links.forEach(link => {
         const parentNode = nodeMap[link.source];
         const childNode = nodeMap[link.target];
 
-        if (parentNode && childNode) {
+        // Step 4: Only add childNode if it hasn't been added yet
+        if (parentNode && childNode && !addedNodes.has(childNode.name)) {
             parentNode.children.push(childNode);  // Link the child node to its parent
+            addedNodes.add(childNode.name);  // Mark this node as added
         }
     });
 
-    // Step 3: Detect root nodes (nodes that are not children of any other node)
+    // Step 5: Detect root nodes (nodes that are not children of any other node)
     var roots = nodes.filter(node => 
         !links.some(link => link.target === node.name)
     ).map(rootNode => nodeMap[rootNode.name]);
@@ -384,8 +389,8 @@
 
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
-    const cx = width * 0.5; // adjust as needed to fit
-    const cy = height * 0.59; // adjust as needed to fit
+    const cx = width * 0.8; // adjust as needed to fit
+    const cy = height * 0.8; // adjust as needed to fit
     const radius = Math.min(width, height) / 2 - 30;
 
     // Setup zoom
@@ -477,17 +482,17 @@
             menu.dataset.nodeName = d.data.name;
         });
 
-    node.append("text")
-        .attr("dy", "0.31em")
-        .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
-        .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
-        .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
-        .attr("paint-order", "stroke")
-        .attr("stroke", "white")
-        .attr("fill", "currentColor")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-width", 3)
-        .text(d => d.data.name);
+    // node.append("text")
+    //     .attr("dy", "0.31em")
+    //     .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+    //     .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+    //     .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+    //     .attr("paint-order", "stroke")
+    //     .attr("stroke", "white")
+    //     .attr("fill", "currentColor")
+    //     .attr("stroke-linejoin", "round")
+    //     .attr("stroke-width", 3)
+    //     .text(d => d.data.name);
 
     // Highlighting functionality
     function highlightConnections(nodeName) {
