@@ -168,10 +168,21 @@
     const tooltip = d3.select("#tooltip")
         .style("opacity", 0);  // Initially hidden
 
-    // // Color scale based on hierarchy
-    // const color = d3.scaleOrdinal()
-    //     .domain([1, 2, 3])
-    //     .range(['Mauve', 'Violet', 'MediumOrchid', 'Orchid', 'Plum', 'Thistle', 'Lavender']);
+    // Color scale based on hierarchy levels
+    const colorScale = d3.scaleOrdinal()
+        .domain(d3.range(0, 10))  // Levels 0-9
+        .range([
+            '#3D0E61', 
+            '#461177', 
+            '#4E148C', 
+            '#5829A7', 
+            '#613DC1', 
+            '#7364D2', 
+            '#858AE3', 
+            '#8EB5F0',
+            '#93CAF6', 
+            '#97DFFC'  
+        ]);
 
     function modifyGraphAction(action) {
         const nodeName = selectedNode.name;
@@ -232,7 +243,7 @@
             translate(${d.y},0)`);
 
     node.append("circle")
-        .attr("fill", d => d.children ? "#555" : "#999")
+        .attr("fill", d => colorScale(d.depth % 10))  // Assign color based on hierarchy level
         .attr("r", 5)
         .on("mouseover", function (event, d) {
             tooltip.transition().duration(200).style("opacity", 0.9);
@@ -309,7 +320,7 @@
     // Unhighlight all connections
     function unhighlightConnections() {
         svg.selectAll("path").classed("highlighted", false);
-        svg.selectAll("circle").attr("fill", d => d.children ? "#555" : "#999");
+        svg.selectAll("circle").attr("fill", d => colorScale(d.depth % 10));  // Reset to original colors
     }
 
     document.addEventListener('click', function () {
