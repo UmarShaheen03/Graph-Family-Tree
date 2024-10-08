@@ -1,18 +1,22 @@
 """Main route views"""
 
 import os
-from flask import Blueprint, render_template, flash, redirect, url_for, request, session
-from app.forms import BiographyEditForm, CommentForm, Search_Node
-from app.models import Biography,Comment
-from datetime import datetime
-from flask_login import login_required, current_user
-from datetime import datetime
-from flask_wtf import CSRFProtect
-from neo4j import GraphDatabase
-from app.forms import AddNodeForm, UpdateNode, AppendGraph, LoginForm, SignupForm, BiographyEditForm, CommentForm
-from app.accounts import signup, login, SignupError, LoginError, init_database
+from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file, send_from_directory
+import app
+from app.forms import * 
+from app.models import Biography, Comment, User
+from app.accounts import *
 from app import db
+from neo4j import GraphDatabase
+from flask_wtf import CSRFProtect, FlaskForm
+from datetime import datetime
+from flask_login import login_required, current_user, logout_user
+from werkzeug.utils import secure_filename
+from neo4j import Driver
+import sys #TODO using for debug printing, remove in final
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
 
 
 main_bp = Blueprint('main_bp', __name__)
@@ -98,6 +102,10 @@ def tree_page():
     nodes, relationships = fetch_data()
     return render_template('Tree.html', nodes=nodes, relationships=relationships,form=form)
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
     # Fetch person's biography details from Neo4j
@@ -119,9 +127,34 @@ def biography(name):
         db.session.add(new_comment)
         db.session.commit()
         flash('Comment added successfully')
-        return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
-
-    # Pass the fetched biography details and comments to the template
+        return redirect(url_for('main_bp.biography', name=name))
+    
+    biography = Biography.query.first()
+    upload_form = ImageUploadForm() 
+    person = get_person_bio(name)
+    if upload_form.validate_on_submit() and 'profile_image' in request.files:
+        file = request.files['profile_image']
+        if file.filename != '' and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            unique_filename = f"{uuid.uuid4().hex}_{filename}"
+            if not os.path.exists(current_app.config['UPLOAD_FOLDER']):
+                os.makedirs(current_app.config['UPLOAD_FOLDER'])
+            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
+            file.save(file_path)
+            image_path = os.path.join('uploads', unique_filename)
+            with driver.session() as session:
+                session.run(
+                    """
+                    MATCH (p:Person {FullName: $full_name})
+                    SET p.ProfileImage = $profile_image
+                    """,
+                    full_name=name,
+                    profile_image=image_path
+                )
+            flash('Profile image updated successfully.')
+        else:
+            flash('Invalid file type. Please upload a valid image.')
+        return redirect(url_for('biography', name=name))
     return render_template('biography.html', 
                            full_name=person['name'], 
                            dob=person.get('dob', 'Unknown'), 
@@ -131,10 +164,11 @@ def biography(name):
                            phone_number=person.get('phone_number', 'No phone number provided'),
                            address=person.get('address', 'No address provided'),
                            comments=comments, 
-                           comment_form=comment_form)
-
-
-
+                           comment_form=comment_form,
+                           admin=User.is_admin(current_user),
+                           profile_image=person.get('profile_image', None),
+                           upload_form=upload_form
+                           )
 @main_bp.route('/biography/edit', methods=['GET', 'POST'])
 def edit_biography():
     biography = Biography.query.first()
@@ -174,8 +208,7 @@ def edit_biography():
             )
         
         flash(f'Biography for {person_name} has been updated successfully.')
-        return redirect(url_for('main_bp.tree_page'))
-
+        return redirect(url_for('main_bp.biography', name=person_name))
     return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
 
     
@@ -192,7 +225,8 @@ def get_person_bio(full_name):
            p.Location AS location, 
            p.Email AS email, 
            p.PhoneNumber AS phone_number, 
-           p.Address AS address
+           p.Address AS address,
+           p.ProfileImage AS profile_image 
     """
     with driver.session() as session:
         result = session.run(query, full_name=full_name)

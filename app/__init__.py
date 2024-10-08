@@ -4,7 +4,7 @@ import os
 import logging
 from logging.handlers import SMTPHandler
 from logging.handlers import RotatingFileHandler
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -24,7 +24,7 @@ def create_app():
     login.init_app(flask_app)
 
     migrate = Migrate(flask_app, db)
-
+    
     flask_app.register_blueprint(main_bp)
 
     return flask_app

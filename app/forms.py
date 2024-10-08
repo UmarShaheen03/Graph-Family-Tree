@@ -5,7 +5,7 @@ from flask import Flask, flash, render_template, redirect, request, session, url
 from flask_wtf import CSRFProtect, FlaskForm
 from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, TextAreaField, SubmitField, PasswordField, BooleanField, widgets
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Optional, NumberRange
-
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 class LoginForm(FlaskForm):
     username_or_email = StringField("Username or Email", validators=[DataRequired()])
@@ -121,6 +121,7 @@ class BiographyEditForm(FlaskForm):
     email=EmailField('Email', validators=[Optional()])
     phonenumber=IntegerField('Phone Number', validators=[Optional()])
     address=StringField('Address', validators=[Optional()])
+    profile_image = FileField('Profile Image')
     submit=SubmitField('Update')
 
 class Search_Node (FlaskForm):
@@ -130,3 +131,6 @@ class Search_Node (FlaskForm):
     )
       submit = SubmitField("Search")
 
+class ImageUploadForm(FlaskForm):
+    profile_image = FileField('Profile Image', validators=[DataRequired()])
+    submit = SubmitField('Upload Image')

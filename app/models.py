@@ -38,7 +38,7 @@ class Biography(db.Model):
     email = db.Column(db.String(100), nullable=True)
     phonenumber = db.Column(db.Integer, nullable=True)
     address = db.Column(db.String(100), nullable=True)
-
+    profile_image = db.Column(db.String(200), nullable=True)
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
