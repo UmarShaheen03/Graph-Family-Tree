@@ -86,6 +86,7 @@
     <li onclick="modifyGraphAction('delete')">Delete Node</li>
     <li onclick="modifyGraphAction('shift')">Shift Node</li>
     <li onclick="modifyGraphAction('add')">Add Child</li>
+    <li onclick="goToBiography()">View Biography</li>
 </ul>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -141,7 +142,7 @@
         actionField.value = action;
         actionField.dispatchEvent(new Event('change')); // Trigger the form's change event to toggle fields
 
-        // Auto-fill the relevant fields based on action
+        // FIXME:Auto-fill the relevant fields based on action
         if (action === 'edit') {
             document.querySelector('select[name="old_name"]').value = nodeName;
         } else if (action === 'delete') {
