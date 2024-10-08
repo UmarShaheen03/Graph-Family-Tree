@@ -2,6 +2,7 @@
 
 {% block headBlock %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/edit_biography.css') }}">
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4eneOOeiHunYMHble0GvihiawcOy3xsc&libraries=places&callback=initAutocomplete" async defer></script>
 <title>Edit Bibliography</title>
 {% endblock %}
 
@@ -28,12 +29,13 @@
 
                 <div class="form-group">
                     {{ edit_form.biography.label }}
-                    {{ edit_form.biography(class="form-control") }}
+                    <textarea class="form-control" name="biography" rows="3">{{ edit_form.biography.data }}</textarea>
                 </div>
 
                 <div class="form-group">
                     {{ edit_form.location.label }}
-                    {{ edit_form.location(class="form-control") }}
+                    {{ edit_form.location(id="autocomplete", class="form-control") }}
+                    
                 </div>
 
                 <div class="form-group">
@@ -58,4 +60,24 @@
         </div>
     </div>
 </div>
+<script>
+    let autocomplete;
+
+    function initAutocomplete() {
+        autocomplete = new google.maps.places.Autocomplete(
+            document.getElementById('autocomplete'), { types: ['geocode'] }
+        );
+
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+
+            if (!place.geometry || !place.geometry.location) {
+                alert("No details available for the selected location.");
+                return;
+            }
+
+            document.getElementById('autocomplete').value = place.formatted_address;
+        });
+    }
+</script>
 {% endblock %}
