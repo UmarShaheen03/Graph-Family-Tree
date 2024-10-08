@@ -1,0 +1,38 @@
+.form-group{
+    width: 100%
+}
+
+.custom-padding{
+    padding-left:25%; 
+    padding-right:25%; 
+    padding-top:5%; 
+    padding-bottom:5%;
+}
+
+.remember-me{
+    display: flex; 
+    justify-content: space-between; 
+    padding-top:5%
+}
+
+.login-here, .create-account {
+    width: 100%; 
+    text-align: center
+}
+
+/* Submit button styling */
+.btn-primary {
+    background-color: #603494;
+    border-color: #603494;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #432467;
+    border-color: #301a4a;
+    transform: translateY(-2px);
+}
+
+.btn-lg.rounded-pill {
+    border-radius: 50px;
+}

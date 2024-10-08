@@ -2,16 +2,18 @@ import sqlalchemy as sa
 from app.models import User
 from flask_login import current_user
 from flask import Flask, flash, render_template, redirect, request, session, url_for
+from wtforms import EmailField, FieldList, FileField, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
+from wtforms.validators import DataRequired, NumberRange, Email, ValidationError, EqualTo, Length, Optional
 from flask_wtf import CSRFProtect, FlaskForm
-from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, TextAreaField, SubmitField, PasswordField, BooleanField, widgets
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Optional, NumberRange
-from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 class LoginForm(FlaskForm):
     username_or_email = StringField("Username or Email", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     remember_me = BooleanField("Stay logged in?")
     submit = SubmitField("Log In")
+
+class LogoutForm(FlaskForm):
+    submit = SubmitField("Log Out")
     
 class SignupForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email()])
@@ -21,7 +23,19 @@ class SignupForm(FlaskForm):
     remember_me = BooleanField("Stay logged in?")
     submit = SubmitField("Sign Up")
 
+class ForgotPassword(FlaskForm):
+    email = EmailField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Submit")
+
+class ResetPassword(FlaskForm):
+    password = PasswordField("Password", validators=[DataRequired()])
+    repeat = PasswordField("Repeat Password", validators=[DataRequired()])
+    submit = SubmitField("Reset")
+
+
+
 class AddNodeForm(FlaskForm):
+
     action = SelectField(
         'Action',
         choices=[
@@ -115,7 +129,7 @@ class BiographyEditForm(FlaskForm):
         'Full Name',
         choices=[]  # Populate this dynamically in your view
     )
-    dob =DateField('Date of Birth', validators=[Optional()])
+    dob=DateField('Date of Birth', validators=[Optional()])
     biography=StringField('Biography', validators=[Optional()])
     location=StringField('Location', validators=[Optional()])
     email=EmailField('Email', validators=[Optional()])
@@ -134,3 +148,28 @@ class Search_Node (FlaskForm):
 class ImageUploadForm(FlaskForm):
     profile_image = FileField('Profile Image', validators=[DataRequired()])
     submit = SubmitField('Upload Image')
+
+class submit_File (FlaskForm):
+    file=FileField("Upload Your CSV file")
+    name=StringField("Name of the tree")
+    submit=SubmitField('Submit')
+
+
+
+class Request_Tree (FlaskForm):
+    Tree_Name = SelectField(
+        'Tree Name',
+        choices=[]  # Populate this dynamically in your view
+    )
+    submit = SubmitField("Submit")
+
+
+class RequestTreeForm(FlaskForm):
+    tree_name = SelectField(
+        'Tree Name',
+        choices=[],  # This can be populated dynamically in your view
+        validators=[DataRequired()],
+        render_kw={"class": "form-control rounded-pill"}
+    )
+   
+    submit = SubmitField('Submit Request', render_kw={"class": "btn btn-primary rounded-pill"})
