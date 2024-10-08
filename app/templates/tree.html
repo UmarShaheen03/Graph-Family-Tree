@@ -66,12 +66,10 @@
                 </div>
             </div>
         </div>
-<!-- <div class="d-md-flex flex-md-row container"> -->
         <div class="col-lg-9 vh-100 mt-2">
             <p></p>
             <div id="graph-container">
                 {{ form_search.hidden_tag() }}
-                <!-- <label for="fullname" style="font-weight: bold; font-size: 14px; margin-right: 10px;">{{form_search.fullname.label}}</label> -->
                 {{ form_search.fullname(id="fullname") }}
                 {{ form_search.submit_search(id="Search") }}
                 
@@ -81,6 +79,14 @@
         </div>
     </div>
 </div>
+
+<!-- Custom Context Menu -->
+<ul id="context-menu" class="custom-menu" style="display:none; position:absolute; z-index:1000;">
+    <li onclick="modifyGraphAction('edit')">Edit Node</li>
+    <li onclick="modifyGraphAction('delete')">Delete Node</li>
+    <li onclick="modifyGraphAction('shift')">Shift Node</li>
+    <li onclick="modifyGraphAction('add')">Add Child</li>
+</ul>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
@@ -126,6 +132,31 @@
     function groupNodesByHierarchy(nodes) {
         return d3.group(nodes, d => d.hierarchy);
     }
+
+    function modifyGraphAction(action) {
+        const nodeName = document.getElementById('context-menu').dataset.nodeName;
+
+        // Auto-select the action in the form
+        const actionField = document.querySelector('select[name="action"]');
+        actionField.value = action;
+        actionField.dispatchEvent(new Event('change')); // Trigger the form's change event to toggle fields
+
+        // Auto-fill the relevant fields based on action
+        if (action === 'edit') {
+            document.querySelector('select[name="old_name"]').value = nodeName;
+        } else if (action === 'delete') {
+            document.querySelector('select[name="person_to_delete"]').value = nodeName;
+        } else if (action === 'shift') {
+            document.querySelector('select[name="person_to_shift"]').value = nodeName;
+        } else if (action === 'add') {
+            document.querySelector('input[name="name"]').value = ''; // New name to be added
+            document.querySelector('select[name="parent"]').value = nodeName; // Add as child of the current node
+        }
+
+        // Close the context menu
+        document.getElementById('context-menu').style.display = 'none';
+    }
+
 
     // Circular layout with parent-child alignment, sorted by Lineage
     function visualizeGraph(nodes, links) {
@@ -240,6 +271,25 @@
         nodeElements.on("dblclick", function (event, d) {
             window.location.href = "/biography/" + encodeURIComponent(d.name);  // Redirect to view bio page
         });
+
+        // Handle right-click (context menu) on nodes
+        nodeElements.on("contextmenu", function (event, d) {
+            event.preventDefault();
+
+            // Show custom context menu
+            const menu = document.getElementById('context-menu');
+            menu.style.left = event.pageX + 'px';
+            menu.style.top = event.pageY + 'px';
+            menu.style.display = 'block';
+
+            // Store selected node data for further use
+            menu.dataset.nodeName = d.name;
+        });
+
+        // Hide context menu when clicking anywhere else
+        document.addEventListener('click', function () {
+            document.getElementById('context-menu').style.display = 'none';
+        });
     }
 
     // Call visualizeGraph with the fetched nodes and links
@@ -270,105 +320,7 @@
         }
     });
 </script>
-<!-- <script>
-    var nodes = {{ nodes|tojson }};
-    var links = {{ relationships|tojson }};
 
-    // Find all root nodes (nodes that don't have any parent)
-    function findRootNodes(nodes, links) {
-        var childIds = new Set(links.map(link => link.target));
-        return nodes.filter(node => !childIds.has(node.id));
-    }
-
-    // Create a virtual root and connect it to all the actual root nodes
-    function addVirtualRoot(nodes, links) {
-        var rootNodes = findRootNodes(nodes, links);
-        var virtualRoot = { id: "virtual_root", name: "Virtual Root", children: [] };
-        nodes.push(virtualRoot);
-
-        // Add links from the virtual root to all root nodes
-        rootNodes.forEach(rootNode => {
-            links.push({ source: "virtual_root", target: rootNode.id });
-        });
-
-        return virtualRoot;
-    }
-
-    // Convert the flat nodes and links into a hierarchy suitable for D3's radial tree
-    function buildHierarchy(nodes, links) {
-        var nodeById = {};
-        nodes.forEach(node => nodeById[node.id] = node);
-
-        links.forEach(link => {
-            var parent = nodeById[link.source];
-            var child = nodeById[link.target];
-            if (!parent.children) parent.children = [];
-            parent.children.push(child);
-        });
-
-        return nodeById["virtual_root"]; // Return the virtual root node
-    }
-
-    // Add the virtual root to handle multiple root nodes
-    var virtualRoot = addVirtualRoot(nodes, links);
-
-    var root = buildHierarchy(nodes, links);
-
-    // Set up the dimensions of the container
-    const width = document.getElementById('graph-container').clientWidth;
-    const height = document.getElementById('graph-container').clientHeight;
-
-    // Set up the D3 tree layout
-    const radius = Math.min(width, height) / 2;
-    const treeLayout = d3.tree()
-        .size([2 * Math.PI, radius - 100]); // Radial size
-
-    // Create an SVG to draw the tree in
-    const svg = d3.select("#graph-container").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", `translate(${width / 2},${height / 2})`);
-
-    // Create the root hierarchy using D3's hierarchy function
-    const hierarchyRoot = d3.hierarchy(root);
-    treeLayout(hierarchyRoot);
-
-    // Draw links between nodes
-    svg.selectAll('path')
-        .data(hierarchyRoot.links())
-        .enter()
-        .append('path')
-        .attr('d', d3.linkRadial()
-            .angle(d => d.x)
-            .radius(d => d.y))
-        .style("fill", "none")
-        .style("stroke", "#ccc")
-        .style("stroke-width", 2);
-
-    // Draw nodes as circles
-    svg.selectAll('circle')
-        .data(hierarchyRoot.descendants())
-        .enter()
-        .append('circle')
-        .attr('transform', d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
-        .attr('r', 5)
-        .style("fill", "#69b3a2");
-
-    // Add labels to nodes
-    svg.selectAll('text')
-        .data(hierarchyRoot.descendants())
-        .enter()
-        .append('text')
-        .attr('transform', d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
-        .attr('dx', d => d.x < Math.PI ? 8 : -8)
-        .attr('dy', ".31em")
-        .attr('text-anchor', d => d.x < Math.PI ? "start" : "end")
-        .attr('transform', d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`)
-        .text(d => d.data.name)
-        .style("font-size", "10px")
-        .style("fill", "#000");
-</script> -->
 
 
 <!-- Modify graph script -->
