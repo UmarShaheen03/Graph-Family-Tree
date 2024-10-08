@@ -167,8 +167,5 @@ class RequestTreeForm(FlaskForm):
         validators=[DataRequired()],
         render_kw={"class": "form-control rounded-pill"}
     )
-    message = TextAreaField(
-        'Message (optional)', 
-        render_kw={"class": "form-control rounded-lg", "rows": 3, "placeholder": "Additional details"}
-    )
+   
     submit = SubmitField('Submit Request', render_kw={"class": "btn btn-primary rounded-pill"})

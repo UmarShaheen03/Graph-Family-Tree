@@ -18,43 +18,6 @@
     </div>
     <div id="tooltip"></div>
 </div>
-
- <!-- Request Other Tree Button -->
-<div class="text-center my-4">
-    <button type="button" class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#requestTreeModal">
-        Request Other Tree
-    </button>
-</div>
-
-<!-- Request Other Tree Modal Structure -->
-<div class="modal fade" id="requestTreeModal" tabindex="-1" aria-labelledby="requestTreeModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="requestTreeModalLabel">Request Other Family Tree</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="requestTreeForm" method="post">
-                    <div class="form-group">
-                        {{ request.hidden_tag() }}
-                        {{ request.tree_name.label }}
-                        {{ request.tree_name(class_="form-control rounded-pill") }}
-                    </div>
-                    <div class="form-group">
-                        {{ request.message.label }}
-                        {{ request.message }}
-                    </div>
-                    <div class="form-group mt-3">
-                        {{ request.submit }}
-                    </div>
-                </form>
-                
-            </div>
-        </div>
-    </div>
-</div>
-
 </div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="{{ url_for('static', filename='js/request_tree.js') }}"></script> <!-- Link for request modal JS -->
