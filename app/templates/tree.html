@@ -349,9 +349,7 @@
 
 <script>
     var nodes = {{ nodes|tojson }};
-    // console.log(nodes);
     var links = {{ relationships|tojson }};
-    // console.log(links);
     var selectedNode = null;
 
     // Step 1: Build a lookup map of nodes
@@ -415,22 +413,16 @@
 
     // Build the tree layout using the stratified hierarchy
     const root = tree(d3.hierarchy(standInRoot)
-    // const root = tree(d3.hierarchy({name: "root", children: nodes})
         .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
-
-    // const root = tree(d3.stratify()
-    //     .id(d => d.id)
-    //     .parentId(d => d.parentId)(nodes)
-    //     .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
 
     // Tooltip setup
     const tooltip = d3.select("#tooltip")
         .style("opacity", 0);  // Initially hidden
 
-    // Color scale based on hierarchy
-    const color = d3.scaleOrdinal()
-        .domain([1, 2, 3])
-        .range(['Mauve', 'Violet', 'MediumOrchid', 'Orchid', 'Plum', 'Thistle', 'Lavender']);
+    // // Color scale based on hierarchy
+    // const color = d3.scaleOrdinal()
+    //     .domain([1, 2, 3])
+    //     .range(['Mauve', 'Violet', 'MediumOrchid', 'Orchid', 'Plum', 'Thistle', 'Lavender']);
 
     // Add links
     svg.append("g")
@@ -463,7 +455,7 @@
                 .style("left", (event.pageX + 5) + "px")
                 .style("top", (event.pageY - 28) + "px");
 
-            highlightConnections(d.data.name);  // Custom function for highlighting
+            highlightConnections(d);  // Custom function for highlighting
         })
         .on("mouseout", function () {
             tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
@@ -494,15 +486,49 @@
     //     .attr("stroke-width", 3)
     //     .text(d => d.data.name);
 
-    // Highlighting functionality
-    function highlightConnections(nodeName) {
+    // // Highlighting functionality
+    // function highlightConnections(nodeName) {
+    //     svg.selectAll("path")
+    //         .filter(link => link.source.data.name === nodeName || link.target.data.name === nodeName)
+    //         .classed("highlighted", true);
+
+    //     svg.selectAll("circle")
+    //         .filter(d => d.data.name === nodeName)
+    //         .attr("fill", "#ff5722"); // Change color of highlighted nodes
+    // }
+
+    // Highlighting functionality for all ancestors and descendants
+    function highlightConnections(d) {
+        // Highlight ancestors
+        let current = d;
+        while (current) {
+            highlightNode(current);
+            current = current.parent;
+        }
+
+        // Highlight descendants
+        highlightDescendants(d);
+    }
+
+    // Highlight the given node and the links associated with it
+    function highlightNode(d) {
         svg.selectAll("path")
-            .filter(link => link.source.data.name === nodeName || link.target.data.name === nodeName)
+            .filter(link => link.source.data.name === d.data.name || link.target.data.name === d.data.name)
             .classed("highlighted", true);
 
         svg.selectAll("circle")
-            .filter(d => d.data.name === nodeName)
-            .attr("fill", "#ff5722"); // Change color of highlighted nodes
+            .filter(n => n.data.name === d.data.name)
+            .attr("fill", "#ff5722");  // Change color of highlighted nodes
+    }
+
+    // Recursive function to highlight all descendants of a node
+    function highlightDescendants(d) {
+        if (d.children) {
+            d.children.forEach(child => {
+                highlightNode(child);
+                highlightDescendants(child);
+            });
+        }
     }
 
     function unhighlightConnections() {
