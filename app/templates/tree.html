@@ -161,8 +161,9 @@
 
     function goToBiography() {
         if (selectedNode) {
-            const bioUrl = `/biography/${selectedNode.name}`;
-            window.location.href = bioUrl;
+            // const bioUrl = `/biography/${selectedNode.name}`;
+            window.location.href = "/biography/" + encodeURIComponent(selectedNode.name);  // Redirect to view bio page
+            ;
         }
     }
 
