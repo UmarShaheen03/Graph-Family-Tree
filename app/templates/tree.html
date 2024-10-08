@@ -439,7 +439,7 @@
         .attr("stroke-opacity", 0.4)
         .attr("stroke-width", 1.5)
         .selectAll("path")
-        .data(root.links())
+        .data(root.links().filter(link => link.source.data.name !== "Stand-In Root"))  // Filter out stand-in root links
         .join("path")
         .attr("d", d3.linkRadial()
             .angle(d => d.x)
@@ -448,7 +448,7 @@
     // Add nodes
     const node = svg.append("g")
         .selectAll("g")
-        .data(root.descendants())
+        .data(root.descendants().filter(d => d.data.name !== "Stand-In Root"))  // Filter out stand-in root node
         .join("g")
         .attr("transform", d => `
             rotate(${d.x * 180 / Math.PI - 90}) 
