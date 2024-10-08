@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block headBlock %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/edit_biography.css') }}">
+<title>Edit Bibliography</title>
+{% endblock %}
+
+{% block bodyBlock %}
+    <!-- <div class="edit-biography-container">
+        <h2> </h2> -->
+
+<div class="edit-biography-container my-5">
+    <h2 class="text-center mb-4">Edit Biography</h2>
+    <div class="card shadow-lg rounded-lg border-0">
+        <div class="card-body p-5">
+            <form method="POST">
+                {{ edit_form.hidden_tag() }}
+
+                <div class="form-group">
+                    {{ edit_form.fullname.label }}
+                    {{ edit_form.fullname(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_form.dob.label }}
+                    {{ edit_form.dob(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_form.biography.label }}
+                    {{ edit_form.biography(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_form.location.label }}
+                    {{ edit_form.location(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_form.email.label }}
+                    {{ edit_form.email(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_form.phonenumber.label }}
+                    {{ edit_form.phonenumber(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_form.address.label }}
+                    {{ edit_form.address(class="form-control") }}
+                </div>
+
+                <div class="form-group">
+                    {{ edit_form.submit(class="btn-submit btn btn-primary btn-lg rounded-pill") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

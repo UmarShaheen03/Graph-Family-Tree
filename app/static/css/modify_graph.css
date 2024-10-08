@@ -29,22 +29,22 @@
 /* Form controls focus */
 .form-control:focus,
 .form-select:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    border-color: #603494;
+    box-shadow: 0 0 5px #432467;
 }
 
 /* Submit button styling */
 .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
+    background-color: #603494;
+    border-color: #603494;
     transition: background-color 0.3s ease, transform 0.3s ease;
     font-size: 1.25rem;
     padding: 0.5rem 1.5rem;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #004085;
+    background-color: #432467;
+    border-color: #301a4a;
     transform: translateY(-2px);
 }
 
@@ -54,7 +54,6 @@
 
 /* Header styling */
 h1 {
-    font-family: 'Montserrat', sans-serif;
     font-weight: 700;
     color: #343a40;
     letter-spacing: 2px;

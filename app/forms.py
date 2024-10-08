@@ -1,26 +1,19 @@
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
-from wtforms.validators import DataRequired
-from wtforms import EmailField, StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 import sqlalchemy as sa
 from app.models import User
-from wtforms import TextAreaField
-from wtforms.validators import Length
 from flask_login import current_user
 from flask import Flask, flash, render_template, redirect, request, session, url_for
+from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
+from wtforms.validators import DataRequired, NumberRange, Email, ValidationError, EqualTo, Length, Optional
 from flask_wtf import CSRFProtect, FlaskForm
-from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, TextAreaField, SubmitField, widgets
-from wtforms.validators import DataRequired, NumberRange, email
-
-from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, SubmitField
 
 class LoginForm(FlaskForm):
     username_or_email = StringField("Username or Email", validators=[DataRequired()])
     password = PasswordField("Password", validators=[DataRequired()])
     remember_me = BooleanField("Stay logged in?")
     submit = SubmitField("Log In")
+
+class LogoutForm(FlaskForm):
+    submit = SubmitField("Log Out")
     
 class SignupForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email()])
@@ -30,7 +23,19 @@ class SignupForm(FlaskForm):
     remember_me = BooleanField("Stay logged in?")
     submit = SubmitField("Sign Up")
 
+class ForgotPassword(FlaskForm):
+    email = EmailField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Submit")
+
+class ResetPassword(FlaskForm):
+    password = PasswordField("Password", validators=[DataRequired()])
+    repeat = PasswordField("Repeat Password", validators=[DataRequired()])
+    submit = SubmitField("Reset")
+
+
+
 class AddNodeForm(FlaskForm):
+
     action = SelectField(
         'Action',
         choices=[
@@ -55,7 +60,6 @@ class AddNodeForm(FlaskForm):
         'Person to Shift',
         choices=[]  # Populate this dynamically in your view
     )
-
     person_to_delete = SelectField(
         'Person to Delete',
         choices=[]  # Populate this dynamically in your view
@@ -101,9 +105,7 @@ class UpdateNode (FlaskForm):
     relationship_type= StringField("Address")
     relationships = FieldList(FormField(RelationshipForm), min_entries=1, max_entries=10) 
     submit = SubmitField("Add to Family Tree")
-
-
-    
+  
 class AppendGraph(FlaskForm):
     FullName = StringField("Full Name:")
     DateOfBirth = DateField("Date of Birth")
@@ -117,3 +119,27 @@ class AppendGraph(FlaskForm):
     relationship_type= StringField("Address")
     relationships = FieldList(FormField(RelationshipForm), min_entries=1, max_entries=10) 
     submit = SubmitField("Add to Family Tree")
+
+class CommentForm(FlaskForm):
+    comment=TextAreaField('Comment', validators=[DataRequired()])
+    submit=SubmitField('Submit')
+
+class BiographyEditForm(FlaskForm):
+    fullname = SelectField(
+        'Full Name',
+        choices=[]  # Populate this dynamically in your view
+    )
+    dob=DateField('Date of Birth', validators=[Optional()])
+    biography=StringField('Biography', validators=[Optional()])
+    location=StringField('Location', validators=[Optional()])
+    email=EmailField('Email', validators=[Optional()])
+    phonenumber=IntegerField('Phone Number', validators=[Optional()])
+    address=StringField('Address', validators=[Optional()])
+    submit=SubmitField('Update')
+
+class Search_Node (FlaskForm):
+      fullname = SelectField(
+        'Search',
+        choices=[]  # Populate this dynamically in your view
+    )
+      submit = SubmitField("Search")
