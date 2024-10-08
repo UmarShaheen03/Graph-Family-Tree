@@ -455,7 +455,7 @@
                 .style("left", (event.pageX + 5) + "px")
                 .style("top", (event.pageY - 28) + "px");
 
-            highlightConnections(d);  // Custom function for highlighting
+            highlightDirectLineage(d);  // Custom function for highlighting
         })
         .on("mouseout", function () {
             tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
@@ -486,6 +486,46 @@
     //     .attr("stroke-width", 3)
     //     .text(d => d.data.name);
 
+    // Function to highlight the direct lineage (ancestors and descendants)
+    function highlightDirectLineage(d) {
+        highlightAncestors(d);
+        highlightDescendants(d);
+    }
+
+    // Function to highlight ancestors recursively
+    function highlightAncestors(d) {
+        if (d.parent) {
+            highlightLink(d.parent, d);  // Highlight link between parent and current node
+            highlightAncestors(d.parent);  // Recursively highlight ancestors
+        }
+    }
+
+    // Function to highlight descendants recursively
+    function highlightDescendants(d) {
+        if (d.children) {
+            d.children.forEach(child => {
+                highlightLink(d, child);  // Highlight link between node and each child
+                highlightDescendants(child);  // Recursively highlight descendants
+            });
+        }
+    }
+
+    // Highlight the link between two nodes
+    function highlightLink(source, target) {
+        svg.selectAll("path")
+            .filter(link => link.source.data.name === source.data.name && link.target.data.name === target.data.name)
+            .classed("highlighted", true);
+
+        svg.selectAll("circle")
+            .filter(n => n.data.name === source.data.name || n.data.name === target.data.name)
+            .attr("fill", "#ff5722");  // Change color of highlighted nodes
+    }
+
+    // Unhighlight all connections
+    function unhighlightConnections() {
+        svg.selectAll("path").classed("highlighted", false);
+        svg.selectAll("circle").attr("fill", d => d.children ? "#555" : "#999");
+    }
     // // Highlighting functionality
     // function highlightConnections(nodeName) {
     //     svg.selectAll("path")
@@ -497,57 +537,51 @@
     //         .attr("fill", "#ff5722"); // Change color of highlighted nodes
     // }
 
-    // Highlighting functionality for all ancestors and descendants
-    function highlightConnections(d) {
-        // Highlight ancestors
-        let current = d;
-        while (current) {
-            highlightNode(current);
-            current = current.parent;
-        }
+    // // Highlighting functionality for all ancestors and descendants
+    // function highlightConnections(d) {
+    //     let current = d;
+    //     while (current.parent) {
+    //         highlightLink(current.parent, current); 
+    //         current = current.parent;
+    //     }
 
-        // Highlight descendants
-        highlightDescendants(d);
-    }
+    //     // Highlight descendants
+    //     highlightDescendants(d);
+    // }
 
-    // Highlight the given node and the links associated with it
-    function highlightNode(d) {
-        svg.selectAll("path")
-            .filter(link => link.source.data.name === d.data.name || link.target.data.name === d.data.name)
-            .classed("highlighted", true);
+    // // Recursive function to highlight all descendants of a node
+    // function highlightDescendants(d) {
+    //     if (d.children) {
+    //         d.children.forEach(child => {
+    //             highlightLink(d, child);
+    //             highlightDescendants(child);
+    //         });
+    //     }
+    // }
+    // // Highlight the given node and the links associated with it
+    // function highlightLink(d) {
+    //     svg.selectAll("path")
+    //         .filter(link => link.source.data.name === d.data.name || link.target.data.name === d.data.name)
+    //         .classed("highlighted", true);
 
-        svg.selectAll("circle")
-            .filter(n => n.data.name === d.data.name)
-            .attr("fill", "#ff5722");  // Change color of highlighted nodes
-    }
+    //     svg.selectAll("circle")
+    //         .filter(n => n.data.name === d.data.name)
+    //         .attr("fill", "#ff5722");  // Change color of highlighted nodes
+    // }
 
-    // Recursive function to highlight all descendants of a node
-    function highlightDescendants(d) {
-        if (d.children) {
-            d.children.forEach(child => {
-                highlightNode(child);
-                highlightDescendants(child);
-            });
-        }
-    }
 
-    function unhighlightConnections() {
-        svg.selectAll("path").classed("highlighted", false);
-        svg.selectAll("circle").attr("fill", d => d.children ? "#555" : "#999");
-    }
+
+    // function unhighlightConnections() {
+    //     svg.selectAll("path").classed("highlighted", false);
+    //     svg.selectAll("circle").attr("fill", d => d.children ? "#555" : "#999");
+    // }
 
     document.addEventListener('click', function () {
         document.getElementById('context-menu').style.display = 'none';
     });
 </script>
 
-
 <!-- Modify graph script -->
 <script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
 
 {% endblock %}
-
-
-
-
-
