@@ -4,7 +4,7 @@ html, body {
     padding: 0;
 }
 
-/* Center and space out the intro text */
+
 .intro-text {
     text-align: center;
     margin-bottom: 40px;
@@ -24,7 +24,7 @@ html, body {
 /* Container layout */
 .container-fluid {
     min-height: 100vh;
-    padding: 60px 30px; /* Padding around the entire container */
+    padding: 60px 30px; 
     background-color: #f5f5f5;
 }
 
@@ -75,7 +75,7 @@ form button {
     transition: background-color 0.3s ease;
 }
 
-/* Request Tree Access Button (Light Purple) */
+
 #requestTreeAccessForm button {
     background-color: #b67bec;
 }
@@ -84,7 +84,7 @@ form button {
     background-color: #9468bd;
 }
 
-/* Request Admin Access Button (Medium Purple) */
+
 #requestAdminAccessForm button {
     background-color: #8a2be2;
 }
@@ -93,7 +93,7 @@ form button {
     background-color: #7a1cc1;
 }
 
-/* Save Preferences Button (Darker Purple) */
+
 #emailNotificationsForm button {
     background-color: #6a0dad;
 }
@@ -108,30 +108,30 @@ form button {
     justify-content: space-between;
     padding: 20px;
     border-radius: 8px;
-    background-color: #d0c1e9; /* Light purple background */
+    background-color: #d0c1e9; 
     color: black;
     margin-bottom: 20px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer; /* Pointer cursor for all tree items */
+    cursor: pointer; 
 }
 
 /* Hover effect for all clickable list items */
 .list-group-item:hover {
-    transform: translateY(-5px); /* Lift effect on hover */
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); 
 }
 
 /* Styling for clickable links inside list items */
 .list-group-item a {
-    color: #8813db; /* Default purple link color */
-    text-decoration: none; /* Remove underline */
-    font-weight: bold; /* Make link text bold */
-    transition: color 0.3s ease, text-decoration 0.3s ease; /* Smooth transitions */
+    color: #8813db; 
+    text-decoration: none; 
+    font-weight: bold; 
+    transition: color 0.3s ease, text-decoration 0.3s ease; 
 }
 
 /* Hover effect for links */
 .list-group-item a:hover {
-    color: #480975; /* Darker shade of purple on hover */
+    color: #480975; 
     
 }
 
