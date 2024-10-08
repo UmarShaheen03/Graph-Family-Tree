@@ -510,26 +510,35 @@ def Create_Tree():
             Relationships = ""
 
             
+            unique_nodes_by_column = {}
+
             for row in file_data.splitlines():
                 List_Of_Families = row.strip().split(",")  
                 DATA.append(List_Of_Families)
 
-# Create nodes with hierarchy and lineage properties
+            
             for row_index, Family_lines in enumerate(DATA):
-               for column_index, people in enumerate(Family_lines):
-                   if people.strip():  # Ignore empty nodes
-                      hierarchy = column_index + 1  # Hierarchy is the column number
-                      lineage = row_index + 1       #Lineage is row number
-                      Nodes += f"CREATE (p:{name} {{FullName: '{people.strip()}', Hierarchy: {hierarchy}, Lineage: {lineage}}});\n"
+                for column_index, people in enumerate(Family_lines):
+                    if people.strip():  
+                        hierarchy = column_index + 1  # Hierarchy (column number)
+                        lineage = row_index + 1       # Lineage (row number)
 
-# Create relationships between nodes
+                        
+                        node_key = (hierarchy, people.strip())
+
+                       
+                        if node_key not in unique_nodes_by_column:
+                            unique_nodes_by_column[node_key] = True  # Mark this node as created
+                            Nodes += f"CREATE (p:{name} {{FullName: '{people.strip()}', Hierarchy: {hierarchy}, Lineage: {lineage}}});\n"
+
+            # Create relationships between nodes
             for Family_lines in DATA:
                 for i in range(len(Family_lines) - 1):
-        # Check if both current and next nodes are non-empty
+                    # Check if both current and next nodes are non-empty
                     if Family_lines[i].strip() and Family_lines[i + 1].strip():
-                       Relationships += f"MERGE (p:{name} {{FullName: '{Family_lines[i].strip()}'}})-[:PARENT_TO]->(c:{name} {{FullName: '{Family_lines[i + 1].strip()}'}});\n"
+                        Relationships += f"MERGE (p:{name} {{FullName: '{Family_lines[i].strip()}'}})-[:PARENT_TO]->(c:{name} {{FullName: '{Family_lines[i + 1].strip()}'}});\n"
 
-            # Added them to the neo4j Database + Redirection
+            # Add nodes and relationships to the Neo4j Database
             with driver.session() as session:
                 for node_query in Nodes.splitlines():
                     session.run(node_query)
@@ -537,10 +546,10 @@ def Create_Tree():
                 for relationship_query in Relationships.splitlines():
                     session.run(relationship_query)
 
-            
             return redirect(url_for('main_bp.Multiple_Tree', tree_name=name))
 
     return render_template("Create_Tree.html", form=form, error_message=error_message)
+
 
 
 @main_bp.route("/Multiple_Tree")
