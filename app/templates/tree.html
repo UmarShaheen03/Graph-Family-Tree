@@ -95,7 +95,7 @@
 </ul>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<!-- original tree script -->
+<!-- original tree -->
 <!-- <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
@@ -349,11 +349,43 @@
 
 <script>
     var nodes = {{ nodes|tojson }};
+    // console.log(nodes);
     var links = {{ relationships|tojson }};
+    // console.log(links);
     var selectedNode = null;
+
+    // Step 1: Build a lookup map of nodes
+    var nodeMap = {};
+    nodes.forEach(node => {
+        nodeMap[node.name] = { ...node, children: [] };
+    });
+
+    // Step 2: Build the hierarchy by linking child nodes to their parents
+    links.forEach(link => {
+        const parentNode = nodeMap[link.source];
+        const childNode = nodeMap[link.target];
+
+        if (parentNode && childNode) {
+            parentNode.children.push(childNode);  // Link the child node to its parent
+        }
+    });
+
+    // Step 3: Detect root nodes (nodes that are not children of any other node)
+    var roots = nodes.filter(node => 
+        !links.some(link => link.target === node.name)
+    ).map(rootNode => nodeMap[rootNode.name]);
+
+    // If multiple roots exist, create a stand-in root and link all detected roots to it
+    if (roots.length > 1) {
+        var standInRoot = { name: "Stand-In Root", hierarchy: 0, lineage: 0, children: roots };
+    } else {
+        var standInRoot = roots[0];  // If only one root, use it directly
+    }
 
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
+    const cx = width * 0.5; // adjust as needed to fit
+    const cy = height * 0.59; // adjust as needed to fit
     const radius = Math.min(width, height) / 2 - 30;
 
     // Setup zoom
@@ -366,6 +398,8 @@
     const svg = d3.select("#graph")
         .attr("width", width)
         .attr("height", height)
+        .attr("viewBox", [-cx, -cy, width, height])
+        .attr("style", "width: 100%; height: auto; font: 10px sans-serif;")
         .call(zoom)
         .append("g")
         .attr("transform", `translate(${width / 2},${height / 2})`);  // Centering the radial layout
@@ -374,8 +408,15 @@
         .size([2 * Math.PI, radius])
         .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
 
-    const root = tree(d3.hierarchy({name: "root", children: nodes})
+    // Build the tree layout using the stratified hierarchy
+    const root = tree(d3.hierarchy(standInRoot)
+    // const root = tree(d3.hierarchy({name: "root", children: nodes})
         .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
+
+    // const root = tree(d3.stratify()
+    //     .id(d => d.id)
+    //     .parentId(d => d.parentId)(nodes)
+    //     .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
 
     // Tooltip setup
     const tooltip = d3.select("#tooltip")
@@ -441,6 +482,11 @@
         .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
         .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
         .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+        .attr("paint-order", "stroke")
+        .attr("stroke", "white")
+        .attr("fill", "currentColor")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-width", 3)
         .text(d => d.data.name);
 
     // Highlighting functionality
