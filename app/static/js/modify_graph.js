@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    $('select.form-select-searchable').select2({
-        theme:'bootstrap-5'
-    });
+    // $('select.form-select-searchable').select2({
+    //     theme:'bootstrap-5'
+    // });
     
     actionField.addEventListener('change', toggleFields);
     toggleFields();  // Initialize the form based on the current selection

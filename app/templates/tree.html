@@ -136,14 +136,17 @@
     }
 
     function modifyGraphAction(action) {
-        const nodeName = document.getElementById('context-menu').dataset.nodeName;
+        const nodeName2 = document.getElementById('context-menu').dataset.nodeName;
+        alert("context menu node name:", nodeName2);
+        const nodeName = selectedNode.name;
+        alert("Selected Node:", nodeName);
 
         // Auto-select the action in the form
         const actionField = document.querySelector('select[name="action"]');
         actionField.value = action;
         actionField.dispatchEvent(new Event('change')); // Trigger the form's change event to toggle fields
+        // alert("action:", action);
 
-        // FIXME:Auto-fill the relevant fields based on action
         if (action === 'edit') {
             document.querySelector('select[name="old_name"]').value = nodeName;
         } else if (action === 'delete') {
@@ -151,7 +154,7 @@
         } else if (action === 'shift') {
             document.querySelector('select[name="person_to_shift"]').value = nodeName;
         } else if (action === 'add') {
-            document.querySelector('input[name="name"]').value = ''; // New name to be added
+            document.querySelector('select[name="name"]').value = ''; // New name to be added
             document.querySelector('select[name="parent"]').value = nodeName; // Add as child of the current node
         }
 
