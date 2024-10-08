@@ -146,7 +146,7 @@ def reset_form():
 
 
 
-@main_bp.route("/tree")
+@main_bp.route("/tree", methods=["GET", "POST"])
 def tree_page():
     """A family tree page"""
     check = check_login()
@@ -171,7 +171,7 @@ def tree_page():
 
     nodes, relationships = fetch_data()
 
-    if form_modify.validate_on_submit()  and form_modify.submit.data:
+    if form_modify.submit_modify.data and form_modify.validate_on_submit():
         if form_modify.action.data == "add":
             with driver.session() as session:
                 # Retrieve the parent's hierarchy

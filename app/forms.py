@@ -80,7 +80,7 @@ class AddNodeForm(FlaskForm):
         choices=[]  # Populate this dynamically in your view
     )
 
-    submit = SubmitField('Submit')
+    submit_modify = SubmitField('Submit')
 
 class RelationshipForm(FlaskForm):
     node = SelectField('Node:', choices=[], validators=[DataRequired()])
@@ -138,8 +138,8 @@ class BiographyEditForm(FlaskForm):
     submit=SubmitField('Update')
 
 class Search_Node (FlaskForm):
-      fullname = SelectField(
+    fullname = SelectField(
         'Search',
         choices=[]  # Populate this dynamically in your view
     )
-      submit = SubmitField("Search")
+    submit_search = SubmitField("Search")

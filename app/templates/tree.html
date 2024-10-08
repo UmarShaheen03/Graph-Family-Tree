@@ -60,7 +60,7 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            {{ form_modify.submit(class="btn btn-primary btn-lg rounded-pill") }}
+                            {{ form_modify.submit_modify(class="btn btn-primary btn-lg rounded-pill") }}
                         </div>
                     </form>
                 </div>
@@ -73,7 +73,7 @@
                 {{ form_search.hidden_tag() }}
                 <!-- <label for="fullname" style="font-weight: bold; font-size: 14px; margin-right: 10px;">{{form_search.fullname.label}}</label> -->
                 {{ form_search.fullname(id="fullname") }}
-                {{ form_search.submit(id="Search") }}
+                {{ form_search.submit_search(id="Search") }}
                 
                 <svg id="graph"></svg>
             </div>
@@ -83,7 +83,7 @@
 </div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<!-- <script>
+<script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
 
@@ -269,8 +269,8 @@
             alert("Node not found");
         }
     });
-</script> -->
-<script>
+</script>
+<!-- <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
 
@@ -368,7 +368,7 @@
         .text(d => d.data.name)
         .style("font-size", "10px")
         .style("fill", "#000");
-</script>
+</script> -->
 
 
 <!-- Modify graph script -->
