@@ -18,12 +18,13 @@
     </div>
     <div id="tooltip"></div>
 </div>
+
 </div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="{{ url_for('static', filename='js/request_tree.js') }}"></script> <!-- Link for request modal JS -->
+
 <script>
-    var nodes = {{ nodes|tojson }};
-    var links = {{ relationships|tojson }};
+    var nodes = "{{ nodes|tojson }}";
+    var links = "{{ relationships|tojson }}";
 
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;

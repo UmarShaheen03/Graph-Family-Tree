@@ -1,0 +1,154 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+
+.intro-text {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.intro-text h2 {
+    font-size: 2.5rem;
+    color: #4c4c4c;
+}
+
+.intro-text p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-top: 10px;
+}
+
+/* Container layout */
+.container-fluid {
+    min-height: 100vh;
+    padding: 60px 30px; 
+    background-color: #f5f5f5;
+}
+
+.row {
+    justify-content: center;
+}
+
+/* General styles for each box */
+.box {
+    background-color: #fff;
+    padding: 30px;
+    margin-bottom: 40px;
+    border-radius: 10px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.box h3 {
+    margin-bottom: 20px;
+    font-size: 1.6rem;
+    color: #333;
+}
+
+/* Input and select styles */
+form input, form select, form textarea {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #fdfdfd;
+    margin-bottom: 20px;
+}
+
+/* Button styles */
+form button {
+    color: #fff;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+#requestTreeAccessForm button {
+    background-color: #b67bec;
+}
+
+#requestTreeAccessForm button:hover {
+    background-color: #9468bd;
+}
+
+
+#requestAdminAccessForm button {
+    background-color: #8a2be2;
+}
+
+#requestAdminAccessForm button:hover {
+    background-color: #7a1cc1;
+}
+
+
+#emailNotificationsForm button {
+    background-color: #6a0dad;
+}
+
+#emailNotificationsForm button:hover {
+    background-color: #5a0a8d;
+}
+
+/* Styling the family tree list items */
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #d0c1e9; 
+    color: black;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer; 
+}
+
+/* Hover effect for all clickable list items */
+.list-group-item:hover {
+    transform: translateY(-5px); 
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); 
+}
+
+/* Styling for clickable links inside list items */
+.list-group-item a {
+    color: #8813db; 
+    text-decoration: none; 
+    font-weight: bold; 
+    transition: color 0.3s ease, text-decoration 0.3s ease; 
+}
+
+/* Hover effect for links */
+.list-group-item a:hover {
+    color: #480975; 
+    
+}
+
+
+
+/* Responsive layout */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-top: 20px;
+        flex-direction: column;
+    }
+
+    .box {
+        margin-bottom: 30px;
+    }
+
+    form button {
+        width: 100%;
+    }
+}
