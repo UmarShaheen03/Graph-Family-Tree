@@ -424,6 +424,42 @@
     //     .domain([1, 2, 3])
     //     .range(['Mauve', 'Violet', 'MediumOrchid', 'Orchid', 'Plum', 'Thistle', 'Lavender']);
 
+    function modifyGraphAction(action) {
+        const nodeName = selectedNode.name;
+
+        // Auto-select the action in the form
+        const actionField = document.querySelector('select[name="action"]');
+        actionField.value = action;
+        actionField.dispatchEvent(new Event('change')); // Trigger the form's change event to toggle fields
+
+        // Auto-fill the relevant fields based on the selected action
+        if (action === 'edit') {
+            $('select[name="old_name"]').val(nodeName).trigger('change'); // Set value for Select2
+            $('input[name="new_name"]').val(''); // Clear the new name field
+        } else if (action === 'delete') {
+            $('select[name="person_to_delete"]').val(nodeName).trigger('change'); // Set value for Select2
+        } else if (action === 'shift') {
+            $('select[name="person_to_shift"]').val(nodeName).trigger('change'); // Set value for Select2
+            $('select[name="new_parent"]').val(null).trigger('change'); // Clear the new parent field in Select2
+        } else if (action === 'add') {
+            $('input[name="name"]').val(''); // Clear the name field
+            $('select[name="parent"]').val(nodeName).trigger('change'); // Set value for Select2
+        }
+
+        // Trigger form updates to show/hide fields after filling the data
+        actionField.dispatchEvent(new Event('change'));
+        
+        // Close the context menu
+        document.getElementById('context-menu').style.display = 'none';
+    }
+
+    function goToBiography() {
+        if (selectedNode) {
+            window.location.href = "/biography/" + encodeURIComponent(selectedNode.name);  // Redirect to view bio page
+            ;
+        }
+    }
+    
     // Add links
     svg.append("g")
         .attr("fill", "none")
@@ -474,17 +510,17 @@
             menu.dataset.nodeName = d.data.name;
         });
 
-    // node.append("text")
-    //     .attr("dy", "0.31em")
-    //     .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
-    //     .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
-    //     .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
-    //     .attr("paint-order", "stroke")
-    //     .attr("stroke", "white")
-    //     .attr("fill", "currentColor")
-    //     .attr("stroke-linejoin", "round")
-    //     .attr("stroke-width", 3)
-    //     .text(d => d.data.name);
+    node.append("text")
+        .attr("dy", "0.31em")
+        .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+        .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+        .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+        .attr("paint-order", "stroke")
+        .attr("stroke", "white")
+        .attr("fill", "currentColor")
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-width", 3)
+        .text(d => d.data.name);
 
     // Function to highlight the direct lineage (ancestors and descendants)
     function highlightDirectLineage(d) {
@@ -526,55 +562,6 @@
         svg.selectAll("path").classed("highlighted", false);
         svg.selectAll("circle").attr("fill", d => d.children ? "#555" : "#999");
     }
-    // // Highlighting functionality
-    // function highlightConnections(nodeName) {
-    //     svg.selectAll("path")
-    //         .filter(link => link.source.data.name === nodeName || link.target.data.name === nodeName)
-    //         .classed("highlighted", true);
-
-    //     svg.selectAll("circle")
-    //         .filter(d => d.data.name === nodeName)
-    //         .attr("fill", "#ff5722"); // Change color of highlighted nodes
-    // }
-
-    // // Highlighting functionality for all ancestors and descendants
-    // function highlightConnections(d) {
-    //     let current = d;
-    //     while (current.parent) {
-    //         highlightLink(current.parent, current); 
-    //         current = current.parent;
-    //     }
-
-    //     // Highlight descendants
-    //     highlightDescendants(d);
-    // }
-
-    // // Recursive function to highlight all descendants of a node
-    // function highlightDescendants(d) {
-    //     if (d.children) {
-    //         d.children.forEach(child => {
-    //             highlightLink(d, child);
-    //             highlightDescendants(child);
-    //         });
-    //     }
-    // }
-    // // Highlight the given node and the links associated with it
-    // function highlightLink(d) {
-    //     svg.selectAll("path")
-    //         .filter(link => link.source.data.name === d.data.name || link.target.data.name === d.data.name)
-    //         .classed("highlighted", true);
-
-    //     svg.selectAll("circle")
-    //         .filter(n => n.data.name === d.data.name)
-    //         .attr("fill", "#ff5722");  // Change color of highlighted nodes
-    // }
-
-
-
-    // function unhighlightConnections() {
-    //     svg.selectAll("path").classed("highlighted", false);
-    //     svg.selectAll("circle").attr("fill", d => d.children ? "#555" : "#999");
-    // }
 
     document.addEventListener('click', function () {
         document.getElementById('context-menu').style.display = 'none';
