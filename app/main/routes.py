@@ -1,6 +1,7 @@
 """Main route views"""
 
 import os
+import io
 from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file
 from app.forms import *
 from app.models import Biography, Comment, User
@@ -569,6 +570,136 @@ def check_login_admin():
     
     else:
         return None
+@main_bp.route("/Create_Tree", methods=['GET', 'POST'])
+def Create_Tree():
+    form = submit_File()
+    error_message = None  # Initialize an error message variable
+    if form.validate_on_submit():
+        file = form.file.data
+        name = form.name.data
+        if file:
+            # Check if the file is a CSV
+            if not file.filename.endswith('.csv'):
+                error_message = 'Invalid file format. Please upload a CSV file.'
+                return render_template("Create_Tree.html", form=form, error_message=error_message)
+
+            file_data = file.read().decode('utf-8')
+            DATA = []
+            Nodes = ""
+            Relationships = ""
+
+            
+            unique_nodes_by_column = {}
+
+            for row in file_data.splitlines():
+                List_Of_Families = row.strip().split(",")  
+                DATA.append(List_Of_Families)
+
+            
+            for row_index, Family_lines in enumerate(DATA):
+                for column_index, people in enumerate(Family_lines):
+                    if people.strip():  
+                        hierarchy = column_index + 1  # Hierarchy (column number)
+                        lineage = row_index + 1       # Lineage (row number)
+
+                        
+                        node_key = (hierarchy, people.strip())
+
+                       
+                        if node_key not in unique_nodes_by_column:
+                            unique_nodes_by_column[node_key] = True  # Mark this node as created
+                            Nodes += f"CREATE (p:{name} {{FullName: '{people.strip()}', Hierarchy: {hierarchy}, Lineage: {lineage}}});\n"
+
+            # Create relationships between nodes
+            for Family_lines in DATA:
+                for i in range(len(Family_lines) - 1):
+                    # Check if both current and next nodes are non-empty
+                    if Family_lines[i].strip() and Family_lines[i + 1].strip():
+                        Relationships += f"MERGE (p:{name} {{FullName: '{Family_lines[i].strip()}'}})-[:PARENT_TO]->(c:{name} {{FullName: '{Family_lines[i + 1].strip()}'}});\n"
+
+            # Add nodes and relationships to the Neo4j Database
+            with driver.session() as session:
+                for node_query in Nodes.splitlines():
+                    session.run(node_query)
+
+                for relationship_query in Relationships.splitlines():
+                    session.run(relationship_query)
+
+            return redirect(url_for('main_bp.Multiple_Tree', tree_name=name))
+
+    return render_template("Create_Tree.html", form=form, error_message=error_message)
+
+
+
+@main_bp.route("/Multiple_Tree")
+def Multiple_Tree():
+    tree_name = request.args.get('tree_name')  # Get the tree name from the URL parameter
+    form=Search_Node()
+    with driver.session() as session:
+        query=f"""
+    MATCH (p:{tree_name})
+    RETURN p.FullName AS name"""
+        result = session.run(query)
+        nodes = [(record["name"], record["name"]) for record in result]
+    # Set choices for the FullName dropdown field
+    form.fullname.choices = nodes
+    
+    
+
+    node_query = f"""
+    MATCH (p:{tree_name})
+    RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
+    """
+
+    relationship_query = f"""
+    MATCH (p:{tree_name})-[r:PARENT_TO]->(c:{tree_name})
+    RETURN p.FullName AS parent, c.FullName AS child
+    """
+
+    nodes = []
+    links = []
+
+    # Fetch all nodes
+    with driver.session() as session:
+        node_result = session.run(node_query)
+        for record in node_result:
+            name = record["name"]
+            hierarchy = record["hierarchy"]
+            lineage = record["lineage"]  # Fetch the lineage property
+
+            # Add node if not already in the list (to avoid duplicates)
+            if not any(node['name'] == name for node in nodes):
+                nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
+
+    # Fetch all relationships
+    with driver.session() as session:
+        relationship_result = session.run(relationship_query)
+        for record in relationship_result:
+            parent_name = record["parent"]
+            child_name = record["child"]
+
+            # Add link from parent to child
+            links.append({'source': parent_name, 'target': child_name})
+
+    return render_template('Multiple_Trees.html', nodes=nodes, relationships=links,form=form,tree_name=tree_name)
+
+
+@main_bp.route("/Request_Tree", methods=['GET', 'POST'])
+def Request_Multiple_Tree():
+    form = Request_Tree()
+    with driver.session() as session:
+        # Retrieve distinct labels except for 'Person'
+        result = session.run("MATCH (n) WHERE NOT 'Person' IN labels(n) RETURN DISTINCT labels(n) AS labels")
+        choices = [(label, label) for record in result for label in record["labels"]]
+    form.Tree_Name.choices=choices
+
+    if form.validate_on_submit():
+        # Redirect to Multiple_Tree with the selected tree name as a parameter
+        return redirect(url_for('main_bp.Multiple_Tree', tree_name=form.Tree_Name.data))
+
+    return render_template("Request_Tree.html", form=form)
+
+
     
 # Function to fetch biography from Neo4j
 def get_person_bio(full_name):

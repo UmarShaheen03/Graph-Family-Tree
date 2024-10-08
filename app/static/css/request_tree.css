@@ -1,0 +1,30 @@
+/* request_tree.css */
+.modal-header {
+    background-color: #593196;
+    color: white;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px; /* Ensure rounded corners at the top */
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-content {
+    border-radius: 20px; /* More rounded corners for the modal */
+}
+
+.btn-primary {
+    background-color: #593196;
+    border: none;
+    border-radius: 50px; /* Make the button more rounded */
+    padding: 10px 20px; /* Add padding for a nicer shape */
+}
+
+.btn-primary:hover {
+    background-color: #4a2b96;
+}
+
+.btn-close {
+    border-radius: 50%; /* Ensure the close button is round */
+}

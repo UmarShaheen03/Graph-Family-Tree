@@ -48,6 +48,13 @@
                     <li>
                         <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.modify_graph') }}">Modify</a>
                     </li>
+                    <li>
+                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.Create_Tree') }}">Create Tree</a>
+                    </li>
+                    
+                    <li>
+                        <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.Request_Multiple_Tree') }}">Request Tree</a>
+                    </li>
                     <div class="dropdown">
                         <a id="home-nav-link" class="nav-link bell_box" onclick="clickNotifications()">
                             {% if notifications|length > 0 %} <!-- if user has notifcations, make icon white and add num -->
