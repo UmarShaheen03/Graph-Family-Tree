@@ -24,10 +24,6 @@ def run_once_on_start():
     init_database()
     email_thread = Thread(target=check_for_emails)
     email_thread.start() #TODO may be leaking?
-    log_notif("test notif 1", [3])
-    log_notif("test notif 2", [3])
-    log_notif("test notif 3", [3])
-    send_emails([3])
     print("created email thread")
     #replaces code of this function with none, so it only runs once
     run_once_on_start.__code__ = (lambda:None).__code__
@@ -211,23 +207,68 @@ def reset_form():
 
 
 
-@main_bp.route("/tree")
+@main_bp.route("/tree/<tree_id>")
 def tree_page():
     check = check_login()
     if check != None:
         return check
     
-    """A family tree page"""
+    tree_id = request.args.get('tree_id')  # Get the tree id from the URL parameter
+    tree_name = db.session.query(Tree).filter(Tree.id == tree_id).first()
+
+    #TODO check if user has access to this tree
+
+    if tree_name == None:
+        return redirect(url_for("main_bp.home_page"))
+    else:
+        tree_name = tree_name.name
+
     form=Search_Node()
     with driver.session() as session:
-        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
+        query=f"""
+    MATCH (p:{tree_name})
+    RETURN p.FullName AS name"""
+        result = session.run(query)
         nodes = [(record["name"], record["name"]) for record in result]
     # Set choices for the FullName dropdown field
     form.fullname.choices = nodes
-    nodes, relationships = fetch_data()
 
-    #no user check, as need to be logged in to visit this page
-    return render_template('tree.html', nodes=nodes, relationships=relationships,form=form,
+    node_query = f"""
+    MATCH (p:{tree_name})
+    RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
+    """
+
+    relationship_query = f"""
+    MATCH (p:{tree_name})-[r:PARENT_TO]->(c:{tree_name})
+    RETURN p.FullName AS parent, c.FullName AS child
+    """
+
+    nodes = []
+    links = []
+
+    # Fetch all nodes
+    with driver.session() as session:
+        node_result = session.run(node_query)
+        for record in node_result:
+            name = record["name"]
+            hierarchy = record["hierarchy"]
+            lineage = record["lineage"]  # Fetch the lineage property
+
+            # Add node if not already in the list (to avoid duplicates)
+            if not any(node['name'] == name for node in nodes):
+                nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
+
+    # Fetch all relationships
+    with driver.session() as session:
+        relationship_result = session.run(relationship_query)
+        for record in relationship_result:
+            parent_name = record["parent"]
+            child_name = record["child"]
+
+            # Add link from parent to child
+            links.append({'source': parent_name, 'target': child_name})
+
+    return render_template('trees.html', nodes=nodes, relationships=links,form=form,tree_name=tree_name,
             notifications=get_users_notifs(current_user), 
             logged_in_as=User.get_username(current_user))
 
@@ -400,7 +441,7 @@ def modify_graph():
             log_notif(f"User {User.get_username(current_user)} just added a new person, {form.name.data}, to family TODO", 
             get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about new person
 
-            return redirect(url_for("main_bp.tree_page"), 
+            return redirect(url_for("main_bp.tree_page", tree_id=), #TODO 
                             notifications=get_users_notifs(current_user), 
                             logged_in_as=User.get_username(current_user))
         else:
@@ -427,7 +468,7 @@ def modify_graph():
             log_notif(f"User {User.get_username(current_user)} just changed the name of person {form.old_name.data} to {form.new_name.data}, in the family TODO", 
             get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
 
-            return redirect(url_for("main_bp.tree_page"), 
+            return redirect(url_for("main_bp.tree_page", tree_id=), 
                             notifications=get_users_notifs(current_user), 
                             logged_in_as=User.get_username(current_user))
     
@@ -446,7 +487,7 @@ def modify_graph():
         log_notif(f"User {User.get_username(current_user)} just removed the person {form.person_to_delete.data} from the family TODO", 
         get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
 
-        return redirect(url_for("main_bp.tree_page"),
+        return redirect(url_for("main_bp.tree_page", tree_id=), #TODO
                         notifications=get_users_notifs(current_user), 
                         logged_in_as=User.get_username(current_user))
     
@@ -581,8 +622,8 @@ def my_dashboard():
     return render_template('my_dashboard.html')
 
 
-@main_bp.route("/Create_Tree", methods=['GET', 'POST'])
-def Create_Tree():
+@main_bp.route("/create_tree", methods=['GET', 'POST'])
+def create_tree():
     form = submit_File()
     error_message = None  # Initialize an error message variable
     if form.validate_on_submit():
@@ -592,7 +633,7 @@ def Create_Tree():
             # Check if the file is a CSV
             if not file.filename.endswith('.csv'):
                 error_message = 'Invalid file format. Please upload a CSV file.'
-                return render_template("Create_Tree.html", form=form, error_message=error_message)
+                return render_template("create_tree.html", form=form, error_message=error_message)
 
             file_data = file.read().decode('utf-8')
             DATA = []
@@ -636,67 +677,13 @@ def Create_Tree():
                 for relationship_query in Relationships.splitlines():
                     session.run(relationship_query)
 
-            return redirect(url_for('main_bp.Multiple_Tree', tree_name=name))
+            return redirect(url_for('main_bp.multiple_tree', tree_name=name))
 
-    return render_template("Create_Tree.html", form=form, error_message=error_message)
-
-
-
-@main_bp.route("/Multiple_Tree")
-def Multiple_Tree():
-    tree_name = request.args.get('tree_name')  # Get the tree name from the URL parameter
-    form=Search_Node()
-    with driver.session() as session:
-        query=f"""
-    MATCH (p:{tree_name})
-    RETURN p.FullName AS name"""
-        result = session.run(query)
-        nodes = [(record["name"], record["name"]) for record in result]
-    # Set choices for the FullName dropdown field
-    form.fullname.choices = nodes
-    
-    
-
-    node_query = f"""
-    MATCH (p:{tree_name})
-    RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
-    """
-
-    relationship_query = f"""
-    MATCH (p:{tree_name})-[r:PARENT_TO]->(c:{tree_name})
-    RETURN p.FullName AS parent, c.FullName AS child
-    """
-
-    nodes = []
-    links = []
-
-    # Fetch all nodes
-    with driver.session() as session:
-        node_result = session.run(node_query)
-        for record in node_result:
-            name = record["name"]
-            hierarchy = record["hierarchy"]
-            lineage = record["lineage"]  # Fetch the lineage property
-
-            # Add node if not already in the list (to avoid duplicates)
-            if not any(node['name'] == name for node in nodes):
-                nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
-
-    # Fetch all relationships
-    with driver.session() as session:
-        relationship_result = session.run(relationship_query)
-        for record in relationship_result:
-            parent_name = record["parent"]
-            child_name = record["child"]
-
-            # Add link from parent to child
-            links.append({'source': parent_name, 'target': child_name})
-
-    return render_template('Multiple_Trees.html', nodes=nodes, relationships=links,form=form,tree_name=tree_name)
+    return render_template("create_tree.html", form=form, error_message=error_message)
 
 
-@main_bp.route("/Request_Tree", methods=['GET', 'POST'])
-def Request_Multiple_Tree():
+@main_bp.route("/request_tree", methods=['GET', 'POST'])
+def request_multiple_tree():
     form = Request_Tree()
     with driver.session() as session:
         # Retrieve distinct labels except for 'Person'
@@ -706,9 +693,9 @@ def Request_Multiple_Tree():
 
     if form.validate_on_submit():
         # Redirect to Multiple_Tree with the selected tree name as a parameter
-        return redirect(url_for('main_bp.Multiple_Tree', tree_name=form.Tree_Name.data))
+        return redirect(url_for('main_bp.multiple_tree', tree_name=form.Tree_Name.data))
 
-    return render_template("Request_Tree.html", form=form)
+    return render_template("request_tree.html", form=form)
 
 
     
@@ -784,5 +771,5 @@ def calculate_age(date_of_birth_str):
     today = datetime.today()
     age = today.year - date_of_birth.year - ((today.month, today.day) < (date_of_birth.month, date_of_birth.day))
     if age is not None:
-            print(f"Calculated Age: {age}",date_of_birth_str)
+        print(f"Calculated Age: {age}",date_of_birth_str)
     return age
