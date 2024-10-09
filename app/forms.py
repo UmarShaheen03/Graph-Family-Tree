@@ -186,15 +186,15 @@ class IgnoreNotifs (FlaskForm):
 
     admin_req=BooleanField("Admin Requests", default=True)
     tree_req=BooleanField("Tree Requests", default=True)
-    req_accepted=BooleanField("Request Acceptance", default=True)
+    req_accepted=BooleanField("Request Accept", default=True)
 
     comment=BooleanField("New Comments", default=True)
     bio_edit=BooleanField("Biography Edits", default=True)
 
-    tree_create=BooleanField("New People On Tree", default=True)
-    tree_move=BooleanField("Person Moved On Tree", default=True)
-    tree_update=BooleanField("Person Renamed On Tree", default=True)
-    tree_delete=BooleanField("Person Removed From Tree", default=True)
+    tree_create=BooleanField("New Person", default=True)
+    tree_move=BooleanField("Person Moved", default=True)
+    tree_update=BooleanField("Person Renamed", default=True)
+    tree_delete=BooleanField("Person Removed", default=True)
 
     submit=SubmitField("Submit")
     # "Login", "Logout", "Reset", "Signup" (account related) 

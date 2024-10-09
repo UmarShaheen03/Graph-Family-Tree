@@ -88,9 +88,10 @@
 
       <div class="box mb-4">
         <h3>Ignored Notifications</h3>
-        <form action="/preference-form" method="post" class="container px-4">
-          <p>Check the box of any notifications you'd like to stop receiving.</p>
-            <div class="col-md-3" style="display:inline-block">
+        <form action="/preference-form" method="post">
+          <p>Check the box of any notifications you'd like to stop receiving, and submit.</p>
+
+            <div style="display:inline-block;vertical-align:top;width:24%">
               <h4>Accounts</h4>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.login.label(style="width:150%") }}
@@ -110,7 +111,7 @@
               </div>
             </div>
 
-            <div class="col-md-3" style="display:inline-block">
+            <div style="display:inline-block;vertical-align:top;width:24%;">
               <h4>Requests</h4>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.admin_req.label(style="width:150%") }}
@@ -125,7 +126,39 @@
                 {{ ignoreForm.req_accepted(style="height:20px;margin:0;") }}
               </div>
             </div>
-            <br>
+
+            <div style="display:inline-block;vertical-align:top;width:24%;">
+              <h4>Biographies</h4>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.comment.label(style="width:150%") }}
+                {{ ignoreForm.comment(style="height:20px;margin:0") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.bio_edit.label(style="width:150%") }}
+                {{ ignoreForm.bio_edit(style="height:20px;margin:0;") }}
+              </div>
+            </div>
+
+            <div style="display:inline-block;vertical-align:top;width:24%">
+              <h4>Trees</h4>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.tree_create.label(style="width:150%") }}
+                {{ ignoreForm.tree_create(style="height:20px;margin:0") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.tree_move.label(style="width:150%") }}
+                {{ ignoreForm.tree_move(style="height:20px;margin:0;") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.tree_update.label(style="width:150%") }}
+                {{ ignoreForm.tree_update(style="height:20px;margin:0;") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.tree_delete.label(style="width:150%") }}
+                {{ ignoreForm.tree_delete(style="height:20px;margin:0;") }}
+              </div>
+            </div>
+            <p></p>
             {{ ignoreForm.submit(class="btn btn-primary") }}
           </div>
         </form>
