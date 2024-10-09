@@ -1,17 +1,17 @@
 """Main route views"""
 
 import os
-from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file, send_from_directory, jsonify
-from app.forms import LoginForm, SignupForm, ForgotPassword, ResetPassword, AddNodeForm, UpdateNode, AppendGraph, BiographyEditForm, CommentForm, Search_Node
-from app.models import Biography, Comment
-from app.accounts import signup, login, SignupError, LoginError, init_database, reset_email, verify_reset, reset, send_email_to_admin, make_user_admin
+from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file
+from app.forms import *
+from app.models import Biography, Comment, User
+from app.accounts import *
+from app.notifs import *
 from app import db
 from neo4j import GraphDatabase
 from flask_wtf import CSRFProtect
 from datetime import datetime
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 from itsdangerous import URLSafeTimedSerializer
-
 
 import sys #TODO using for debug printing, remove in final
 
@@ -24,13 +24,25 @@ serializer = URLSafeTimedSerializer("SecretKey")
 @main_bp.before_request
 def run_once_on_start():
     init_database()
+    email_thread = Thread(target=check_for_emails)
+    email_thread.start() #TODO may be leaking?
+    log_notif("test notif 1", [3])
+    log_notif("test notif 2", [3])
+    log_notif("test notif 3", [3])
+    send_emails([3])
+    print("created email thread")
     #replaces code of this function with none, so it only runs once
     run_once_on_start.__code__ = (lambda:None).__code__
 
 @main_bp.route("/")
 def home_page():
     """The landing page"""
-    return render_template('home.html')
+    if current_user.is_authenticated:
+        return render_template('home.html', 
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template('home.html')
 
 @main_bp.route("/pdf/<path:filename>")
 def serve_pdf(filename):
@@ -41,18 +53,33 @@ def serve_pdf(filename):
 
 @main_bp.route("/login")
 def login_page():
+    logoutForm = LogoutForm()
     loginForm = LoginForm()
-    return render_template("login.html", loginForm=loginForm, error="")
+
+    if current_user.is_authenticated:
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm)
 
 @main_bp.route("/signup")
 def signup_page():
     signupForm = SignupForm()
-    return render_template("signup.html", signupForm=signupForm, error="")
+
+    if current_user.is_authenticated:
+        return render_template("signup.html", signupForm=signupForm,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("signup.html", signupForm=signupForm)
+    
 
 #form submissions for login
 @main_bp.route("/login-form", methods=["POST"])
 def login_request():
     form = LoginForm()
+    logoutForm = LogoutForm()
 
     if form.validate_on_submit():
         username_or_email = request.form.get("username_or_email")
@@ -62,13 +89,20 @@ def login_request():
         try:
             login(username_or_email, password, remember)
         except LoginError as error:
-            return render_template("login.html", loginForm=form, error=error)
+            return render_template("login.html", loginForm=form, logoutForm=logoutForm, error=error)
 
-        #send to home page on success
-        return home_page()
+        #send to home page on success TODO change to account page?
+        return redirect(url_for("main_bp.home_page"))
     
     else:
-        return render_template("login.html", loginForm=form, error="Invalid Form")
+        return render_template("login.html", loginForm=form, logoutForm=logoutForm, error="Invalid Form")
+
+#form submissions for logout
+@main_bp.route("/logout-form", methods=["POST"])
+def logout_request():
+    log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids()) #notify all admins of logout
+    logout_user()
+    return redirect(url_for("main_bp.home_page"))
     
 #form submissions for signup
 @main_bp.route("/signup-form", methods=["POST"])
@@ -85,26 +119,49 @@ def signup_request():
         try:
             signup(email, username, password, repeat, remember)
         except SignupError as error:
-            return render_template("signup.html", signupForm=form, error=error)
+            if current_user.is_authenticated:
+                return render_template("signup.html", signupForm=form, error=error,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+            else:
+                return render_template("signup.html", signupForm=form, error=error)
+
 
         #send to home page on success
-        return home_page()
+        return redirect(url_for("main_bp.home_page"))
     
     else:
-        return render_template("signup.html", loginForm=form, error="Invalid Form")
+        if current_user.is_authenticated:
+            return render_template("signup.html", loginForm=form, error="Invalid Form",
+                    notifications=get_users_notifs(current_user), 
+                    logged_in_as=User.get_username(current_user))
+        else:
+            return render_template("signup.html", loginForm=form, error="Invalid Form")
    
 
 @main_bp.route("/forgot")
 def forgot_password_page():
     form = ForgotPassword()
-    return render_template("forgot.html", forgotForm=form, submitted=False)
+
+    if current_user.is_authenticated:
+        return render_template("forgot.html", forgotForm=form, submitted=False,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("forgot.html", forgotForm=form, submitted=False)
 
 @main_bp.route("/forgot-form", methods=["POST"])
 def forgot_request():
     form = ForgotPassword()
     email = request.form.get("email")
     reset_email(email)
-    return render_template("forgot.html", forgotForm=form, submitted=True)
+
+    if current_user.is_authenticated:
+        return render_template("forgot.html", forgotForm=form, submitted=True,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("forgot.html", forgotForm=form, submitted=True)
 
 @main_bp.route("/reset")
 def reset_password_page():
@@ -113,10 +170,15 @@ def reset_password_page():
     token = request.args.get("token")
 
     if not verify_reset(user_id, token):
-        return home_page()
+        return redirect(url_for("main_bp.home_page"))
     
     form = ResetPassword()
-    return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
+    if current_user.is_authenticated:
+        return render_template("reset.html", resetForm=form, token=token, user_id=user_id,
+                               notifications=get_users_notifs(current_user), 
+                               logged_in_as=User.get_username(current_user))
+    else:
+        return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
 
 @main_bp.route("/reset-form", methods=["POST"])
 def reset_form():
@@ -125,7 +187,7 @@ def reset_form():
     token = request.args.get("token")
 
     if not verify_reset(user_id, token):
-        return home_page()
+        return redirect(url_for("main_bp.home_page"))
     
     form = ResetPassword()
     password = request.form.get("password")
@@ -134,15 +196,34 @@ def reset_form():
     try:
         reset(user_id, password, repeat)
     except SignupError as error:
-        return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
+        if current_user.is_authenticated:
+            return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id,
+                    notifications=get_users_notifs(current_user), 
+                    logged_in_as=User.get_username(current_user))
+        else:
+            return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
+
+
+    user = db.session.query(User).filter(User.user_id == user_id).first()
+    log_notif(f"User {User.get_username(user)} just reset their password", get_all_admin_ids()) #notify all admins of password reset
 
     loginForm = LoginForm()
-    return render_template("login.html", loginForm=loginForm, reset_success=True) #send user back to login when finished
+    logoutForm = LogoutForm()
+
+    if current_user.is_authenticated: #if they're already logged in, send them to home
+        return redirect(url_for("main_bp.home_page"))   
+    else: #otherwise, send user back to login when finished
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Password reset succesfully, please login") 
+
 
 
 
 @main_bp.route("/tree")
 def tree_page():
+    check = check_login()
+    if check != None:
+        return check
+    
     """A family tree page"""
     form=Search_Node()
     with driver.session() as session:
@@ -151,10 +232,18 @@ def tree_page():
     # Set choices for the FullName dropdown field
     form.fullname.choices = nodes
     nodes, relationships = fetch_data()
-    return render_template('tree.html', nodes=nodes, relationships=relationships,form=form)
+
+    #no user check, as need to be logged in to visit this page
+    return render_template('tree.html', nodes=nodes, relationships=relationships,form=form,
+            notifications=get_users_notifs(current_user), 
+            logged_in_as=User.get_username(current_user))
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
+    check = check_login()
+    if check != None:
+        return check
+ 
     # Fetch person's biography details from Neo4j
     person = get_person_bio(name)
     
@@ -173,8 +262,16 @@ def biography(name):
         )
         db.session.add(new_comment)
         db.session.commit()
+
+        log_notif(f"User {User.get_username(current_user)} just commented on person {name} from the family TODO", 
+        get_all_admin_ids() + get_all_ids_with_tree("TODO"), "/biography/" + name) #notify all admins/users with access about moved person
+
         flash('Comment added successfully')
-        return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
+
+        #no user check, as need to be logged in to visit this page            
+        return redirect(url_for('main_bp.biography', name=name, 
+            notifications=get_users_notifs(current_user), 
+            logged_in_as=User.get_username(current_user)))  # Pass 'name' to redirect properly
 
     # Pass the fetched biography details and comments to the template
     return render_template('biography.html', 
@@ -186,12 +283,19 @@ def biography(name):
                            phone_number=person.get('phone_number', 'No phone number provided'),
                            address=person.get('address', 'No address provided'),
                            comments=comments, 
-                           comment_form=comment_form)
+                           comment_form=comment_form,
+                           admin=User.is_admin(current_user),
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
 
 
 
 @main_bp.route('/biography/edit', methods=['GET', 'POST'])
 def edit_biography():
+    check = check_login_admin()
+    if check != None:
+        return check
+    
     biography = Biography.query.first()
     edit_form = BiographyEditForm()
 
@@ -229,12 +333,391 @@ def edit_biography():
             )
         
         flash(f'Biography for {person_name} has been updated successfully.')
-        return redirect(url_for('main_bp.biography', name=person_name))
+        log_notif(f"User {User.get_username(current_user)} just edited the bio of {person_name} from family TODO", 
+                  get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about bio edit
+        
+        return redirect(url_for('main_bp.biography', name=person_name,
+                                notifications=get_users_notifs(current_user), 
+                                logged_in_as=User.get_username(current_user)))
 
-    return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
+    return render_template('edit_biography.html', biography=biography, edit_form=edit_form,
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
+    
+    
+
+@main_bp.route("/modify_graph", methods=['GET', 'POST'])
+def modify_graph():
+    """The Add node page"""
+    check = check_login_admin()
+    if check != None:
+        return check
+    
+    form = AddNodeForm()
+    
+    # Fetch nodes for the select box for form 
+    with driver.session() as session:
+        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
+        nodes = [(record["name"], record["name"]) for record in result]
+        
+    form.parent.choices = nodes
+    form.new_parent.choices = nodes
+    form.person_to_delete.choices = nodes
+    form.person_to_shift.choices = nodes
+    form.old_name.choices = nodes
+
+    if form.validate_on_submit():
+        if form.action.data == "add":
+            with driver.session() as session:
+                # Retrieve the parent's hierarchy
+                parent_hierarchy_query = """
+                MATCH (p:Person {FullName: $Parent})
+                RETURN p.Hierarchy AS parent_hierarchy
+                """
+                parent_result = session.run(
+                    parent_hierarchy_query, Parent=form.parent.data
+                )
+                
+                parent_hierarchy = parent_result.single()["parent_hierarchy"]
+
+                # Add new node with hierarchy as parent's hierarchy + 1
+                session.run(
+                    """
+                    CREATE (n:Person {FullName: $full_name, Hierarchy: $new_hierarchy})
+                    """,
+                    full_name=form.name.data,
+                    new_hierarchy=parent_hierarchy + 1  # Child's hierarchy is parent's + 1
+                )
+
+                # Build the dynamic query string to add a relationship
+                query = """
+                MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
+                MERGE (a)-[r:PARENT_OF]->(b)
+                """
+
+                # Create or update relationship
+                session.run(
+                    query,
+                    full_name=form.name.data,
+                    Parent=form.parent.data
+                )
+
+            print("Data processed. Redirecting to index.")
+
+            log_notif(f"User {User.get_username(current_user)} just added a new person, {form.name.data}, to family TODO", 
+            get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about new person
+
+            return redirect(url_for("main_bp.tree_page"), 
+                            notifications=get_users_notifs(current_user), 
+                            logged_in_as=User.get_username(current_user))
+        else:
+            print("Selected action is not 'Add Person'.")
+    else:
+        # Add debugging output
+        print("Form validation failed.")
+        print(form.errors)  # Print form validation errors if any
 
     
     
+    if form.action.data == "edit":
+            with driver.session() as session:
+                # Add node
+                session.run(
+                    """
+                   MATCH (n:Person {FullName: $old_name})
+                   SET n.FullName = $new_name
+                   """,
+    old_name=form.old_name.data,
+    new_name=form.new_name.data
+                )
+
+            log_notif(f"User {User.get_username(current_user)} just changed the name of person {form.old_name.data} to {form.new_name.data}, in the family TODO", 
+            get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
+
+            return redirect(url_for("main_bp.tree_page"), 
+                            notifications=get_users_notifs(current_user), 
+                            logged_in_as=User.get_username(current_user))
+    
+
+    if form.action.data == "delete":
+        with driver.session() as session:
+        # Delete person logic
+           session.run(
+            """
+            MATCH (n:Person {FullName: $person_to_delete})
+            DETACH DELETE n
+            """,
+            person_to_delete=form.person_to_delete.data
+        )
+           
+        log_notif(f"User {User.get_username(current_user)} just removed the person {form.person_to_delete.data} from the family TODO", 
+        get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
+
+        return redirect(url_for("main_bp.tree_page"),
+                        notifications=get_users_notifs(current_user), 
+                        logged_in_as=User.get_username(current_user))
+    
+    if form.action.data == "shift":
+        with driver.session() as session:
+        # Retrieve the new parent's hierarchy
+            parent_hierarchy_query = """
+        MATCH (p:Person {FullName: $Parent})
+        RETURN p.Hierarchy AS parent_hierarchy
+        """
+            parent_result = session.run(parent_hierarchy_query, Parent=form.new_parent.data)
+            parent_hierarchy = parent_result.single()["parent_hierarchy"]
+
+        # Update the hierarchy of the person being shifted
+            update_hierarchy_query = """
+            MATCH (b:Person {FullName: $full_name})
+            SET b.Hierarchy = $new_hierarchy
+            """
+            session.run(
+            update_hierarchy_query,
+            full_name=form.person_to_shift.data,
+            new_hierarchy=parent_hierarchy + 1  # New hierarchy is parent's hierarchy + 1
+        )
+
+        # Create or update the relationship between the new parent and the person being shifted
+            update_relationship_query = """
+        MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
+        MERGE (a)-[r:PARENT_OF]->(b)
+        """
+            session.run(
+                update_relationship_query,
+                full_name=form.person_to_shift.data,
+                Parent=form.new_parent.data
+        )
+
+            print("Person shifted and hierarchy updated. Redirecting to index.")
+
+            log_notif(f"User {User.get_username(current_user)} moved person {form.person_to_shift.data} to be under {form.new_parent.data} in family TODO", 
+            get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about moved person
+
+            return redirect(url_for("main_bp.tree_page"),
+                            notifications=get_users_notifs(current_user), 
+                            logged_in_as=User.get_username(current_user))
+        
+    return render_template('modify_graph.html', form=form,
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
+
+
+
+#NOTIFICATION ROUTES
+@main_bp.route("/unsubscribe/<user_id>", methods=['GET', 'POST'])
+def unsubscribe(user_id):
+    loginForm = LoginForm()
+    logoutForm = LogoutForm()
+
+    if not current_user.is_authenticated: #if not logged in
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
+    elif (int(user_id) != User.get_id(current_user)): #if logged in as a different user
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe",
+                                notifications=get_users_notifs(current_user), 
+                                logged_in_as=User.get_username(current_user))
+
+    User.unsubscribe(current_user)
+    return render_template("unsubscribe.html", email=User.get_email(current_user),
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
+
+@main_bp.route("/mark_as_seen/<notif_id>", methods=['POST'])
+def seen_notif(notif_id):
+    notif = db.session.query(Notification).filter(Notification.id == notif_id).first()
+    if notif == None:
+        return redirect(url_for("main_bp.home_page"))
+    if notif.user_id != User.get_id(current_user): #failsafe so cant delete other users notifs
+        return redirect(url_for("main_bp.home_page"))
+    db.session.query(Notification).filter(Notification.id == notif_id).delete()
+    db.session.commit()
+    return redirect(url_for("main_bp.home_page"))
+
+@main_bp.route("/ignore_notifs/<user_id>", methods=["POST"])
+def ignore_notifs(user_id):
+    loginForm = LoginForm()
+    logoutForm = LogoutForm()
+
+    if not current_user.is_authenticated: #if not logged in
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
+    elif (int(user_id) != User.get_id(current_user)): #if logged in as a different user
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe",
+                                notifications=get_users_notifs(current_user), 
+                                logged_in_as=User.get_username(current_user))
+    
+    preferences = create_notifs_string()
+    User.change_ignore_notifs(current_user, preferences)
+
+    #TODO return to account page
+    return redirect(url_for("main_bp.home_page"))
+
+
+
+
+#functions for checking if the current user is logged in, and if they are an admin
+def check_login():
+    if not current_user.is_authenticated:
+        form = LoginForm()
+        logoutForm  = LogoutForm()
+        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Please login or create an account to view this page")
+    
+    else:
+        return None
+    
+def check_login_admin():
+    check = check_login()
+    if check != None:
+        return check
+    
+    if not User.is_admin(current_user): #if user is not an admin
+        form = LoginForm()
+        logoutForm = LogoutForm()
+        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Admin permissions are required to view this page", logged_in_as=User.get_username(current_user))
+        #TODO: make this return requests page, so user can request to become admin
+    
+    else:
+        return None
+    
+
+@main_bp.route('/my_dashboard', methods=['GET', 'POST'])
+def my_dashboard():
+    
+    check = check_login()
+    if check is not None:
+        return check 
+    return render_template('my_dashboard.html')
+
+
+@main_bp.route("/Create_Tree", methods=['GET', 'POST'])
+def Create_Tree():
+    form = submit_File()
+    error_message = None  # Initialize an error message variable
+    if form.validate_on_submit():
+        file = form.file.data
+        name = form.name.data
+        if file:
+            # Check if the file is a CSV
+            if not file.filename.endswith('.csv'):
+                error_message = 'Invalid file format. Please upload a CSV file.'
+                return render_template("Create_Tree.html", form=form, error_message=error_message)
+
+            file_data = file.read().decode('utf-8')
+            DATA = []
+            Nodes = ""
+            Relationships = ""
+
+            
+            unique_nodes_by_column = {}
+
+            for row in file_data.splitlines():
+                List_Of_Families = row.strip().split(",")  
+                DATA.append(List_Of_Families)
+
+            
+            for row_index, Family_lines in enumerate(DATA):
+                for column_index, people in enumerate(Family_lines):
+                    if people.strip():  
+                        hierarchy = column_index + 1  # Hierarchy (column number)
+                        lineage = row_index + 1       # Lineage (row number)
+
+                        
+                        node_key = (hierarchy, people.strip())
+
+                       
+                        if node_key not in unique_nodes_by_column:
+                            unique_nodes_by_column[node_key] = True  # Mark this node as created
+                            Nodes += f"CREATE (p:{name} {{FullName: '{people.strip()}', Hierarchy: {hierarchy}, Lineage: {lineage}}});\n"
+
+            # Create relationships between nodes
+            for Family_lines in DATA:
+                for i in range(len(Family_lines) - 1):
+                    # Check if both current and next nodes are non-empty
+                    if Family_lines[i].strip() and Family_lines[i + 1].strip():
+                        Relationships += f"MERGE (p:{name} {{FullName: '{Family_lines[i].strip()}'}})-[:PARENT_TO]->(c:{name} {{FullName: '{Family_lines[i + 1].strip()}'}});\n"
+
+            # Add nodes and relationships to the Neo4j Database
+            with driver.session() as session:
+                for node_query in Nodes.splitlines():
+                    session.run(node_query)
+
+                for relationship_query in Relationships.splitlines():
+                    session.run(relationship_query)
+
+            return redirect(url_for('main_bp.Multiple_Tree', tree_name=name))
+
+    return render_template("Create_Tree.html", form=form, error_message=error_message)
+
+
+
+@main_bp.route("/Multiple_Tree")
+def Multiple_Tree():
+    tree_name = request.args.get('tree_name')  # Get the tree name from the URL parameter
+    form=Search_Node()
+    with driver.session() as session:
+        query=f"""
+    MATCH (p:{tree_name})
+    RETURN p.FullName AS name"""
+        result = session.run(query)
+        nodes = [(record["name"], record["name"]) for record in result]
+    # Set choices for the FullName dropdown field
+    form.fullname.choices = nodes
+    
+    
+
+    node_query = f"""
+    MATCH (p:{tree_name})
+    RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
+    """
+
+    relationship_query = f"""
+    MATCH (p:{tree_name})-[r:PARENT_TO]->(c:{tree_name})
+    RETURN p.FullName AS parent, c.FullName AS child
+    """
+
+    nodes = []
+    links = []
+
+    # Fetch all nodes
+    with driver.session() as session:
+        node_result = session.run(node_query)
+        for record in node_result:
+            name = record["name"]
+            hierarchy = record["hierarchy"]
+            lineage = record["lineage"]  # Fetch the lineage property
+
+            # Add node if not already in the list (to avoid duplicates)
+            if not any(node['name'] == name for node in nodes):
+                nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
+
+    # Fetch all relationships
+    with driver.session() as session:
+        relationship_result = session.run(relationship_query)
+        for record in relationship_result:
+            parent_name = record["parent"]
+            child_name = record["child"]
+
+            # Add link from parent to child
+            links.append({'source': parent_name, 'target': child_name})
+
+    return render_template('Multiple_Trees.html', nodes=nodes, relationships=links,form=form,tree_name=tree_name)
+
+
+@main_bp.route("/Request_Tree", methods=['GET', 'POST'])
+def Request_Multiple_Tree():
+    form = Request_Tree()
+    with driver.session() as session:
+        # Retrieve distinct labels except for 'Person'
+        result = session.run("MATCH (n) WHERE NOT 'Person' IN labels(n) RETURN DISTINCT labels(n) AS labels")
+        choices = [(label, label) for record in result for label in record["labels"]]
+    form.Tree_Name.choices=choices
+
+    if form.validate_on_submit():
+        # Redirect to Multiple_Tree with the selected tree name as a parameter
+        return redirect(url_for('main_bp.Multiple_Tree', tree_name=form.Tree_Name.data))
+
+    return render_template("Request_Tree.html", form=form)
+
+
     
 # Function to fetch biography from Neo4j
 def get_person_bio(full_name):
@@ -252,10 +735,6 @@ def get_person_bio(full_name):
     with driver.session() as session:
         result = session.run(query, full_name=full_name)
         return result.single()
-
-
-
-
 
 NEO4J_URI='neo4j+ssc://633149e1.databases.neo4j.io'
 NEO4J_USERNAME='neo4j'
@@ -314,132 +793,6 @@ def calculate_age(date_of_birth_str):
     if age is not None:
             print(f"Calculated Age: {age}",date_of_birth_str)
     return age
-
-@main_bp.route("/modify_graph", methods=['GET', 'POST'])
-def modify_graph():
-    """The Add node page"""
-    form = AddNodeForm()
-    
-    # Fetch nodes for the select box for form 
-    with driver.session() as session:
-        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
-        nodes = [(record["name"], record["name"]) for record in result]
-        
-    form.parent.choices = nodes
-    form.new_parent.choices = nodes
-    form.person_to_delete.choices = nodes
-    form.person_to_shift.choices = nodes
-    form.old_name.choices = nodes
-
-    if form.validate_on_submit():
-        if form.action.data == "add":
-            with driver.session() as session:
-                # Retrieve the parent's hierarchy
-                parent_hierarchy_query = """
-                MATCH (p:Person {FullName: $Parent})
-                RETURN p.Hierarchy AS parent_hierarchy
-                """
-                parent_result = session.run(
-                    parent_hierarchy_query, Parent=form.parent.data
-                )
-                
-                parent_hierarchy = parent_result.single()["parent_hierarchy"]
-
-                # Add new node with hierarchy as parent's hierarchy + 1
-                session.run(
-                    """
-                    CREATE (n:Person {FullName: $full_name, Hierarchy: $new_hierarchy})
-                    """,
-                    full_name=form.name.data,
-                    new_hierarchy=parent_hierarchy + 1  # Child's hierarchy is parent's + 1
-                )
-
-                # Build the dynamic query string to add a relationship
-                query = """
-                MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
-                MERGE (a)-[r:PARENT_OF]->(b)
-                """
-
-                # Create or update relationship
-                session.run(
-                    query,
-                    full_name=form.name.data,
-                    Parent=form.parent.data
-                )
-
-            print("Data processed. Redirecting to index.")
-            return redirect(url_for("main_bp.tree_page"))
-        else:
-            print("Selected action is not 'Add Person'.")
-    else:
-        # Add debugging output
-        print("Form validation failed.")
-        print(form.errors)  # Print form validation errors if any
-
-    
-    
-    if form.action.data == "edit":
-            with driver.session() as session:
-                # Add node
-                session.run(
-                    """
-                   MATCH (n:Person {FullName: $old_name})
-                   SET n.FullName = $new_name
-                   """,
-    old_name=form.old_name.data,
-    new_name=form.new_name.data
-                )
-            return redirect(url_for("main_bp.tree_page"))
-    
-
-    if form.action.data == "delete":
-        with driver.session() as session:
-        # Delete person logic
-           session.run(
-            """
-            MATCH (n:Person {FullName: $person_to_delete})
-            DETACH DELETE n
-            """,
-            person_to_delete=form.person_to_delete.data
-        )
-        return redirect(url_for("main_bp.tree_page"))
-    
-    if form.action.data == "shift":
-        with driver.session() as session:
-        # Retrieve the new parent's hierarchy
-            parent_hierarchy_query = """
-        MATCH (p:Person {FullName: $Parent})
-        RETURN p.Hierarchy AS parent_hierarchy
-        """
-            parent_result = session.run(parent_hierarchy_query, Parent=form.new_parent.data)
-            parent_hierarchy = parent_result.single()["parent_hierarchy"]
-
-        # Update the hierarchy of the person being shifted
-            update_hierarchy_query = """
-            MATCH (b:Person {FullName: $full_name})
-            SET b.Hierarchy = $new_hierarchy
-            """
-            session.run(
-            update_hierarchy_query,
-            full_name=form.person_to_shift.data,
-            new_hierarchy=parent_hierarchy + 1  # New hierarchy is parent's hierarchy + 1
-        )
-
-        # Create or update the relationship between the new parent and the person being shifted
-            update_relationship_query = """
-        MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
-        MERGE (a)-[r:PARENT_OF]->(b)
-        """
-            session.run(
-                update_relationship_query,
-                full_name=form.person_to_shift.data,
-                Parent=form.new_parent.data
-        )
-
-            print("Person shifted and hierarchy updated. Redirecting to index.")
-            return redirect(url_for("main_bp.tree_page"))
-    return render_template('modify_graph.html', form=form)
-
 
 
 

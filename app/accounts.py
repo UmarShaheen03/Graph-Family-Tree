@@ -1,9 +1,12 @@
-from app.models import User
+from app.models import *
 from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
 from flask import current_app, url_for, session
+from app.notifs import log_notif, get_all_admin_ids
 import sys #TODO using for debug printing, remove in final
+from config import WEBSITE_URL
+from jinja2 import Template
 
 #libraries for reset password
 import smtplib
@@ -24,8 +27,9 @@ class LoginError(Exception):
 def init_database():
     #create tables
     db.create_all()
-    #clear any existing info (for testing DO NOT KEEP IN FINAL)
+    #clear any existing info (for testing TODO DO NOT KEEP IN FINAL)
     User.query.delete()
+    Notification.query.delete()
 
     #create mock accounts
     nima = User(
@@ -56,8 +60,15 @@ def init_database():
         user_id=3,
         username="cooper",
         email="cooptrooper04@gmail.com",
-        admin=False,
+        admin=True,
         password_hash=str(generate_password_hash("test"))
+    )
+
+    first_notif = Notification(
+        id=0,
+        user_id=-1,
+        text="Databases initialised",
+        time=datetime.now()
     )
   
 
@@ -66,6 +77,8 @@ def init_database():
     db.session.add(group31)
     db.session.add(test_user)
     db.session.add(cooper)
+    #add first notification to db
+    db.session.add(first_notif)
     db.session.commit()
 
 
@@ -100,6 +113,7 @@ def signup(email, username, password, repeat, remember):
     db.session.add(user)
     db.session.commit()
 
+    log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids()) #notify all admins of new account
     login(username, password, remember)
     
 
@@ -115,7 +129,7 @@ def login(email_or_username, password, remember):
         raise LoginError("Incorrect password")
     
     login_user(user, remember=remember)
-    
+    log_notif(f"User {User.get_username(user)} just logged in", get_all_admin_ids()) #notify all admins of succesful login
 
 
 
@@ -146,8 +160,7 @@ def reset_email(receiver_email):
         update({"reset_expiry": expiry}, synchronize_session = False)
     db.session.commit()
 
-    website_url = "127.0.0.1:5000" #TODO replace with real url when deploying
-    link = website_url + url_for("main_bp.reset_password_page") +"?token=" + str(token.hex) + "&user_id=" + str(user.user_id)
+    link = WEBSITE_URL + url_for("main_bp.reset_password_page") +"?token=" + str(token.hex) + "&user_id=" + str(user.user_id)
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Password Reset for " + user.username
@@ -156,86 +169,9 @@ def reset_email(receiver_email):
 
     #html version of email
     #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
-    html = """\
-    <!DOCTYPE html>
-    <html lang = "en">
-
-    <head>
-        <style>
-            body {
-                font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-                min-height: 100vh;
-            
-                padding-top: 25px;
-                padding-bottom: 25px;
-                background-repeat: no-repeat;
-            }
-
-            h1 {
-                color: purple;
-            }
-
-            .contents {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                
-            }
-
-            .texts {
-                box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-                border-radius: 1rem;
-                padding-top: 2rem; 
-                padding-right:4rem;
-                padding-left: 4rem;
-                padding-bottom: 2rem;
-                background-color: white;
-            }
-
-            #btn {
-                border: none;
-                color: white;
-                padding: 0.5rem 1rem;
-                text-decoration: none;
-                display: inline-block;
-
-                margin-top: 1rem;
-                margin-bottom: 2rem;
-                cursor: pointer;
-                background-color: purple;
-
-            }
-
-            #btn:hover {
-                background-color: rgb(92, 2, 92);
-            }
-
-            .subtext{
-                font-size: x-small;
-                color: grey;
-            }
-        </style>
-
-    </head>
-
-    <body>
-        <div class="contents">
-            <div class="texts">
-                <h1>Forgot password?</h1>
-                <p style="color:black">Click the link below to reset it.</p>
-                <div id="button">
-                    <a id='btn' href="%s">Click here</a>
-                </div>
-                <p>TEMPORARY LINK FOR DEVELOPMENT: %s</p>
-                <p class="subtext">This link is only valid for 24 hours</p>
-                <p class="subtext">If you did not make this request, simply ignore this email </p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """ % (link, link)
+    file = open("app/templates/email_reset.html", "r").read()
+    html = Template(file).render(link=link)
     
-
     #plaintext as backup if html doesn't load
     text = """\
     %s

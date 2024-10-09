@@ -70,68 +70,76 @@
 {%block bodyBlock %}
 
 <div id="back">
-  <div class='welcome'>
+  <div class='welcome container-fluid text-center'>
     <h1> Visualise your family tree with </h1>
     <h1 id="name">"Neo4j"</h1>
-    <p> Discover connections, trace your lineage, and watch your family story come to life in an intuitive,
+    <p>Discover connections, trace your lineage, and watch your family story come to life in an intuitive,
       easy-to-navigate interface.</p>
     <div class='buttons'>
-      <a class="btn" , id='started' href="{{ url_for('main_bp.login_page') }}"> Get Started</a>
-      <a class="btn" , id='learnMore'> Learn More</a>
+    <a class="btn", id = 'started' href="{{ url_for('main_bp.login_page') }}"> Get Started</a>
+    <a class="m-2"></a>
+    <a class="btn", id = 'learnMore'> Learn More</a>
     </div>
   </div>
 </div>
 
 <hr>
-
-<div id="info">
-  <div id="visualise">
-    <div class="text">
-      <h1>Visualise</h1>
-      <p>Our platform leverages Neo4j's graph database to provide a dynamic and visually engaging representation of your
-        family tree</p>
-    </div>
-    <div class="image">
-      <img src="../static/visualise.png" alt="insert image here">
-    </div>
-  </div>
-
-  <div id="navigate">
-    <div class="image">
-      <img src="../static/zooming.gif" alt="insert image here">
-    </div>
-
-    <div class="text">
-      <h1>Navigate</h1>
-      <p>Seamlessly zoom in on specific branches or get a bird's-eye view of your entire ancestory with just a few
-        clicks</p>
-      <p>
-        Be able to track your direct lineage just by hovering over the node
-      </p>
+<div class="containter">
+  <div class="row">
+    <div id="visualise">
+      <div class="text col-md">
+        <h1>Visualise</h1>
+        <p>Our platform leverages Neo4j's graph database to provide a dynamic and visually engaging representation of your
+          family tree</p>
+      </div>
+      <div class="image col-md">
+        <img src="../static/visualise.png" alt="insert image here">
+      </div>
     </div>
   </div>
 
-  <div id="discover">
-    <div class="text">
-      <h1>Discover</h1>
-      <p>Add a new family member at the click of a button and watch your family tree automatically update, ensuring your
-        family history remains current and comprehensive</p>
-    </div>
-    <div class="image">
-      <img src="../static/discover.gif" alt="insert image here">
+  <div class="row">
+    <div id="navigate">
+      <div class="image col-md">
+        <img src="../static/zooming.gif" alt="insert image here">
+      </div>
+      <div class="text col-md">
+        <h1>Navigate</h1>
+        <p>
+          Seamlessly zoom in on specific branches or get a bird's-eye view of your entire ancestory with just a few
+          clicks
+        </p>
+        <p>
+          Be able to track your direct lineage just by hovering over the node
+        </p>
+      </div>
     </div>
   </div>
 
-  <div id="learn">
-    <div class="image">
-      <img src="../static/biography.png" alt="insert image here">
+  <div class="row">
+    <div id="discover">
+      <div class="text col-md">
+        <h1>Discover</h1>
+        <p>Add a new family member at the click of a button and watch your family tree automatically update, ensuring your
+          family history remains current and comprehensive</p>
+      </div>
+      <div class="image col-md">
+        <img src="../static/discover.gif" alt="insert image here">
+      </div>
     </div>
+  </div> 
+
+  <div class="row">
+    <div id="learn">
+      <div class="image col-md">
+        <img src="../static/biography.png" alt="insert image here">
+      </div>
 
     <div class="text">
       <h1>Learn</h1>
       <p>Learn more about your family with dedicated biography pages for each node</p>
     </div>
-
+    
   </div>
 </div>
 <div id="usermanual">
@@ -143,7 +151,6 @@
 
 
 <div id="toast" class="toast">Request made successfully!</div>
-
 
 
 {%endblock %}

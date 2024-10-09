@@ -2,7 +2,7 @@ import sqlalchemy as sa
 from app.models import User
 from flask_login import current_user
 from flask import Flask, flash, render_template, redirect, request, session, url_for
-from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
+from wtforms import EmailField, FieldList, FileField, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
 from wtforms.validators import DataRequired, NumberRange, Email, ValidationError, EqualTo, Length, Optional
 from flask_wtf import CSRFProtect, FlaskForm
 
@@ -11,6 +11,9 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password", validators=[DataRequired()])
     remember_me = BooleanField("Stay logged in?")
     submit = SubmitField("Log In")
+
+class LogoutForm(FlaskForm):
+    submit = SubmitField("Log Out")
     
 class SignupForm(FlaskForm):
     email = EmailField("Email", validators=[DataRequired(), Email()])
@@ -140,3 +143,53 @@ class Search_Node (FlaskForm):
         choices=[]  # Populate this dynamically in your view
     )
       submit = SubmitField("Search")
+
+
+class submit_File (FlaskForm):
+    file=FileField("Upload Your CSV file")
+    name=StringField("Name of the tree")
+    submit=SubmitField('Submit')
+
+
+
+class Request_Tree (FlaskForm):
+    Tree_Name = SelectField(
+        'Tree Name',
+        choices=[]  # Populate this dynamically in your view
+    )
+    submit = SubmitField("Submit")
+
+
+class RequestTreeForm(FlaskForm):
+    tree_name = SelectField(
+        'Tree Name',
+        choices=[],  # This can be populated dynamically in your view
+        validators=[DataRequired()],
+        render_kw={"class": "form-control rounded-pill"}
+    )
+   
+    submit = SubmitField('Submit Request', render_kw={"class": "btn btn-primary rounded-pill"})
+
+class IgnoreNotifs (FlaskForm):
+    login=BooleanField("Logins", default=True)
+    logout=BooleanField("Logouts", default=True)
+    reset=BooleanField("Password Resets", default=True)
+    signup=BooleanField("Sign Ups", default=True)
+
+    admin_req=BooleanField("Admin Requests", default=True)
+    tree_req=BooleanField("Tree Access Requests", default=True)
+    req_accepted=BooleanField("Request Acceptance", default=True)
+
+    comment=BooleanField("New Comments", default=True)
+    bio_edit=BooleanField("Biography Edits", default=True)
+
+    tree_create=BooleanField("New People On Tree", default=True)
+    tree_move=BooleanField("Person Moved On Tree", default=True)
+    tree_update=BooleanField("Person Renamed On Tree", default=True)
+    tree_delete=BooleanField("Person Removed From Tree", default=True)
+
+    submit=SubmitField("Submit")
+    # "Login", "Logout", "Reset", "Signup" (account related) 
+    # "Admin Request", "Tree Request", "Request" (request related)
+    # "Comment", "Bio Edit" (bio related)
+    # "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)

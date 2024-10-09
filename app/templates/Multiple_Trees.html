@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 
 {% block headBlock %}
-    <title>Dehdashti Family Graph</title>
+    <title> Family Graph</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tree.css') }}"/>
 {% endblock %}
 
 {% block bodyBlock %}
+<h1 id="Multi_Tree">{{ tree_name }}  Family Graph</h1>
 <div class="d-md-flex flex-md-row container">
-    <p></p>
+   
     <div id="graph-container">
         {{ form.hidden_tag() }}
         <!-- <label for="fullname" style="font-weight: bold; font-size: 14px; margin-right: 10px;">{{form.fullname.label}}</label> -->
@@ -18,13 +19,10 @@
     </div>
     <div id="tooltip"></div>
 </div>
-
-</div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
-
 <script>
-    var nodes = "{{ nodes|tojson }}";
-    var links = "{{ relationships|tojson }}";
+    var nodes = {{ nodes|tojson }};
+    var links = {{ relationships|tojson }};
 
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
@@ -53,7 +51,13 @@
         .append("g");
 
     // Tooltip setup
-    const tooltip = d3.select("#tooltip")
+    const tooltip = d3.select("body").append("div")
+        .attr("id", "tooltip")
+        .style("position", "absolute")
+        .style("background-color", "white")
+        .style("border", "1px solid #ccc")
+        .style("padding", "5px")
+        .style("border-radius", "4px")
         .style("opacity", 0);  // Initially hidden
 
     // Color scale based on hierarchy
@@ -72,9 +76,7 @@
 
         // Place nodes in a circular fashion by hierarchy
         groupedNodes.forEach((group, hierarchy) => {
-            // Sort nodes in each hierarchy group by their lineage
             const sortedGroup = Array.from(group).sort((a, b) => d3.ascending(a.lineage, b.lineage));
-            
             const angleStep = (2 * Math.PI) / sortedGroup.length;
             const radius = hierarchy * radiusStep;
 
@@ -86,35 +88,33 @@
             });
         });
 
-        // Add links (hidden by default)
-        const linkElements = svg.selectAll(".link")
+        // Add links first (always visible)
+        svg.selectAll(".link")
             .data(links)
             .enter().append("line")
             .attr("class", "link")
             .attr("x1", d => nodes.find(node => node.name === d.source).x)
             .attr("y1", d => nodes.find(node => node.name === d.source).y)
             .attr("x2", d => nodes.find(node => node.name === d.target).x)
-            .attr("y2", d => nodes.find(node => node.name === d.target).y);
+            .attr("y2", d => nodes.find(node => node.name === d.target).y)
+            .attr("stroke", "#ff0000")  // Link color set to red
+            .attr("stroke-width", 2)    // Set width for visibility
+            .style("visibility", "visible")  // Explicitly set visibility
+            .style("opacity", 1);  // Ensure full opacity
 
         // Draw nodes
         const nodeElements = svg.selectAll(".node")
             .data(nodes)
             .enter().append("g")
             .attr("class", "node")
-            .on("mouseover", function (event, d) {
+            .on("mouseover", function(event, d) {
                 tooltip.transition().duration(200).style("opacity", 0.9);
                 tooltip.html(d.name)  // Display node name in tooltip
-                    .style("left", (event.pageX + 5) + "px")
-                    .style("top", (event.pageY - 28) + "px");
-
-                // Highlight the node's direct connections
-                highlightConnections(d.name);
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 10) + "px");
             })
-            .on("mouseout", function () {
+            .on("mouseout", function() {
                 tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
-
-                // Remove highlighting on mouse out
-                unhighlightConnections();
             })
             .call(d3.drag()
                 .on("start", function (event, d) {
@@ -124,7 +124,7 @@
                     d.x = event.x;
                     d.y = event.y;
                     d3.select(this).select("circle").attr("cx", d.x).attr("cy", d.y);
-                    d3.select(this).select("text").attr("x", d.x + 30).attr("y", d.y + 5); // Adjusted label position
+                    d3.select(this).select("text").attr("x", d.x + 30).attr("y", d.y + 5);
                     svg.selectAll(".link")
                         .filter(link => link.source === d.name || link.target === d.name)
                         .attr("x1", link => nodes.find(node => node.name === link.source).x)
@@ -137,84 +137,50 @@
                 })
             );
 
-        // Add circle for each node with increased size
+        // Add circle for each node
         nodeElements.append("circle")
-            .attr("r", 25)  // Increased radius for better visibility
+            .attr("r", 25)
             .attr("cx", d => d.x)
             .attr("cy", d => d.y)
             .attr("fill", d => color(d.hierarchy));
 
-        // Add text label for each node showing the name of the node
+        // Add text label for each node
         nodeElements.append("text")
-            .attr("x", d => d.x + 30)  // Position label slightly to the right
-            .attr("y", d => d.y + 5)  // Center vertically to the node
-            .text(d => d.name)  // Show node name
+            .attr("x", d => d.x + 30)
+            .attr("y", d => d.y + 5)
+            .text(d => d.name)
             .attr("font-size", "14px")
-            .attr("font-weight", "lighter")
-            // .attr("fill", "#000");
-
-        // Function to highlight the direct lineage and cascade connections
-        function highlightConnections(nodeName) {
-            // Highlight the edges and nodes directly connected to the hovered node (no cascading)
-            svg.selectAll(".link")
-                .filter(link => link.source === nodeName || link.target === nodeName)
-                .classed("highlighted", true);
-
-            // Highlight the connected nodes
-            svg.selectAll(".node")
-                .filter(node => node.name === nodeName || links.some(link => (link.source === nodeName && link.target === node.name) || (link.target === nodeName && link.source === node.name)))
-                .select("circle")
-                .attr("fill", "#ff5722"); // Change color of highlighted nodes
-        }
-
-        // Function to reset the highlights
-        function unhighlightConnections() {
-            // Reset the edges and nodes back to normal
-            svg.selectAll(".link").classed("highlighted", false);
-            svg.selectAll(".node").select("circle")
-                .attr("fill", d => color(d.hierarchy)); // Reset node colors
-        }
-
-       // When a node is double-clicked, redirect to the bio view page for that person
-nodeElements.on("dblclick", function (event, d) {
-    window.location.href = "/biography/" + encodeURIComponent(d.name);  // Redirect to view bio page
-});
-
-
+            .attr("font-weight", "lighter");
     }
 
     // Call visualizeGraph with the fetched nodes and links
     visualizeGraph(nodes, links);
 
-// Function to zoom into a specific node
-function zoomToNode(node) {
-    const scale = 2; // Adjust zoom scale as needed
-    const x = node.x;
-    const y = node.y;
+    // Function to zoom into a specific node
+    function zoomToNode(node) {
+        const scale = 2; // Adjust zoom scale as needed
+        const x = node.x;
+        const y = node.y;
 
-    svg.transition()
-        .duration(750)
-        .call(zoom.transform, d3.zoomIdentity.translate(centerX - x * scale, centerY - y * scale).scale(scale));
-}
-
-// Event handler for form submission
-document.getElementById('Search').addEventListener('click', function(event) {
-    event.preventDefault(); // Prevent default form submission
-
-    const nodeName = document.getElementById('fullname').value;
-    const node = nodes.find(n => n.name === nodeName);
-
-    if (node) {
-        zoomToNode(node);
-    } else {
-        alert("Node not found");
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity.translate(centerX - x * scale, centerY - y * scale).scale(scale));
     }
-});
+
+    // Event handler for form submission
+    document.getElementById('Search').addEventListener('click', function(event) {
+        event.preventDefault();
+        const nodeName = document.getElementById('fullname').value;
+        const node = nodes.find(n => n.name === nodeName);
+        if (node) {
+            zoomToNode(node);
+        } else {
+            alert("Node not found");
+        }
+    });
 </script>
 
+
+
+
 {% endblock %}
-
-
-
-
-
