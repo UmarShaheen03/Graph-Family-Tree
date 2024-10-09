@@ -72,8 +72,8 @@ class Comment(db.Model):
 
 class Tree(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     name = db.Column(db.String)
-
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)

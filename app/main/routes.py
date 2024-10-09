@@ -452,7 +452,7 @@ def modify_graph():
             log_notif(f"User {User.get_username(current_user)} just added a new person, {form.name.data}, to family TODO", 
             get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about new person
 
-            return redirect(url_for("main_bp.tree_page", tree_id=), #TODO 
+            return redirect(url_for("main_bp.tree_page"), #TODO 
                             notifications=get_users_notifs(current_user), 
                             logged_in_as=User.get_username(current_user))
         else:
@@ -479,7 +479,7 @@ def modify_graph():
             log_notif(f"User {User.get_username(current_user)} just changed the name of person {form.old_name.data} to {form.new_name.data}, in the family TODO", 
             get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
 
-            return redirect(url_for("main_bp.tree_page", tree_id=), 
+            return redirect(url_for("main_bp.tree_page"), 
                             notifications=get_users_notifs(current_user), 
                             logged_in_as=User.get_username(current_user))
     
@@ -498,7 +498,7 @@ def modify_graph():
         log_notif(f"User {User.get_username(current_user)} just removed the person {form.person_to_delete.data} from the family TODO", 
         get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
 
-        return redirect(url_for("main_bp.tree_page", tree_id=), #TODO
+        return redirect(url_for("main_bp.tree_page"), #TODO
                         notifications=get_users_notifs(current_user), 
                         logged_in_as=User.get_username(current_user))
     

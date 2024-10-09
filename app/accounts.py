@@ -73,6 +73,7 @@ def init_database():
 
     dehdashti_tree = Tree(
         id=0,
+        user_id=0,
         name="Dehdashti"
     )
   
