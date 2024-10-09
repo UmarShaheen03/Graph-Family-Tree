@@ -39,6 +39,7 @@
 
     
     <div class="col-md-8">
+      {% if not admin %}
       <div class="box mb-4">
         <h3>Request Access to a Family Tree</h3>
         <form id="requestTreeAccessForm">
@@ -72,10 +73,10 @@
           <button type="submit" class="btn btn-primary">Request Admin Access</button>
         </form>
       </div>
-
+      {% endif %}
       <div class="box mb-4">
         <h3>Email Notifications</h3>
-        <form action="/preference-form" method="post" class="container px-4">
+        <form action="/often_form" method="post">
           <div class="form-group">
             {{ preferenceForm.preference.label }}
             <br>
@@ -171,6 +172,12 @@
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 
 <script>
+  //scripts to set the defaults on all the forms
+  //uses jinja so i couldn't put it in the other file
+
+  often = "{{ often }}"
+  document.getElementById("preference").value = often;
+
   preferences = "{{ preferences }}"
   if (preferences.includes(" Login")) {
       document.getElementById("login").checked = true;
@@ -214,7 +221,5 @@
   if (preferences.includes(" Tree Delete")) {
       document.getElementById("tree_delete").checked = true;
   }
-  
-
 </script>
 {% endblock %}

@@ -35,6 +35,12 @@ class User(UserMixin, db.Model):
     def get_ignored(self):
         return (self.notifs_ignored)
     
+    def set_often(self, preference):
+        self.email_preference = preference
+    
+    def get_often(self):
+        return (self.email_preference)
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
