@@ -1,7 +1,7 @@
 """Main route views"""
 
 import os
-from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file
+from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file, send_from_directory
 from app.forms import *
 from app.models import Biography, Comment, User
 from app.accounts import *
@@ -800,11 +800,17 @@ def calculate_age(date_of_birth_str):
 def request_admin():
     user_email = session.get('user_email')
     token = serializer.dumps(user_email, salt="admin-privilege-request")
+    approval_link = f"approve_admin?token={token}"
     if not user_email:
-        return jsonify({'error': 'User email not found in session'}), 400
-    send_email_to_admin(token)
+        return 'error: User email not found in session'
+    ids = get_all_admin_ids()
+    text = user_email + " is requesting admin privileges, press the 'go to' button to accept"
+    log_notif(text,ids, approval_link)
+    send_emails(ids)
 
-    return jsonify({"message": user_email})
+    return 'request sent'
+    
+
 
 
 @main_bp.route('/approve_admin', methods=['GET'])
