@@ -586,7 +586,6 @@ def update_preferences():
     
     user = db.session.query(User).filter(User.user_id == User.get_id(current_user)).first()
     user.set_ignored(create_notifs_string(request))
-    print(create_notifs_string(request))
     db.session.commit()
 
     return redirect(url_for("main_bp.my_dashboard"))
@@ -664,7 +663,9 @@ def create_tree():
             # Check if the file is a CSV
             if not file.filename.endswith('.csv'):
                 error_message = 'Invalid file format. Please upload a CSV file.'
-                return render_template("create_tree.html", form=form, error_message=error_message)
+                return render_template("create_tree.html", form=form, error_message=error_message,
+                                        notifications=get_users_notifs(current_user), 
+                                        logged_in_as=User.get_username(current_user))
 
             file_data = file.read().decode('utf-8')
             DATA = []
@@ -720,7 +721,9 @@ def create_tree():
 
             return redirect(url_for('main_bp.multiple_tree', tree_id=new_id))
 
-    return render_template("create_tree.html", form=form, error_message=error_message)
+    return render_template("create_tree.html", form=form, error_message=error_message,
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
 
 
 @main_bp.route("/request_tree", methods=['GET', 'POST'])
@@ -736,7 +739,9 @@ def request_multiple_tree():
         # Redirect to Multiple_Tree with the selected tree name as a parameter
         return redirect(url_for('main_bp.multiple_tree', tree_name=form.Tree_Name.data))
 
-    return render_template("request_tree.html", form=form)
+    return render_template("request_tree.html", form=form,
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
 
 
     

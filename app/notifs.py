@@ -22,7 +22,6 @@ def get_users_notifs(user): #check through notif db for all notifs with user id
     #clear any ignored notifs automatically
     for notif in notifications:
         if notif.type != None:
-            print(notif.type)
             if notif.type in ignored:
                 db.session.query(Notification).filter(Notification.id == notif.id).delete()
                 notifications.remove(notif)

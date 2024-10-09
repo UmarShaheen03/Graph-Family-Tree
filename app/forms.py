@@ -172,7 +172,7 @@ class RequestTreeForm(FlaskForm):
 
 class EmailPreference(FlaskForm):
     preference = SelectField(
-        "How often would you like emails? (sent 5pm daily, or 5pm Friday if weekly)",
+        "Choose how often would you like emails, and submit (emails are sent 5pm daily, or 5pm Friday if weekly).",
         choices=["Daily","Weekly","None"],
         validators=[DataRequired()]
     )
