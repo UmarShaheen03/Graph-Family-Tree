@@ -29,6 +29,9 @@ class User(UserMixin, db.Model):
     def get_email(self):
         return (self.email)
     
+    def set_ignored(self, preferences):
+        self.notifs_ignored = preferences
+    
     def get_ignored(self):
         return (self.notifs_ignored)
     
@@ -38,18 +41,12 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password) 
     
-    def unsubscribe(self):
-        self.email_preference = "None"
-    
     @login.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
 
     def is_admin(self):
         return (self.admin)
-    
-    def change_ignore_notifs(self, preferences):
-        self.notifs_ignored = preferences
     
 
 class Biography(db.Model):

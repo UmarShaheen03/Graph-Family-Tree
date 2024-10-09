@@ -41,16 +41,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Placeholder for backend integration 
     });
 
-    // Handle the 'Enable Email Notifications' form submission
-    document.getElementById('emailNotificationsForm').addEventListener('submit', function(event) {
-        event.preventDefault();
 
-        // Check if the email notifications checkbox is checked
-        const emailEnabled = document.getElementById('email_notifications').checked;
-
-        // Show an alert for email notification status
-        alert('Email Notifications ' + (emailEnabled ? 'Enabled' : 'Disabled'));
-
-        // Placeholder for backend integration
-    });
+    
 });

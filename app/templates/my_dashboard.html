@@ -88,7 +88,7 @@
 
       <div class="box mb-4">
         <h3>Ignored Notifications</h3>
-        <form action="/preference-form" method="post">
+        <form action="/preference_form" method="post">
           <p>Check the box of any notifications you'd like to stop receiving, and submit.</p>
 
             <div style="display:inline-block;vertical-align:top;width:24%">
@@ -169,4 +169,52 @@
 
 
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+<script>
+  preferences = "{{ preferences }}"
+  if (preferences.includes(" Login")) {
+      document.getElementById("login").checked = true;
+  }
+  if (preferences.includes(" Logout")) {
+      document.getElementById("logout").checked = true;
+  }
+  if (preferences.includes(" Reset")) {
+      document.getElementById("reset").checked = true;
+  }
+  if (preferences.includes(" Signup")) {
+      document.getElementById("signup").checked = true;
+  }
+
+  if (preferences.includes(" Admin Req")) {
+      document.getElementById("admin_req").checked = true;
+  }
+  if (preferences.includes(" Tree Req")) {
+      document.getElementById("tree_req").checked = true;
+  }
+  if (preferences.includes(" Request")) {
+      document.getElementById("req_accepted").checked = true;
+  }
+
+  if (preferences.includes(" Comment")) {
+      document.getElementById("comment").checked = true;
+  }
+  if (preferences.includes(" Bio Edit")) {
+      document.getElementById("bio_edit").checked = true;
+  }
+
+  if (preferences.includes(" Tree Create")) {
+      document.getElementById("tree_create").checked = true;
+  }
+  if (preferences.includes(" Tree Move")) {
+      document.getElementById("tree_move").checked = true;
+  }
+  if (preferences.includes(" Tree Update")) {
+      document.getElementById("tree_update").checked = true;
+  }
+  if (preferences.includes(" Tree Delete")) {
+      document.getElementById("tree_delete").checked = true;
+  }
+  
+
+</script>
 {% endblock %}

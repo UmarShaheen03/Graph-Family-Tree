@@ -179,22 +179,22 @@ class EmailPreference(FlaskForm):
     submit=SubmitField("Submit")
 
 class IgnoreNotifs (FlaskForm):
-    login=BooleanField("Logins", default=True)
-    logout=BooleanField("Logouts", default=True)
-    reset=BooleanField("Password Resets", default=True)
-    signup=BooleanField("Sign Ups", default=True)
+    login=BooleanField("Logins", default=False)
+    logout=BooleanField("Logouts", default=False)
+    reset=BooleanField("Password Resets", default=False)
+    signup=BooleanField("Sign Ups", default=False)
 
-    admin_req=BooleanField("Admin Requests", default=True)
-    tree_req=BooleanField("Tree Requests", default=True)
-    req_accepted=BooleanField("Request Accept", default=True)
+    admin_req=BooleanField("Admin Requests", default=False)
+    tree_req=BooleanField("Tree Requests", default=False)
+    req_accepted=BooleanField("Request Accept", default=False)
 
-    comment=BooleanField("New Comments", default=True)
-    bio_edit=BooleanField("Biography Edits", default=True)
+    comment=BooleanField("New Comments", default=False)
+    bio_edit=BooleanField("Biography Edits", default=False)
 
-    tree_create=BooleanField("New Person", default=True)
-    tree_move=BooleanField("Person Moved", default=True)
-    tree_update=BooleanField("Person Renamed", default=True)
-    tree_delete=BooleanField("Person Removed", default=True)
+    tree_create=BooleanField("New Person", default=False)
+    tree_move=BooleanField("Person Moved", default=False)
+    tree_update=BooleanField("Person Renamed", default=False)
+    tree_delete=BooleanField("Person Removed", default=False)
 
     submit=SubmitField("Submit")
     # "Login", "Logout", "Reset", "Signup" (account related) 

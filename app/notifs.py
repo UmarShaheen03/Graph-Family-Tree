@@ -15,7 +15,6 @@ import sys
 
 
 def get_users_notifs(user): #check through notif db for all notifs with user id
-    #TODO auto remove notifs user doesn't want to see
     id = User.get_id(user)
     ignored = User.get_ignored(user)
     notifications = db.session.query(Notification).filter(Notification.user_id == id).order_by(desc(Notification.time)).all()
@@ -132,34 +131,34 @@ def create_notifs_string(request):
     string = ""
 
     if (request.form.get("login")):
-        string.append(" Login")
+        string += (" Login")
     if (request.form.get("logout")):
-        string.append(" Logout")
+        string += (" Logout")
     if (request.form.get("reset")):
-        string.append(" Reset")
+        string += (" Reset")
     if (request.form.get("signup")):
-        string.append(" Signup")
+        string += (" Signup")
 
     if (request.form.get("admin_req")):
-        string.append(" Admin Req")
+        string += (" Admin Req")
     if (request.form.get("tree_req")):
-        string.append(" Tree Req")
+        string += (" Tree Req")
     if (request.form.get("req_accepted")):
-        string.append(" Request")
+        string += (" Request")
 
     if (request.form.get("comment")):
-        string.append(" Comment")
+        string += (" Comment")
     if (request.form.get("bio_edit")):
-        string.append(" Bio Edit")
+        string += (" Bio Edit")
 
     if (request.form.get("tree_create")):
-        string.append(" Tree Create")
+        string += (" Tree Create")
     if (request.form.get("tree_move")):
-        string.append(" Tree Move")
+        string += (" Tree Move")
     if (request.form.get("tree_update")):
-        string.append(" Tree Delete")
+        string += (" Tree Delete")
     if (request.form.get("tree_delete")):
-        string.append(" Tree Delete")
+        string += (" Tree Delete")
     
     return string
 

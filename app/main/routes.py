@@ -596,6 +596,18 @@ def ignore_notifs(user_id):
     #TODO return to account page
     return redirect(url_for("main_bp.home_page"))
 
+@main_bp.route("/preference_form", methods=['POST'])
+def update_preferences():
+    check = check_login()
+    if check != None:
+        return check
+    
+    user = db.session.query(User).filter(User.user_id == User.get_id(current_user)).first()
+    user.set_ignored(create_notifs_string(request))
+    db.session.commit()
+
+    return redirect(url_for("main_bp.my_dashboard"))
+    
 
 
 
@@ -632,7 +644,7 @@ def my_dashboard():
     
     form1 = EmailPreference()
     form2 = IgnoreNotifs()
-    return render_template('my_dashboard.html', preferenceForm=form1, ignoreForm=form2)
+    return render_template('my_dashboard.html', preferenceForm=form1, ignoreForm=form2, preferences=User.get_ignored(current_user))
 
 
 @main_bp.route("/create_tree", methods=['GET', 'POST'])
