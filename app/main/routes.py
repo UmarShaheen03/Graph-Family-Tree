@@ -1,7 +1,7 @@
 """Main route views"""
 
 import os
-from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file, send_from_directory
+from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file, send_from_directory, jsonify
 from app.forms import *
 from app.models import Biography, Comment, User
 from app.accounts import *
@@ -808,7 +808,11 @@ def request_admin():
     log_notif(text,ids, approval_link)
     send_emails(ids)
 
-    return 'request sent'
+    message = {
+        "message" : user_email
+    }
+
+    return jsonify(message)
     
 
 

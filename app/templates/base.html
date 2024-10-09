@@ -21,6 +21,69 @@
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
         <!-- Cryptography JavaScript Library-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+        <style>
+            /* Basic styling for the toast notification */
+            .toast {
+                visibility: hidden;
+                min-width: 250px;
+                background-color: white;
+                color: purple;
+                text-align: center;
+                border-radius: 2px;
+                padding: 16px;
+                position: fixed;
+                z-index: 1;
+                left: 50%;
+                top: 20px;
+                transform: translateX(-50%);
+                font-size: 17px;
+            }
+          
+            .toast.show {
+                visibility: visible;
+                animation: fadein 0.5s, fadeout 0.5s 2.5s;
+            }
+          
+            @keyframes fadein {
+                from {top: 0; opacity: 0;}
+                to {top: 20px; opacity: 1;}
+            }
+          
+            @keyframes fadeout {
+                from {top: 20px; opacity: 1;}
+                to {top: 0; opacity: 0;}
+            }
+        </style>
+
+        <script>
+            function requestAdmin() {
+              fetch('/request_admin', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                }
+              })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.message) {
+                    showToast(data.message);
+                  } else if (data.error) {
+                    showToast(data.error);
+                  }
+                })
+                .catch((error) => {
+                  console.error('Error:', error);
+                  showToast("An error occurred");
+                });
+            }
+          
+            function showToast(message) {
+              const toast = document.getElementById("toast");
+              toast.innerText = "Admin Request Made for " + message;
+              toast.className = "toast show";
+              setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+            }
+          </script>
 
         {% block headBlock %}{% endblock %}
     </head>
@@ -84,6 +147,8 @@
                 {% endwith %}
             {% endfor %}
         </div>
+
+        <div id="toast" class="toast">Request made successfully!</div>
 
         <script> //script for notifications drop down
             function clickNotifications() { //toggle dropdown when clicked
