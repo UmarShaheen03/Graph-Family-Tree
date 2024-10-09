@@ -329,6 +329,7 @@ def edit_biography():
     check = check_login_admin()
     if check != None:
         return check
+        
     
     biography = Biography.query.first()
     edit_form = BiographyEditForm()
@@ -380,12 +381,22 @@ def edit_biography():
     
     
 
-@main_bp.route("/modify_graph", methods=['GET', 'POST'])
+@main_bp.route("/modify_graph/<tree_id>", methods=['GET', 'POST'])
 def modify_graph():
     """The Add node page"""
     check = check_login_admin()
     if check != None:
         return check
+    
+    tree_id = request.args.get('tree_id')  # Get the tree id from the URL parameter
+    tree_name = db.session.query(Tree).filter(Tree.id == tree_id).first()
+
+    #TODO check if user has access to this tree
+
+    if tree_name == None:
+        return redirect(url_for("main_bp.home_page")) #invalid tree TODO redirect elswewhere?
+    else:
+        tree_name = tree_name.name
     
     form = AddNodeForm()
     
@@ -615,10 +626,10 @@ def check_login_admin():
 
 @main_bp.route('/my_dashboard', methods=['GET', 'POST'])
 def my_dashboard():
-    
     check = check_login()
     if check is not None:
         return check 
+    
     return render_template('my_dashboard.html')
 
 
@@ -677,7 +688,17 @@ def create_tree():
                 for relationship_query in Relationships.splitlines():
                     session.run(relationship_query)
 
-            return redirect(url_for('main_bp.multiple_tree', tree_name=name))
+            #add name to tree database
+            new_id = db.session.query(Tree).order_by(Tree.id.desc()).first().id + 1,
+            tree = Tree(
+                id = new_id,
+                name = name
+            )
+
+            db.session.add(tree)
+            db.session.commit()
+
+            return redirect(url_for('main_bp.multiple_tree', tree_id=new_id))
 
     return render_template("create_tree.html", form=form, error_message=error_message)
 

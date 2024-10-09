@@ -70,6 +70,11 @@ def init_database():
         text="Databases initialised",
         time=datetime.now()
     )
+
+    dehdashti_tree = Tree(
+        id=0,
+        name="Dehdashti"
+    )
   
 
     #add mock accounts to db
@@ -79,6 +84,8 @@ def init_database():
     db.session.add(cooper)
     #add first notification to db
     db.session.add(first_notif)
+    #add first tree to db
+    db.session.add(dehdashti_tree)
     db.session.commit()
 
 
