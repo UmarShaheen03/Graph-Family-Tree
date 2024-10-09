@@ -18,17 +18,19 @@ def get_users_notifs(user): #check through notif db for all notifs with user id
     id = User.get_id(user)
     ignored = User.get_ignored(user)
     notifications = db.session.query(Notification).filter(Notification.user_id == id).order_by(desc(Notification.time)).all()
-    
+
     #clear any ignored notifs automatically
     for notif in notifications:
         if notif.type != None:
+            print(notif.type)
             if notif.type in ignored:
                 db.session.query(Notification).filter(Notification.id == notif.id).delete()
+                notifications.remove(notif)
         
     db.session.commit()
     return notifications
 
-def log_notif(text, users, goto = None): #users is a list of ids to send the notif to
+def log_notif(text, users, type, goto = None): #users is a list of ids to send the notif to
     new_id = db.session.query(Notification).order_by(Notification.id.desc()).first().id
     users.append(-1) #master log, send backup of all notifs to it
     if (goto != None):
@@ -42,6 +44,7 @@ def log_notif(text, users, goto = None): #users is a list of ids to send the not
             user_id = user_id,
             text = text,
             time = datetime.now(),
+            type = type,
             goto = goto
         )
         db.session.add(notif)
@@ -51,9 +54,11 @@ def check_for_emails(): #threaded task, runs every second
     while True:
         sleep(1)
         #print("Email Time: " + str(datetime.now().time())[:8])
-        if(str(datetime.now().time())[:8] == "17:00:00"): #5pm
+        if(str(datetime.now().time())[:8] == "13:35:00"): #5pm
+            print("sending daily emails!")
             send_emails(get_all_ids_with_daily())
             if (datetime.now().weekday() == 4): #friday
+                print("sending weekly emails too!")
                 send_emails(get_all_ids_with_weekly())
 
 def send_emails(ids):
@@ -68,9 +73,14 @@ def send_emails(ids):
         context = ssl.create_default_context()
 
         notifications = get_users_notifs(user)
+
+        if (notifications == None):
+            continue #skip if no notifs for this user
+
         notif_amount = len(notifications)
         if (notif_amount > 10):
             notifications = notifications[:10] #slice to just first 10 notifications
+        
 
         message = MIMEMultipart("alternative")
         message["Subject"] = "Notifications from Dehdashti Family Graph for " + user.username

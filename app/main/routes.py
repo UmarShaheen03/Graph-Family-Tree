@@ -89,7 +89,7 @@ def login_request():
 #form submissions for logout
 @main_bp.route("/logout-form", methods=["POST"])
 def logout_request():
-    log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids()) #notify all admins of logout
+    log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids(), " Logout") #notify all admins of logout
     logout_user()
     return redirect(url_for("main_bp.home_page"))
     
@@ -194,7 +194,7 @@ def reset_form():
 
 
     user = db.session.query(User).filter(User.user_id == user_id).first()
-    log_notif(f"User {User.get_username(user)} just reset their password", get_all_admin_ids()) #notify all admins of password reset
+    log_notif(f"User {User.get_username(user)} just reset their password", get_all_admin_ids() + User.get_id(user), " Reset") #notify all admins (and user) of password reset
 
     loginForm = LoginForm()
     logoutForm = LogoutForm()
@@ -298,7 +298,7 @@ def biography(name):
         db.session.commit()
 
         log_notif(f"User {User.get_username(current_user)} just commented on person {name} from the family TODO", 
-        get_all_admin_ids() + get_all_ids_with_tree("TODO"), "/biography/" + name) #notify all admins/users with access about moved person
+        get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Comment", "/biography/" + name) #notify all admins/users with access about moved person
 
         flash('Comment added successfully')
 
@@ -369,7 +369,7 @@ def edit_biography():
         
         flash(f'Biography for {person_name} has been updated successfully.')
         log_notif(f"User {User.get_username(current_user)} just edited the bio of {person_name} from family TODO", 
-                  get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about bio edit
+                  get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Bio Edit", "/biography/" + person_name) #notify all admins/users with access about bio edit
         
         return redirect(url_for('main_bp.biography', name=person_name,
                                 notifications=get_users_notifs(current_user), 
@@ -450,7 +450,7 @@ def modify_graph():
             print("Data processed. Redirecting to index.")
 
             log_notif(f"User {User.get_username(current_user)} just added a new person, {form.name.data}, to family TODO", 
-            get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about new person
+            get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Tree Create") #notify all admins/users with access about new person
 
             return redirect(url_for("main_bp.tree_page"), #TODO 
                             notifications=get_users_notifs(current_user), 
@@ -477,7 +477,7 @@ def modify_graph():
                 )
 
             log_notif(f"User {User.get_username(current_user)} just changed the name of person {form.old_name.data} to {form.new_name.data}, in the family TODO", 
-            get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
+            get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Tree Update") #notify all admins/users with access about removed person
 
             return redirect(url_for("main_bp.tree_page"), 
                             notifications=get_users_notifs(current_user), 
@@ -496,7 +496,7 @@ def modify_graph():
         )
            
         log_notif(f"User {User.get_username(current_user)} just removed the person {form.person_to_delete.data} from the family TODO", 
-        get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about removed person
+        get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Tree Remove") #notify all admins/users with access about removed person
 
         return redirect(url_for("main_bp.tree_page"), #TODO
                         notifications=get_users_notifs(current_user), 
@@ -537,7 +537,7 @@ def modify_graph():
             print("Person shifted and hierarchy updated. Redirecting to index.")
 
             log_notif(f"User {User.get_username(current_user)} moved person {form.person_to_shift.data} to be under {form.new_parent.data} in family TODO", 
-            get_all_admin_ids() + get_all_ids_with_tree("TODO")) #notify all admins/users with access about moved person
+            get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Tree Move") #notify all admins/users with access about moved person
 
             return redirect(url_for("main_bp.tree_page"),
                             notifications=get_users_notifs(current_user), 
@@ -562,7 +562,7 @@ def unsubscribe(user_id):
                                 notifications=get_users_notifs(current_user), 
                                 logged_in_as=User.get_username(current_user))
 
-    User.unsubscribe(current_user)
+    User.set_often(current_user)
     return render_template("unsubscribe.html", email=User.get_email(current_user),
                            notifications=get_users_notifs(current_user), 
                            logged_in_as=User.get_username(current_user))
@@ -578,24 +578,6 @@ def seen_notif(notif_id):
     db.session.commit()
     return redirect(url_for("main_bp.home_page"))
 
-@main_bp.route("/ignore_notifs/<user_id>", methods=["POST"])
-def ignore_notifs(user_id):
-    loginForm = LoginForm()
-    logoutForm = LogoutForm()
-
-    if not current_user.is_authenticated: #if not logged in
-        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
-    elif (int(user_id) != User.get_id(current_user)): #if logged in as a different user
-        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe",
-                                notifications=get_users_notifs(current_user), 
-                                logged_in_as=User.get_username(current_user))
-    
-    preferences = create_notifs_string()
-    User.change_ignore_notifs(current_user, preferences)
-
-    #TODO return to account page
-    return redirect(url_for("main_bp.home_page"))
-
 @main_bp.route("/preference_form", methods=['POST'])
 def update_preferences():
     check = check_login()
@@ -604,6 +586,7 @@ def update_preferences():
     
     user = db.session.query(User).filter(User.user_id == User.get_id(current_user)).first()
     user.set_ignored(create_notifs_string(request))
+    print(create_notifs_string(request))
     db.session.commit()
 
     return redirect(url_for("main_bp.my_dashboard"))
@@ -665,7 +648,9 @@ def my_dashboard():
     return render_template('my_dashboard.html', preferenceForm=form1, ignoreForm=form2, 
                            preferences=User.get_ignored(current_user),
                            often=User.get_often(current_user),
-                           admin=admin) #boolean for if admin or not #TODO make mroe secure?
+                           admin=admin,
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user)) #boolean for if admin or not #TODO make more secure?
 
 
 @main_bp.route("/create_tree", methods=['GET', 'POST'])

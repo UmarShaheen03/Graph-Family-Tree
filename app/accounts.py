@@ -62,7 +62,8 @@ def init_database():
         username="cooper",
         email="cooptrooper04@gmail.com",
         admin=True,
-        password_hash=str(generate_password_hash("test"))
+        password_hash=str(generate_password_hash("test")),
+        notifs_ignored=" Logout"
     )
 
     first_notif = Notification(
@@ -137,7 +138,7 @@ def login(email_or_username, password, remember):
         raise LoginError("Incorrect password")
     
     login_user(user, remember=remember)
-    log_notif(f"User {User.get_username(user)} just logged in", get_all_admin_ids()) #notify all admins of succesful login
+    log_notif(f"User {User.get_username(user)} just logged in", get_all_admin_ids(), " Login") #notify all admins of succesful login
 
 
 
