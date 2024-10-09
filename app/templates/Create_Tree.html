@@ -14,6 +14,7 @@
         {% if error_message %}
   <p style="color: red;">{{ error_message }}</p>
 {% endif %}
+
         <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
 
@@ -33,6 +34,7 @@
                 {{ form.submit(class="btn btn-primary btn-lg") }}
             </div>
         </form>
+        <p> <strong>If you want to create a tree from scratch , import a csv with a single cell containing the people from the first lineage </strong></p>
     </div>
 </div>
 

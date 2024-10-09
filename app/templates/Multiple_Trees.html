@@ -1,10 +1,9 @@
-{% extends "base.html" %}
 
+{% extends "base.html" %}
 {% block headBlock %}
     <title> Family Graph</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tree.css') }}"/>
 {% endblock %}
-
 {% block bodyBlock %}
 <h1 id="Multi_Tree">{{ tree_name }}  Family Graph</h1>
 <div class="d-md-flex flex-md-row container">
@@ -19,37 +18,77 @@
     </div>
     <div id="tooltip"></div>
 </div>
+<div class="card shadow-lg rounded-lg border-0">
+    <div class="card-body p-5">
+        <form action="" method="post" novalidate class="Form">
+            {{ form_modify.hidden_tag() }}
+            
+            <div class="form-group mb-4">
+                <label for="action" class="form-label fw-bold">{{ form_modify.action.label }}</label>
+                {{ form_modify.action(class="form-select form-select-lg") }}
+            </div>
+            <div id="name-group" class="form-group mb-4" style="display:none;">
+                <label for="name" class="form-label fw-bold">{{ form_modify.name.label }}</label>
+                {{ form_modify.name(class="form-control form-control-lg") }}
+            </div>
+            <div id="new-name-group" class="form-group mb-4" style="display:none;">
+                <label for="new_name" class="form-label fw-bold">{{ form_modify.new_name.label }}</label>
+                {{ form_modify.new_name(class="form-control form-control-lg") }}
+            </div>
+            <div id="old-name-group" class="form-group mb-4" style="display:none;">
+                <label for="old_name" class="form-label fw-bold">{{ form_modify.old_name.label }}</label>
+                {{ form_modify.old_name(class="form-select form-select-lg") }}
+            </div>
+            <div id="person-to-shift-group" class="form-group mb-4" style="display:none;">
+                <label for="person_to_shift" class="form-label fw-bold">{{ form_modify.person_to_shift.label }}</label>
+                {{ form_modify.person_to_shift(class="form-select form-select-lg") }}
+            </div>
+            <div id="person-to-delete-group" class="form-group mb-4" style="display:none;">
+                <label for="person_to_delete" class="form-label fw-bold">{{ form_modify.person_to_delete.label }}</label>
+                {{ form_modify.person_to_delete(class="form-select form-select-lg") }}
+            </div>
+            <div id="parent-group" class="form-group mb-4">
+                <label for="parent" class="form-label fw-bold">{{ form_modify.parent.label }}</label>
+                {{ form_modify.parent(class="form-select form-select-lg") }}
+            </div>
+            <div id="new-parent-group" class="form-group mb-4" style="display:none;">
+                <label for="new_parent" class="form-label fw-bold">{{ form_modify.new_parent.label }}</label>
+                {{ form_modify.new_parent(class="form-select form-select-lg") }}
+            </div>
+            <div class="d-grid gap-2">
+                {{ form_modify.submit(class="btn btn-primary btn-lg rounded-pill") }}
+            </div>
+        </form>
+    </div>
+</div>
+</div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
 <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
-
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
     const centerX = width / 2;
     const centerY = height / 2;
     const radiusStep = 200;
-
     // Filter out links where the hierarchy difference is not 1
     links = links.filter(link => {
         const sourceNode = nodes.find(n => n.name === link.source);
         const targetNode = nodes.find(n => n.name === link.target);
         return Math.abs(sourceNode.hierarchy - targetNode.hierarchy) === 1;
     });
-
     // Setup zoom
     const zoom = d3.zoom()
         .scaleExtent([0.01, 4])
         .on("zoom", (event) => {
             svg.attr("transform", event.transform);
         });
-
     const svg = d3.select("#graph")
         .attr("width", width)
         .attr("height", height)
         .call(zoom)
         .append("g");
-
     // Tooltip setup
     const tooltip = d3.select("body").append("div")
         .attr("id", "tooltip")
@@ -59,27 +98,22 @@
         .style("padding", "5px")
         .style("border-radius", "4px")
         .style("opacity", 0);  // Initially hidden
-
     // Color scale based on hierarchy
     const color = d3.scaleOrdinal()
         .domain([1, 2, 3])
         .range(['Mauve', 'Violet', 'MediumOrchid', 'Orchid', 'Plum', 'Thistle', 'Lavender']);
-
     // Group nodes by hierarchy level
     function groupNodesByHierarchy(nodes) {
         return d3.group(nodes, d => d.hierarchy);
     }
-
     // Circular layout with parent-child alignment, sorted by Lineage
     function visualizeGraph(nodes, links) {
         const groupedNodes = groupNodesByHierarchy(nodes);
-
         // Place nodes in a circular fashion by hierarchy
         groupedNodes.forEach((group, hierarchy) => {
             const sortedGroup = Array.from(group).sort((a, b) => d3.ascending(a.lineage, b.lineage));
             const angleStep = (2 * Math.PI) / sortedGroup.length;
             const radius = hierarchy * radiusStep;
-
             sortedGroup.forEach((node, i) => {
                 const angle = i * angleStep;
                 node.x = centerX + Math.cos(angle) * radius;
@@ -87,7 +121,6 @@
                 node.angle = angle;
             });
         });
-
         // Add links first (always visible)
         svg.selectAll(".link")
             .data(links)
@@ -101,7 +134,6 @@
             .attr("stroke-width", 2)    // Set width for visibility
             .style("visibility", "visible")  // Explicitly set visibility
             .style("opacity", 1);  // Ensure full opacity
-
         // Draw nodes
         const nodeElements = svg.selectAll(".node")
             .data(nodes)
@@ -136,14 +168,12 @@
                     d3.select(this).classed("active", false);
                 })
             );
-
         // Add circle for each node
         nodeElements.append("circle")
             .attr("r", 25)
             .attr("cx", d => d.x)
             .attr("cy", d => d.y)
             .attr("fill", d => color(d.hierarchy));
-
         // Add text label for each node
         nodeElements.append("text")
             .attr("x", d => d.x + 30)
@@ -152,21 +182,17 @@
             .attr("font-size", "14px")
             .attr("font-weight", "lighter");
     }
-
     // Call visualizeGraph with the fetched nodes and links
     visualizeGraph(nodes, links);
-
     // Function to zoom into a specific node
     function zoomToNode(node) {
         const scale = 2; // Adjust zoom scale as needed
         const x = node.x;
         const y = node.y;
-
         svg.transition()
             .duration(750)
             .call(zoom.transform, d3.zoomIdentity.translate(centerX - x * scale, centerY - y * scale).scale(scale));
     }
-
     // Event handler for form submission
     document.getElementById('Search').addEventListener('click', function(event) {
         event.preventDefault();
@@ -179,7 +205,6 @@
         }
     });
 </script>
-
 
 
 
