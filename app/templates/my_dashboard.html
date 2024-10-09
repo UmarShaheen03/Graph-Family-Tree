@@ -69,18 +69,65 @@
             <textarea id="reason" name="reason" class="form-control" placeholder="Provide a reason for admin access" required></textarea>
           </div>
 
-          <button type="submit" class="btn btn-warning">Request Admin Access</button>
+          <button type="submit" class="btn btn-primary">Request Admin Access</button>
         </form>
       </div>
 
       <div class="box mb-4">
         <h3>Email Notifications</h3>
-        <form id="emailNotificationsForm">
-          <div class="form-check form-switch">
-            <input type="checkbox" class="form-check-input" id="email_notifications" name="email_notifications">
-            <label class="form-check-label" for="email_notifications">Enable Email Notifications</label>
+        <form action="/preference-form" method="post" class="container px-4">
+          <div class="form-group">
+            {{ preferenceForm.preference.label }}
+            <br>
+            {{ preferenceForm.preference}}
+            <br>
+            {{ preferenceForm.submit(class="btn btn-primary") }}
           </div>
-          <button type="submit" class="btn btn-success mt-3">Save Preferences</button>
+        </form>
+      </div>
+
+      <div class="box mb-4">
+        <h3>Ignored Notifications</h3>
+        <form action="/preference-form" method="post" class="container px-4">
+          <p>Check the box of any notifications you'd like to stop receiving.</p>
+            <div class="col-md-3" style="display:inline-block">
+              <h4>Accounts</h4>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.login.label(style="width:150%") }}
+                {{ ignoreForm.login(style="height:20px;margin:0") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.logout.label(style="width:150%") }}
+                {{ ignoreForm.logout(style="height:20px;margin:0;") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.reset.label(style="width:150%") }}
+                {{ ignoreForm.reset(style="height:20px;margin:0;") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.signup.label(style="width:150%") }}
+                {{ ignoreForm.signup(style="height:20px;margin:0;") }}
+              </div>
+            </div>
+
+            <div class="col-md-3" style="display:inline-block">
+              <h4>Requests</h4>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.admin_req.label(style="width:150%") }}
+                {{ ignoreForm.admin_req(style="height:20px;margin:0") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.tree_req.label(style="width:150%") }}
+                {{ ignoreForm.tree_req(style="height:20px;margin:0;") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.req_accepted.label(style="width:150%") }}
+                {{ ignoreForm.req_accepted(style="height:20px;margin:0;") }}
+              </div>
+            </div>
+            <br>
+            {{ ignoreForm.submit(class="btn btn-primary") }}
+          </div>
         </form>
       </div>
     </div>
@@ -89,6 +136,4 @@
 
 
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 {% endblock %}

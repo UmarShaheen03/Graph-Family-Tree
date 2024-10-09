@@ -30,6 +30,7 @@ def init_database():
     #clear any existing info (for testing TODO DO NOT KEEP IN FINAL)
     User.query.delete()
     Notification.query.delete()
+    Tree.query.delete()
 
     #create mock accounts
     nima = User(

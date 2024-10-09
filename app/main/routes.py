@@ -630,7 +630,9 @@ def my_dashboard():
     if check is not None:
         return check 
     
-    return render_template('my_dashboard.html')
+    form1 = EmailPreference()
+    form2 = IgnoreNotifs()
+    return render_template('my_dashboard.html', preferenceForm=form1, ignoreForm=form2)
 
 
 @main_bp.route("/create_tree", methods=['GET', 'POST'])

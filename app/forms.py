@@ -170,6 +170,14 @@ class RequestTreeForm(FlaskForm):
    
     submit = SubmitField('Submit Request', render_kw={"class": "btn btn-primary rounded-pill"})
 
+class EmailPreference(FlaskForm):
+    preference = SelectField(
+        "How often would you like emails? (sent 5pm daily, or 5pm Friday if weekly)",
+        choices=["Daily","Weekly","None"],
+        validators=[DataRequired()]
+    )
+    submit=SubmitField("Submit")
+
 class IgnoreNotifs (FlaskForm):
     login=BooleanField("Logins", default=True)
     logout=BooleanField("Logouts", default=True)
@@ -177,7 +185,7 @@ class IgnoreNotifs (FlaskForm):
     signup=BooleanField("Sign Ups", default=True)
 
     admin_req=BooleanField("Admin Requests", default=True)
-    tree_req=BooleanField("Tree Access Requests", default=True)
+    tree_req=BooleanField("Tree Requests", default=True)
     req_accepted=BooleanField("Request Acceptance", default=True)
 
     comment=BooleanField("New Comments", default=True)
