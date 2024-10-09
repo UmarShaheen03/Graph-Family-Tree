@@ -654,11 +654,18 @@ def my_dashboard():
     if check is not None:
         return check 
     
+    check2 = check_login_admin()
+    if check2 is None:
+        admin = True
+    else:
+        admin = False
+    
     form1 = EmailPreference()
     form2 = IgnoreNotifs()
     return render_template('my_dashboard.html', preferenceForm=form1, ignoreForm=form2, 
                            preferences=User.get_ignored(current_user),
-                           often=User.get_often(current_user))
+                           often=User.get_often(current_user),
+                           admin=admin) #boolean for if admin or not #TODO make mroe secure?
 
 
 @main_bp.route("/create_tree", methods=['GET', 'POST'])

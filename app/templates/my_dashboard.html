@@ -74,6 +74,7 @@
         </form>
       </div>
       {% endif %}
+
       <div class="box mb-4">
         <h3>Email Notifications</h3>
         <form action="/often_form" method="post">
@@ -94,6 +95,7 @@
 
             <div style="display:inline-block;vertical-align:top;width:24%">
               <h4>Accounts</h4>
+              {% if admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.login.label(style="width:150%") }}
                 {{ ignoreForm.login(style="height:20px;margin:0") }}
@@ -103,17 +105,19 @@
                 {{ ignoreForm.logout(style="height:20px;margin:0;") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.reset.label(style="width:150%") }}
-                {{ ignoreForm.reset(style="height:20px;margin:0;") }}
-              </div>
-              <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.signup.label(style="width:150%") }}
                 {{ ignoreForm.signup(style="height:20px;margin:0;") }}
+              </div>
+              {% endif %}
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.reset.label(style="width:150%") }}
+                {{ ignoreForm.reset(style="height:20px;margin:0;") }}
               </div>
             </div>
 
             <div style="display:inline-block;vertical-align:top;width:24%;">
               <h4>Requests</h4>
+              {% if admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.admin_req.label(style="width:150%") }}
                 {{ ignoreForm.admin_req(style="height:20px;margin:0") }}
@@ -122,6 +126,7 @@
                 {{ ignoreForm.tree_req.label(style="width:150%") }}
                 {{ ignoreForm.tree_req(style="height:20px;margin:0;") }}
               </div>
+              {% endif %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.req_accepted.label(style="width:150%") }}
                 {{ ignoreForm.req_accepted(style="height:20px;margin:0;") }}
