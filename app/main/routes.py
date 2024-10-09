@@ -550,7 +550,6 @@ def Create_Tree():
 
     return render_template("Create_Tree.html", form=form, error_message=error_message)
 
-
 @main_bp.route("/Multiple_Tree", methods=['GET', 'POST'])
 def Multiple_Tree():
     tree_name = request.args.get('tree_name')  # Get the tree name from the URL parameter
@@ -563,38 +562,49 @@ def Multiple_Tree():
             RETURN p.FullName AS name"""
         result = session.run(query)
         nodes_choices = [(record["name"], record["name"]) for record in result]
-    form.fullname.choices = nodes_choices
+    
+    # Add "None" as an option for creating a node without a parent
+    nodes_choices.insert(0, ('No Parent', 'No Parent'))
+    
+    form.fullname.choices = nodes_choices[1:]
     form_modify = AddNodeForm()
 
     form_modify.parent.choices = nodes_choices
-    form_modify.new_parent.choices = nodes_choices
-    form_modify.person_to_delete.choices = nodes_choices
-    form_modify.person_to_shift.choices = nodes_choices
-    form_modify.old_name.choices = nodes_choices
+    form_modify.new_parent.choices = nodes_choices[1:]
+    form_modify.person_to_delete.choices = nodes_choices[1:]
+    form_modify.person_to_shift.choices = nodes_choices[1:]
+    form_modify.old_name.choices = nodes_choices[1:]
     
     if form_modify.submit.data and form_modify.validate_on_submit():
         if form_modify.action.data == "add":
             with driver.session() as session:
-                # Retrieve the parent's hierarchy
-                parent_hierarchy_query = f"""
-                    MATCH (p:{tree_name} {{FullName: $Parent}})
-                    RETURN p.Hierarchy AS parent_hierarchy
-                """
-                parent_result = session.run(parent_hierarchy_query, Parent=form_modify.parent.data)
-                parent_hierarchy = parent_result.single()["parent_hierarchy"]
-                
-                # Add new node with hierarchy as parent's hierarchy + 1
-                session.run(f"""
-                    CREATE (n:{tree_name} {{FullName: $full_name, Hierarchy: $new_hierarchy}})
-                """, full_name=form_modify.name.data, new_hierarchy=parent_hierarchy + 1)
-                
-                # Build the dynamic query string to add a relationship
-                query = f"""
-                    MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
-                    MERGE (a)-[r:PARENT_TO]->(b)
-                """
-                # Create or update relationship
-                session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
+                # Check if the parent is set to "None"
+                if form_modify.parent.data == "No Parent":
+                    # Create a node without a parent relationship
+                    session.run(f"""
+                        CREATE (n:{tree_name} {{FullName: $full_name, Hierarchy: 1}})
+                    """, full_name=form_modify.name.data)
+                else:
+                    # Retrieve the parent's hierarchy
+                    parent_hierarchy_query = f"""
+                        MATCH (p:{tree_name} {{FullName: $Parent}})
+                        RETURN p.Hierarchy AS parent_hierarchy
+                    """
+                    parent_result = session.run(parent_hierarchy_query, Parent=form_modify.parent.data)
+                    parent_hierarchy = parent_result.single()["parent_hierarchy"]
+                    
+                    # Add new node with hierarchy as parent's hierarchy + 1
+                    session.run(f"""
+                        CREATE (n:{tree_name} {{FullName: $full_name, Hierarchy: $new_hierarchy}})
+                    """, full_name=form_modify.name.data, new_hierarchy=parent_hierarchy + 1)
+                    
+                    # Build the dynamic query string to add a relationship
+                    query = f"""
+                        MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
+                        MERGE (a)-[r:PARENT_TO]->(b)
+                    """
+                    # Create or update relationship
+                    session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
             print("Data processed. Redirecting to index.")
             return redirect(url_for("main_bp.Multiple_Tree", tree_name=tree_name))
         
