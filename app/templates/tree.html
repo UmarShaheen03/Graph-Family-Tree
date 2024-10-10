@@ -333,6 +333,71 @@
     document.addEventListener('click', function () {
         document.getElementById('context-menu').style.display = 'none';
     });
+
+    function zoomToNode(node) {
+        const scale = 2; // Zoom scale factor, adjust this if needed
+        const duration = 750; // Duration of the zoom transition
+
+        // Convert polar coordinates (x, y) to Cartesian
+        const angle = node.x - Math.PI / 2; // Subtract PI/2 to align with Cartesian coordinates
+        const radius = node.y;
+        const targetX = Math.cos(angle) * radius;
+        const targetY = Math.sin(angle) * radius;
+
+        // Get the current transform applied to the graph (translate and scale)
+        const currentTransform = d3.zoomTransform(svg.node());
+
+        // Calculate the new translation to center the selected node in the viewport
+        const translateX = width / 2 - targetX * currentTransform.k;
+        const translateY = height / 2 - targetY * currentTransform.k;
+
+        // Apply smooth zooming transition to the new position and scale
+        svg.transition()
+            .duration(duration)
+            .call(
+                zoom.transform,
+                d3.zoomIdentity
+                .translate(translateX, translateY)
+                .scale(scale * currentTransform.k) // Scale relative to the current zoom level
+            );
+    }
+
+    // // Function to zoom into a specific node
+    // function zoomToNode(node) {
+    //     const scale = 2; // Adjust zoom scale as needed
+
+    //     // const x = node.x;
+    //     // const y = node.y;
+
+    //     // svg.transition()
+    //     //     .duration(750)
+    //     //     .call(zoom.transform, d3.zoomIdentity.translate(centerX - x * scale, centerY - y * scale).scale(scale));
+
+    //     // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
+    //     const angle = node.x - Math.PI / 2;  // Subtract PI/2 to rotate to normal Cartesian plane
+    //     const radius = node.y;
+    //     const x = Math.cos(angle) * radius;
+    //     const y = Math.sin(angle) * radius;
+
+    //     svg.transition()
+    //         .duration(750)
+    //         .call(zoom.transform, d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale));
+    // }
+
+    // Event handler for form submission
+    document.getElementById('Search').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const nodeName = document.getElementById('fullname').value;
+        const nodeData = root.descendants().find(d => d.data.name === nodeName);  // Find the node in the hierarchical structure
+
+        if (nodeData) {
+            zoomToNode(nodeData);  // Zoom to the found node
+            // alert("NodeDataName: " + nodeData.data.name);
+        } else {
+            alert("Node not found: " + nodeName );
+        }
+    });
 </script>
 
 <!-- Modify graph script -->

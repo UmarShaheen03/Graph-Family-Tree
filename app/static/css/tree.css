@@ -23,7 +23,7 @@
     }
 }
 
-@media (max-width: 576px) {
+/* @media (max-width: 576px) {
     .col-auto > .select2-container {
         width: 225% !important;
     }
@@ -31,7 +31,7 @@
     #Search {
         margin-left: 220%;
     }
-}
+} */
 
 .highlighted {
     stroke: #ff5722; /* Highlight color */
