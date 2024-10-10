@@ -225,7 +225,6 @@ def get_all_ids_with_weekly():
 #   ~ comments (viewable to users, linked to tree)
 
 #TODO
-# - create master log
-# - add all the tree/account stuff once thats done
+# - tree integration (check josh's branch?)
 # - integrate requests into notifs (check umar's branch?)
 # - testing! yay!
