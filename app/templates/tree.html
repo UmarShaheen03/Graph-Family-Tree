@@ -104,6 +104,7 @@
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
     var selectedNode = null;
+    var currentRoot = null;
 
     //Build a lookup map of nodes
     var nodeMap = {};
@@ -256,6 +257,8 @@
     }
 
     function initialiseGraph(rootNode) {
+        var currentRoot = rootNode;
+        console.log("currentRoot: " + currentRoot);
         // Build the tree layout using the stratified hierarchy
         const root = tree(d3.hierarchy(rootNode)
             .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
@@ -330,16 +333,14 @@
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
             .text(d => d.data.name);
+
+        // console.log("desc: " + currentRoot.descendants);
     }
-
-    initialiseGraph(standInRoot);
-
-    document.addEventListener('click', function () {
-        document.getElementById('context-menu').style.display = 'none';
-    });
 
     // Function to zoom into a specific node
     function zoomToNode(node) {
+        console.log('zoomToNode');
+        console.log(node);
         const scale = 2; // Adjust zoom scale as needed
 
         // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
@@ -347,6 +348,8 @@
         const radius = node.y;
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
+
+        console.log(x,y);
 
         // Calculate the new transform
         const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 500, height / 2 - y * scale - 300).scale(scale);
@@ -358,30 +361,18 @@
             .call(zoom.transform, newTransform);  // Programmatically zoom to the node
     }
 
-    // Event handler for form submission
-    document.getElementById('Search').addEventListener('click', function(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        const nodeName = document.getElementById('fullname').value;
-        const nodeData = root.descendants().find(d => d.data.name === nodeName);  // Find the node in the hierarchical structure
-
-        if (nodeData) {
-            zoomToNode(nodeData);  // Zoom to the found node
-        } else {
-            alert("Node not found: " + nodeName );
-        }
-    });
-
     function drillDown(node) {
         if (selectedNode){
             // Filter nodes and links to keep only the selected node's descendants
             const descendants = nodeMap[selectedNode.name].children;
 
             // Rebuild the graph, showing only the descendants
-            const newRoot = {
+            const newRoot = d3.hierarchy({
                 ...selectedNode,
                 children: descendants
-            };
+            });
+
+            currentRoot = newRoot;
             updateGraph(newRoot);  // Function to update the graph with new data
 
             // Close context menu
@@ -393,12 +384,40 @@
         // Remove existing nodes and links
         svg.selectAll("*").remove();
     
+        // // Create the hierarchy for the new root node
+        // const hierarchyRoot = d3.hierarchy(rootNode);
+        
         initialiseGraph(rootNode);
     }
+
+    document.addEventListener('click', function () {
+        document.getElementById('context-menu').style.display = 'none';
+    });
 
     document.getElementById('resetGraph').addEventListener('click', function() {
         updateGraph(standInRoot);  // Reinitialize the graph with the original root node
     });
+    
+    // Event handler for form submission
+    document.getElementById('Search').addEventListener('click', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        console.log("descendants" + currentRoot);
+        const nodeName = document.getElementById('fullname').value;
+        const nodeData = currentRoot.descendants().find(d => d.data.name === nodeName);  // Find the node in the hierarchical structure
+        console.log("searching for...");
+        console.log(nodeName, nodeData);
+
+        if (nodeData) {
+            zoomToNode(nodeData);  // Zoom to the found node
+        } else {
+            alert("Node not found: " + nodeName );
+        }
+    });
+
+    currentRoot = d3.hierarchy(standInRoot);
+    initialiseGraph(standInRoot);
+
 </script>
 
 <!-- Modify graph script -->
