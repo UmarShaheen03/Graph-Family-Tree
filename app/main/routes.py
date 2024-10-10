@@ -26,7 +26,7 @@ def run_once_on_start():
     log_notif("logged in", [3], " Login")
     log_notif("logged in", [3], " Login")
     log_notif("logged in", [3], " Login")
-    log_notif("edited bio", [3], " Bio Edit", "home")
+    log_notif("edited bio", [3], " Bio Edit", "")
     log_notif("logged in", [3], " Login")
     log_notif("logged in", [3], " Login")
     log_notif("logged in", [3], " Login")
@@ -206,7 +206,10 @@ def reset_form():
 
 
     user = db.session.query(User).filter(User.user_id == user_id).first()
-    log_notif(f"User {User.get_username(user)} just reset their password", get_all_admin_ids() + User.get_id(user), " Reset") #notify all admins (and user) of password reset
+    ids = get_all_admin_ids()
+    if user_id not in ids: #if resetter is a user
+        ids.append(user_id)
+    log_notif(f"User {User.get_username(user)} just reset their password", ids, " Reset") #notify all admins (and user) of password reset
 
     loginForm = LoginForm()
     logoutForm = LogoutForm()
@@ -577,7 +580,7 @@ def unsubscribe(user_id):
     user = db.session.query(User).filter(User.user_id == User.get_id(current_user)).first()
     user.set_often("None")
     db.session.commit()
-    
+
     return render_template("unsubscribe.html", email=User.get_email(current_user),
                            notifications=get_users_notifs(current_user), 
                            logged_in_as=User.get_username(current_user))

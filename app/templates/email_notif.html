@@ -63,12 +63,12 @@
 
             .notif_box {
                 border-color: lightgray;
-                border-radius: 2px;
+                border-radius: 3px;
                 border-width: 2px;
                 border-style: solid;
                 margin-bottom: 3px;
-                margin-right: 4rem;
-                margin-left: 4rem;
+                margin-left: 1rem;
+                padding-left: 2px;
             }
 
             .notif_timestamp {
@@ -105,7 +105,7 @@
         <div class="contents">   
             <div class="texts">
                 <h1>Notifications</h1>
-                <p>Here are the most recent notifications from <a href="{{ home_url }}">Dehdashti Family Graph</a></p>
+                <p style="color:black">Here are the most recent notifications from <a href="{{ home_url }}">Dehdashti Family Graph</a></p>
                 {% for notif in notifications %}
                 {% with %}
                     {% set notif=notif %}
@@ -113,7 +113,7 @@
                 {% endwith %}
                 {% endfor %}
                 {% if notif_amount > 10 %}
-                <p>(and {{ notif_amount - 10}} more on the site...)</p>
+                <p style="color:black">(and {{ notif_amount - 10}} more on the site...)</p>
                 {% endif %}
                 <p class="subtext">To unsubscribe from all emails, <a href="{{ unsub_url }}">click here</a></p>
                 <p class="subtext">Or to edit your email preferences, <a href="{{ account_url }}">click here</a></p>
