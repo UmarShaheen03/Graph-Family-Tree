@@ -71,6 +71,7 @@
         {% for tree in trees %}
         {% with %}
             {% set tree=tree %}
+            {% set url = url + "tree/" + tree.name %}
             {% include "tree_for_log.html" %}
         {% endwith %}
         {% endfor %}

@@ -377,11 +377,13 @@ def log():
         return check
     
     users = db.session.query(User).all()
-    #TODO add trees
+    trees = db.session.query(Tree).all()
     
     return render_template("log.html",
                            users=users,
+                           trees=trees,
                            master_notifications=get_users_notifs(-1),
+                           url=WEBSITE_URL,
                            notifications=get_users_notifs(current_user), 
                            logged_in_as=User.get_username(current_user))
 
