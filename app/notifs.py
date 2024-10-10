@@ -13,7 +13,6 @@ from jinja2 import Template, Environment, BaseLoader, FileSystemLoader
 from flask import url_for
 import sys
 
-
 def get_users_notifs(user): #check through notif db for all notifs with user id
     id = User.get_id(user)
     ignored = User.get_ignored(user)
@@ -99,7 +98,8 @@ def send_emails(ids):
                                home_url=home_url, 
                                unsub_url=unsub_url, 
                                account_url=account_url, 
-                               notif_amount=notif_amount)
+                               notif_amount=notif_amount,
+                               now=str(datetime.utcnow))
                                      
         #plaintext as backup if html doesn't load
         text = """\
@@ -115,7 +115,7 @@ def send_emails(ids):
                 text += str(notif.time) + "\n" + notif.text + "\n"
 
         if (notif_amount > 10):
-            text += "and " + notif_amount-10 + " more...\n"
+            text += "and " + str(notif_amount-10) + " more...\n"
 
         text += """\
         To unsubscribe from all emails, visit: %s\n
@@ -218,15 +218,10 @@ def get_all_ids_with_weekly():
 #   ~ biography edits (viewable to users, linked to tree)
 #   ~ comments (viewable to users, linked to tree)
 
-# options
-#   - toggles for each type of notification
-#   - toggles for how often to email (daily, weekly, monthly?, none)
-
 #TODO
-# - add types to every notif
 # - full notification template for master log/email
 # - polish email
 # - create master log
-# - email preference form
 # - add all the tree/account stuff once thats done
+# - integrate requests into notifs (check umar's branch?)
 # - testing! yay!

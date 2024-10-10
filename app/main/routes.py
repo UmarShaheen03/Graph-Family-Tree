@@ -13,9 +13,6 @@ from flask_wtf import CSRFProtect
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user
 
-import sys #TODO using for debug printing, remove in final
-
-
 main_bp = Blueprint('main_bp', __name__)
 
 #test function, resets database and adds two mock users
@@ -25,6 +22,21 @@ def run_once_on_start():
     email_thread = Thread(target=check_for_emails)
     email_thread.start() #TODO may be leaking?
     print("created email thread")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("edited bio", [3], " Bio Edit", "home")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged in", [3], " Login")
+    log_notif("logged out", [3], " Logout")
+    send_emails([3])
     #replaces code of this function with none, so it only runs once
     run_once_on_start.__code__ = (lambda:None).__code__
 
@@ -562,7 +574,10 @@ def unsubscribe(user_id):
                                 notifications=get_users_notifs(current_user), 
                                 logged_in_as=User.get_username(current_user))
 
-    User.set_often(current_user)
+    user = db.session.query(User).filter(User.user_id == User.get_id(current_user)).first()
+    user.set_often("None")
+    db.session.commit()
+    
     return render_template("unsubscribe.html", email=User.get_email(current_user),
                            notifications=get_users_notifs(current_user), 
                            logged_in_as=User.get_username(current_user))
