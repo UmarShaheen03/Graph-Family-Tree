@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String, unique=True, nullable=False) 
     password_hash = db.Column(db.String, nullable=False)
     admin = db.Column(db.Boolean)
+    create_time = db.Column(db.DateTime)
     reset_token = db.Column(db.String)
     reset_expiry = db.Column(db.Integer) #is a datetime, but i store it as an int
     comments = db.relationship('Comment', back_populates='user', lazy=True)

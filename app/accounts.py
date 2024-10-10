@@ -38,6 +38,7 @@ def init_database():
         username="Nima Dehdashti",
         email="nima519@gmail.com",
         admin=True,
+        create_time=datetime.now(),
         password_hash=str(generate_password_hash("CHANGEME"))
     )
 
@@ -46,6 +47,7 @@ def init_database():
         username="Group 31",
         email="cits3200group31@gmail.com",
         admin=True,
+        create_time=datetime.now(),
         password_hash=str(generate_password_hash("CHANGEME"))
     )
 
@@ -54,6 +56,7 @@ def init_database():
         username="user_test",
         email="user@test.com",
         admin=False,
+        create_time=datetime.now(),
         password_hash=str(generate_password_hash("test1234"))
     )
 
@@ -62,6 +65,7 @@ def init_database():
         username="cooper",
         email="cooptrooper04@gmail.com",
         admin=True,
+        create_time=datetime.now(),
         password_hash=str(generate_password_hash("test")),
         notifs_ignored=" Logout"
     )

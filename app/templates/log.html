@@ -6,13 +6,38 @@
 
 {% block bodyBlock %}
 
-<div class="d-md-flex flex-md-row container">
-    {% for notif in notifications %}
-    {% with %}
-        {% set notif=notif %}
-        {% include "notification_for_emails.html" %}
-    {% endwith %}
-    {% endfor %}
+<div class="d-md-flex flex-md-row container" style="padding-top:5%; padding-bottom:5%;">
+
+    <div style="display:inline-block; vertical-align:top; width:33%; padding-right:3%">
+        <h4>Notifications Log</h4>
+        {% for notif in master_notifications %}
+        {% with %}
+            {% set notif=notif %}
+            {% include "notification_for_log.html" %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    <div style="display:inline-block; vertical-align:top; width:33%; padding-right:3%">
+        <h4>All Users</h4>
+        {% for user in users %}
+        {% with %}
+            {% set user=user %}
+            {% include "user_for_log.html" %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    <div style="display:inline-block; vertical-align:top; width:33%; padding-right:3%">
+        <h4>All Trees</h4>
+        {% for tree in trees %}
+        {% with %}
+            {% set tree=tree %}
+            {% include "tree_for_log.html" %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+
 </div>
 
 {% endblock %}

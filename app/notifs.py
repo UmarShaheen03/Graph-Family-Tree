@@ -58,7 +58,7 @@ def check_for_emails(): #threaded task, runs every second
     while True:
         sleep(1)
         #print("Email Time: " + str(datetime.now().time())[:8])
-        if(str(datetime.now().time())[:8] == "13:35:00"): #5pm
+        if(str(datetime.now().time())[:8] == "17:00:00"): #5pm
             print("sending daily emails!")
             send_emails(get_all_ids_with_daily())
             if (datetime.now().weekday() == 4): #friday
