@@ -12,11 +12,14 @@ from neo4j import GraphDatabase
 from flask_wtf import CSRFProtect
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user
+from itsdangerous import URLSafeTimedSerializer
 from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 
 main_bp = Blueprint('main_bp', __name__)
 # Connect to Neo4j
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+
+serializer = URLSafeTimedSerializer("SecretKey")
 
 #test function, resets database and adds two mock users
 @main_bp.before_request
@@ -408,14 +411,59 @@ def my_dashboard():
     
     form1 = EmailPreference()
     form2 = IgnoreNotifs()
-    return render_template('my_dashboard.html', preferenceForm=form1, ignoreForm=form2, 
+    form3 = Request_Tree()
+   
+    accessible = get_all_trees_with_id(User.get_id(current_user))
+    all_trees = db.session.query(Tree).all()
+    noAccess = []
+    for tree in all_trees:
+        if tree not in accessible:
+            noAccess.append(tree.name)
+        else:
+            continue
+    form3.tree_name.choices = noAccess
+
+    return render_template('my_dashboard.html', preferenceForm=form1, ignoreForm=form2, treeForm = form3, 
                            accessible_trees=get_all_trees_with_id(User.get_id(current_user)),
-                           all_trees=db.session.query(Tree).all(),
                            preferences=User.get_ignored(current_user),
                            often=User.get_often(current_user),
                            admin=admin, #boolean for if admin or not #TODO make more secure?
                            notifications=get_users_notifs(current_user), 
                            logged_in_as=User.get_username(current_user)) 
+
+
+@main_bp.route("/request_tree", methods=['POST'])
+def request_tree():
+    uid = User.get_id(current_user)
+    tree = request.form.get('tree_name')
+    comb = str(uid) +'/'+ tree
+    token = serializer.dumps(comb, salt="tree-request")
+    approval_link = f"approve_tree?token={token}"
+    print(approval_link)
+    
+    # Redirect to Multiple_Tree with the selected tree name as a parameter
+    
+    #return redirect(url_for('main_bp.tree', tree_name=form.Tree_Name.data))
+    return "request made successfully"
+
+@main_bp.route("/approve_tree", methods=['GET'])
+def approve_admin():
+    token = request.args.get('token')
+
+    try:
+        string = serializer.loads(token, salt="tree-request", max_age=86400)
+    except Exception as e:
+        return "Invalid or expired token."
+    
+    split = string.split('/')
+    add_tree(split[0],split[1])
+    return "added successfully"
+
+def add_tree(uid,name):
+    tree = Tree.query.filter_by(name = name).first()
+    tree.users += "," +uid
+    db.session.commit()
+
 
 @main_bp.route("/log")
 def log():
@@ -867,19 +915,5 @@ def tree(tree_name):
     print(nodes)
     return render_template('tree.html', nodes=nodes, relationships=links, form=form, tree_name=tree_name,form_modify=form_modify)
 
-@main_bp.route("/request_tree", methods=['GET', 'POST'])
-def Request_Multiple_Tree():
-    form = Request_Tree()
-    with driver.session() as session:
-        # Retrieve distinct labels except for 'Person'
-        result = session.run("MATCH (n) WHERE NOT 'Person' IN labels(n) RETURN DISTINCT labels(n) AS labels")
-        choices = [(label, label) for record in result for label in record["labels"]]
-    form.Tree_Name.choices=choices
 
-    if form.validate_on_submit():
-        # Redirect to Multiple_Tree with the selected tree name as a parameter
-        return redirect(url_for('main_bp.tree', tree_name=form.Tree_Name.data))
 
-    return render_template("request_tree.html", form=form)
-
-@main_bp.route("/approve_tree")

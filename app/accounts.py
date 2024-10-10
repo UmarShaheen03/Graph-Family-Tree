@@ -134,7 +134,9 @@ def signup(email, username, password, repeat, remember):
     db.session.add(user)
     db.session.commit()
 
-    log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids()) #notify all admins of new account
+
+    #was getting error as type wasnt provided, currently filled with null will check with cooper
+    log_notif(f"New account created for user {User.get_username(user)}",get_all_admin_ids(), "NULL") #notify all admins of new account
     login(username, password, remember)
     
 

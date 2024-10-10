@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Handle the 'Request Access to a Family Tree' form submission
     document.getElementById('requestTreeAccessForm').addEventListener('submit', function(event) {
-        event.preventDefault();
 
         // Get the selected Family Tree ID
         const treeId = document.getElementById('tree_id').value;

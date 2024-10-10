@@ -37,22 +37,12 @@
       {% if not admin %}
       <div class="box mb-4">
         <h3>Request Access to a Family Tree</h3>
-        <form id="requestTreeAccessForm">
+        <form id="requestTreeAccessForm" action="/request_tree" method="post">
           <div class="form-group">
-            <label for="tree_id">Select Family Tree:</label>
-            <select id="tree_id" name="tree_id" class="form-control" required>
-              {% for tree in all_trees %}
-                <option value="{{ tree.name }}">{{ tree.name }}</option>
-              {% endfor %}
-            </select>
+            <label for="tree_id">{{treeForm.tree_name.label}}</label>
+            {{treeForm.tree_name}}
           </div>
-
-          <div class="form-group">
-            <label for="message">Add a message with your request (optional):</label>
-            <textarea id="message" name="message" class="form-control" placeholder="Enter your message here..."></textarea>
-          </div>
-
-          <input type="submit" class="btn btn-primary" value="Request Tree Access"></input>
+          {{ treeForm.submit(class="btn btn-primary") }}
         </form>
       </div>
 
@@ -174,7 +164,7 @@
 </div>
 
 
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<!--script src="{{ url_for('static', filename='js/dashboard.js') }}"></script -->
 
 <script>
   //scripts to set the defaults on all the forms

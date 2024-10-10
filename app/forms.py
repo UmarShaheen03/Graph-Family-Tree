@@ -153,8 +153,8 @@ class submit_File (FlaskForm):
 
 
 class Request_Tree (FlaskForm):
-    Tree_Name = SelectField(
-        'Tree Name',
+    tree_name = SelectField(
+        'Select Tree Name',
         choices=[]  # Populate this dynamically in your view
     )
     submit = SubmitField("Submit")
@@ -162,7 +162,7 @@ class Request_Tree (FlaskForm):
 
 class RequestTreeForm(FlaskForm):
     tree_name = SelectField(
-        'Tree Name',
+        
         choices=[],  # This can be populated dynamically in your view
         validators=[DataRequired()],
         render_kw={"class": "form-control rounded-pill"}
