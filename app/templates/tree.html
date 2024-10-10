@@ -134,9 +134,9 @@
         var standInRoot = roots[0];  // If only one root, use it directly
     }
 
-    // const width = document.getElementById('graph-container').clientWidth;
+    const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
-    const width = document.getElementById('graph-container');
+    // const width = document.getElementById('graph-container');
     // const height = document.getElementById('graph-container');
     const cx = width * 0.5; // adjust as needed to fit
     const cy = height * 0.5; // adjust as needed to fit
@@ -156,7 +156,11 @@
         .attr("style", "width: 100%; height: auto; font: 10px sans-serif;")
         .call(zoom)
         .append("g")
-        .attr("transform", `translate(${width / 2},${height / 2})`);  // Centering the radial layout
+        // .attr("transform", `translate(${width / 2},${height / 2})`);  // Centering the radial layout
+        .attr("transform", "translate(0, 0) scale(1)");  // Centering the radial layout
+    
+    // // Track the current zoom state (transform)
+    // let currentZoomState = d3.zoomIdentity;  // Initialize with identity transform
 
     const tree = d3.tree()
         .size([2 * Math.PI, radius])
@@ -334,55 +338,77 @@
         document.getElementById('context-menu').style.display = 'none';
     });
 
+    // Function to zoom into a specific node
     function zoomToNode(node) {
-        const scale = 2; // Zoom scale factor, adjust this if needed
-        const duration = 750; // Duration of the zoom transition
+        console.log(node);
+        const scale = 2.5; // Adjust zoom scale as needed
 
-        // Convert polar coordinates (x, y) to Cartesian
-        const angle = node.x - Math.PI / 2; // Subtract PI/2 to align with Cartesian coordinates
+        // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
+        const angle = node.x - Math.PI / 2;  // Subtract PI/2 to rotate to normal Cartesian plane
         const radius = node.y;
-        const targetX = Math.cos(angle) * radius;
-        const targetY = Math.sin(angle) * radius;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
 
-        // Get the current transform applied to the graph (translate and scale)
-        const currentTransform = d3.zoomTransform(svg.node());
+        alert(x + ", " + y + " " );
 
-        // Calculate the new translation to center the selected node in the viewport
-        const translateX = width / 2 - targetX * currentTransform.k;
-        const translateY = height / 2 - targetY * currentTransform.k;
-
-        // Apply smooth zooming transition to the new position and scale
         svg.transition()
-            .duration(duration)
-            .call(
-                zoom.transform,
-                d3.zoomIdentity
-                .translate(translateX, translateY)
-                .scale(scale * currentTransform.k) // Scale relative to the current zoom level
-            );
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity.translate(width / 2 - x * scale -500, height / 2 - y * scale -300).scale(scale));
+            // .call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
+            // .call(zoom.transform, d3.zoomIdentity.translate(x,y));
     }
 
-    // // Function to zoom into a specific node
     // function zoomToNode(node) {
     //     const scale = 2; // Adjust zoom scale as needed
 
-    //     // const x = node.x;
-    //     // const y = node.y;
-
-    //     // svg.transition()
-    //     //     .duration(750)
-    //     //     .call(zoom.transform, d3.zoomIdentity.translate(centerX - x * scale, centerY - y * scale).scale(scale));
-
     //     // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
-    //     const angle = node.x - Math.PI / 2;  // Subtract PI/2 to rotate to normal Cartesian plane
+    //     const angle = node.x - Math.PI / 2;  // No need to subtract PI/2 for correct orientation here
     //     const radius = node.y;
     //     const x = Math.cos(angle) * radius;
     //     const y = Math.sin(angle) * radius;
 
+    //     // Update the zoom behavior's internal state along with the SVG transformation
     //     svg.transition()
     //         .duration(750)
-    //         .call(zoom.transform, d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale));
+    //         .call(
+    //             zoom.transform, 
+    //             d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale)
+    //         );
+
+    //     // Properly update zoom's internal state
+    //     svg.call(
+    //         zoom.transform, 
+    //         d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale)
+    //     );
     // }
+
+    // function zoomToNode(node) {
+    //     const scale = 2; // Adjust zoom scale as needed
+
+    //     // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
+    //     const angle = node.x;
+    //     const radius = node.y;
+    //     const x = Math.cos(angle) * radius;
+    //     const y = Math.sin(angle) * radius;
+
+    //     // Create the new zoom transform (translate and scale)
+    //     const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale);
+
+    //     // Update the zoom state globally
+    //     currentZoomState = newTransform;
+
+    //     // Apply zoom transition and update the zoom transform
+    //     svg.transition()
+    //         .duration(750)
+    //         .call(zoom.transform, newTransform);  // Apply the new transform to the zoom behavior
+    // }
+
+    // svg.call(
+    //     zoom.on("zoom", (event) => {
+    //         currentZoomState = event.transform;  // Save the current transform
+    //         svg.attr("transform", currentZoomState);  // Apply the transform to the SVG
+    //     })
+    // );
 
     // Event handler for form submission
     document.getElementById('Search').addEventListener('click', function(event) {
@@ -393,7 +419,6 @@
 
         if (nodeData) {
             zoomToNode(nodeData);  // Zoom to the found node
-            // alert("NodeDataName: " + nodeData.data.name);
         } else {
             alert("Node not found: " + nodeName );
         }
