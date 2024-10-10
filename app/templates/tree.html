@@ -257,7 +257,7 @@
     }
 
     function initialiseGraph(rootNode) {
-        var currentRoot = rootNode;
+        // var currentRoot = rootNode;
         console.log("currentRoot: " + currentRoot);
         // Build the tree layout using the stratified hierarchy
         const root = tree(d3.hierarchy(rootNode)
@@ -267,6 +267,8 @@
         root.each(d => {
             d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
         });
+
+        currentRoot = root;
 
         // Tooltip setup
         const tooltip = d3.select("#tooltip")
@@ -333,8 +335,6 @@
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
             .text(d => d.data.name);
-
-        // console.log("desc: " + currentRoot.descendants);
     }
 
     // Function to zoom into a specific node
@@ -343,7 +343,6 @@
         console.log(node);
         const scale = 2; // Adjust zoom scale as needed
 
-        //TODO: node does not have x,y saved??
         // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
         const angle = node.x - Math.PI / 2;  // Subtract PI/2 to rotate to normal Cartesian plane
         const radius = node.y;
@@ -368,12 +367,10 @@
             const descendants = nodeMap[selectedNode.name].children;
 
             // Rebuild the graph, showing only the descendants
-            const newRoot = d3.hierarchy({
+            const newRoot = {
                 ...selectedNode,
                 children: descendants
-            });
-
-            currentRoot = newRoot;
+            };
             updateGraph(newRoot);  // Function to update the graph with new data
 
             // Close context menu
@@ -384,10 +381,7 @@
     function updateGraph(rootNode) {
         // Remove existing nodes and links
         svg.selectAll("*").remove();
-    
-        // // Create the hierarchy for the new root node
-        // const hierarchyRoot = d3.hierarchy(rootNode);
-        
+            
         initialiseGraph(rootNode);
     }
 
@@ -416,7 +410,6 @@
         }
     });
 
-    currentRoot = d3.hierarchy(standInRoot);
     initialiseGraph(standInRoot);
 
 </script>
