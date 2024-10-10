@@ -63,6 +63,9 @@
                             {{ form_modify.submit_modify(class="btn btn-primary btn-lg rounded-pill") }}
                         </div>
                     </form>
+                    <div class="col-auto">
+                        <button id="resetGraph" class="btn btn-secondary btn-lg rounded-pill">Reset Graph</button>
+                    </div>                    
                 </div>
             </div>
         </div>
@@ -92,6 +95,7 @@
     <li onclick="modifyGraphAction('shift')">Shift Node</li>
     <li onclick="modifyGraphAction('add')">Add Child</li>
     <li onclick="goToBiography()">View Biography</li>
+    <li onclick="drillDown()">Drill Down</li> <!-- New Drill Down option -->
 </ul>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -224,7 +228,6 @@
     function goToBiography() {
         if (selectedNode) {
             window.location.href = "/biography/" + encodeURIComponent(selectedNode.name);  // Redirect to view bio page
-            ;
         }
     }
 
@@ -368,6 +371,72 @@
             alert("Node not found: " + nodeName );
         }
     });
+
+    function drillDown(node) {
+        if (selectedNode){
+            // Filter nodes and links to keep only the selected node's descendants
+            const descendants = nodeMap[selectedNode.name].children;
+
+            // Rebuild the graph, showing only the descendants
+            const newRoot = {
+                ...selectedNode,
+                children: descendants
+            };
+            updateGraph(newRoot);  // Function to update the graph with new data
+
+            // Close context menu
+            document.getElementById('context-menu').style.display = 'none';
+        }
+    }
+
+    function updateGraph(rootNode) {
+        // Remove existing nodes and links
+        svg.selectAll("*").remove();
+
+        // Rebuild the tree with new rootNode
+        const root = tree(d3.hierarchy(rootNode));
+        
+        // Redefine your node and link generation logic here
+        root.each(d => {
+            d.y = d.depth * 100;
+        });
+
+        // Re-add nodes, links, and tooltip interactions as defined previously
+        svg.append("g")
+            .attr("fill", "none")
+            .attr("stroke", "#555")
+            .attr("stroke-opacity", 0.4)
+            .attr("stroke-width", 1.5)
+            .selectAll("path")
+            .data(root.links())
+            .join("path")
+            .attr("d", d3.linkRadial()
+                .angle(d => d.x)
+                .radius(d => d.y));
+
+        const node = svg.append("g")
+            .selectAll("g")
+            .data(root.descendants())
+            .join("g")
+            .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
+
+        node.append("circle")
+            .attr("fill", d => colorScale(d.depth % 10))
+            .attr("r", 5);
+
+        node.append("text")
+            .attr("dy", "0.31em")
+            .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+            .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+            .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+            .text(d => d.data.name);
+    }
+
+    document.getElementById('resetGraph').addEventListener('click', function() {
+    updateGraph(standInRoot);  // Reinitialize the graph with the original root node
+});
+
+
 </script>
 
 <!-- Modify graph script -->
