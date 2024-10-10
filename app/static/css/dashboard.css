@@ -42,11 +42,6 @@ html, body {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.box:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-}
-
 .box h3 {
     margin-bottom: 20px;
     font-size: 1.6rem;
@@ -73,33 +68,6 @@ form button {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-}
-
-
-#requestTreeAccessForm button {
-    background-color: #b67bec;
-}
-
-#requestTreeAccessForm button:hover {
-    background-color: #9468bd;
-}
-
-
-#requestAdminAccessForm button {
-    background-color: #8a2be2;
-}
-
-#requestAdminAccessForm button:hover {
-    background-color: #7a1cc1;
-}
-
-
-#emailNotificationsForm button {
-    background-color: #6a0dad;
-}
-
-#emailNotificationsForm button:hover {
-    background-color: #5a0a8d;
 }
 
 /* Styling the family tree list items */

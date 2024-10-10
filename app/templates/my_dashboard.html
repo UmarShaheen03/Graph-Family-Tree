@@ -46,10 +46,9 @@
           <div class="form-group">
             <label for="tree_id">Select Family Tree:</label>
             <select id="tree_id" name="tree_id" class="form-control" required>
-              <option value="">-- Select a Family Tree --</option>
-              <option value="tree_1">Family Tree A</option>
-              <option value="tree_2">Family Tree B</option>
-              <option value="tree_3">Family Tree C</option>
+              {% for tree in all_trees %}
+                <option value="{{ tree.name }}">{{ tree.name }}</option>
+              {% endfor %}
             </select>
           </div>
 
@@ -58,7 +57,7 @@
             <textarea id="message" name="message" class="form-control" placeholder="Enter your message here..."></textarea>
           </div>
 
-          <button type="submit" class="btn btn-primary">Request Tree Access</button>
+          <input type="submit" class="btn btn-primary" value="Request Tree Access"></input>
         </form>
       </div>
 
@@ -70,7 +69,7 @@
             <textarea id="reason" name="reason" class="form-control" placeholder="Provide a reason for admin access" required></textarea>
           </div>
 
-          <button type="submit" class="btn btn-primary">Request Admin Access</button>
+          <input type="submit" class="btn btn-primary" value="Request Admin Access"></input>
         </form>
       </div>
       {% endif %}

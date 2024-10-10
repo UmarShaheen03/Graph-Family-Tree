@@ -176,7 +176,7 @@ class EmailPreference(FlaskForm):
         choices=["Daily","Weekly","None"],
         validators=[DataRequired()]
     )
-    submit=SubmitField("Submit")
+    submit=SubmitField("Submit Preferences")
 
 class IgnoreNotifs (FlaskForm):
     login=BooleanField("Logins", default=False)
@@ -197,7 +197,7 @@ class IgnoreNotifs (FlaskForm):
     tree_update=BooleanField("Person Renamed", default=False)
     tree_delete=BooleanField("Person Removed", default=False)
 
-    submit=SubmitField("Submit")
+    submit=SubmitField("Submit Preferences")
     # "Login", "Logout", "Reset", "Signup" (account related) 
     # "Admin Request", "Tree Request", "Request" (request related)
     # "Comment", "Bio Edit" (bio related)
