@@ -5,8 +5,9 @@ from werkzeug.security import generate_password_hash
 from flask import current_app, url_for
 from app.notifs import log_notif, get_all_admin_ids
 import sys #TODO using for debug printing, remove in final
-from config import WEBSITE_URL
+from config import WEBSITE_URL, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 from jinja2 import Template
+from neo4j import GraphDatabase
 
 #libraries for reset password
 import smtplib
@@ -22,7 +23,7 @@ class SignupError(Exception):
 class LoginError(Exception):
     pass
 
-
+driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 def init_database():
     #create tables
@@ -78,11 +79,19 @@ def init_database():
     )
 
     #get all tree names from the neo4j server
-    dehdashti_tree = Tree(
-        id=0,
-        name="Person"
-    )
-  
+    with driver.session() as session:
+        # Retrieve distinct labels
+        result = session.run("MATCH (n) RETURN DISTINCT labels(n) AS labels")
+        choices = [(label, label) for record in result for label in record["labels"]]
+    
+    for name in choices:
+        tree = Tree(
+            name=name[0],
+            create_time=datetime.now(),
+            users=""
+        )
+        db.session.add(tree)
+
 
     #add mock accounts to db
     db.session.add(nima)
@@ -91,8 +100,6 @@ def init_database():
     db.session.add(cooper)
     #add first notification to db
     db.session.add(first_notif)
-    #add first tree to db
-    db.session.add(dehdashti_tree)
     db.session.commit()
 
 

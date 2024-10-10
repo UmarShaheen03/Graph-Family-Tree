@@ -12,8 +12,11 @@ from neo4j import GraphDatabase
 from flask_wtf import CSRFProtect
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user
+from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 
 main_bp = Blueprint('main_bp', __name__)
+# Connect to Neo4j
+driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 #test function, resets database and adds two mock users
 @main_bp.before_request
@@ -399,14 +402,6 @@ def get_person_bio(full_name):
     with driver.session() as session:
         result = session.run(query, full_name=full_name)
         return result.single()
-
-NEO4J_URI='neo4j+ssc://633149e1.databases.neo4j.io'
-NEO4J_USERNAME='neo4j'
-NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
-
-
-# Connect to Neo4j
-driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 
 def fetch_data():
