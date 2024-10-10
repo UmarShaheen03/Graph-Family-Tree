@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block bodyBlock %}
-<h1 id="Multi_Tree">{{ tree_name }}  Family Graph</h1>
+<h1 id="Multi_Tree">{{ tree_name }} Family Graph</h1>
 <div class="d-md-flex flex-md-row container">
    
     <div id="graph-container">
@@ -21,8 +21,8 @@
 </div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script>
-    var nodes = "{{ nodes|tojson }}";
-    var links = "{{ relationships|tojson }}";
+    var nodes = {{ nodes|tojson }};
+    var links = {{ relationships|tojson }};
 
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;

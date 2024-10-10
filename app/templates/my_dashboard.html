@@ -19,12 +19,7 @@
     <div class="col-md-4">
       <div class="box">
         <h3>Your Family Trees</h3>
-        <ul class="list-group">
-          <!-- Default Dehdashti Family Tree -->
-          <li class="list-group-item">
-            <a href="{{ url_for('main_bp.tree', tree_name='Person') }}" class="tree-link">Dehdashti Family Tree</a>
-          </li>
-      
+        <ul class="list-group">      
           <!-- Accessible Trees for the User -->
           {% for tree in accessible_trees %}
           <li class="list-group-item">
