@@ -337,7 +337,7 @@
 
     // Function to zoom into a specific node
     function zoomToNode(node) {
-        const scale = 2.5; // Adjust zoom scale as needed
+        const scale = 2; // Adjust zoom scale as needed
 
         // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
         const angle = node.x - Math.PI / 2;  // Subtract PI/2 to rotate to normal Cartesian plane
@@ -347,6 +347,7 @@
 
         // Calculate the new transform
         const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 500, height / 2 - y * scale - 300).scale(scale);
+        // const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale);
 
         // Apply the transition
         svg.transition()
