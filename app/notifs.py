@@ -166,6 +166,8 @@ def create_notifs_string(request):
     if (request.form.get("bio_edit")):
         string += (" Bio Edit")
 
+    if (request.form.get("new_tree")):
+        string += (" New Tree")
     if (request.form.get("tree_create")):
         string += (" Tree Create")
     if (request.form.get("tree_move")):
@@ -220,7 +222,8 @@ def get_all_ids_with_weekly():
 #   - tree requests (viewable to admins, linked to user)
 #   - request acceptance (viewable to users, linked to user)
 # waiting on multi tree support to be done:
-#   ~ tree edits [CRUD] (viewable to users, linked to tree)
+#   X tree edits [CRUD] (viewable to users, linked to tree)
+#   X new tree creation
 #   ~ biography edits (viewable to users, linked to tree)
 #   ~ comments (viewable to users, linked to tree)
 

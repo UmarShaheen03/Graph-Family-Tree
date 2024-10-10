@@ -147,6 +147,12 @@
 
             <div style="display:inline-block;vertical-align:top;width:24%">
               <h4>Trees</h4>
+              {% if admin %}
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.new_tree.label(style="width:150%") }}
+                {{ ignoreForm.new_tree(style="height:20px;margin:0") }}
+              </div>
+              {% endif %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.tree_create.label(style="width:150%") }}
                 {{ ignoreForm.tree_create(style="height:20px;margin:0") }}
@@ -214,6 +220,9 @@
       document.getElementById("bio_edit").checked = true;
   }
 
+  if (preferences.includes(" New Tree")) {
+      document.getElementById("new_tree").checked = true;
+  }
   if (preferences.includes(" Tree Create")) {
       document.getElementById("tree_create").checked = true;
   }

@@ -191,6 +191,7 @@ class IgnoreNotifs (FlaskForm):
     comment=BooleanField("New Comments", default=False)
     bio_edit=BooleanField("Biography Edits", default=False)
 
+    new_tree=BooleanField("New Tree", default=False)
     tree_create=BooleanField("New Person", default=False)
     tree_move=BooleanField("Person Moved", default=False)
     tree_update=BooleanField("Person Renamed", default=False)
@@ -200,4 +201,4 @@ class IgnoreNotifs (FlaskForm):
     # "Login", "Logout", "Reset", "Signup" (account related) 
     # "Admin Request", "Tree Request", "Request" (request related)
     # "Comment", "Bio Edit" (bio related)
-    # "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)
+    # "New Tree", "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)

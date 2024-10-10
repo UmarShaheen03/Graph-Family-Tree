@@ -74,10 +74,12 @@ class Comment(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', back_populates='comments') 
 
+
 class Tree(db.Model):
     name = db.Column(db.String, primary_key=True)
     users = db.Column(db.String) #long string of all user ids with access to this tree
     create_time = db.Column(db.DateTime)
+
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -91,4 +93,4 @@ class Notification(db.Model):
     # "Login", "Logout", "Reset", "Signup" (account related) 
     # "Admin Request", "Tree Request", "Request" (request related)
     # "Comment", "Bio Edit" (bio related)
-    # "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)
+    # "New Tree", "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)
