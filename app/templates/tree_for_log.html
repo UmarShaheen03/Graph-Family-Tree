@@ -2,11 +2,11 @@
     <div style="justify-content:space-between; display:flex;">
         <div style="width: 320px">
             <p class="log_subtext">Created on {{ tree.create_time.strftime("%m/%d/%Y, %H:%M") }}</p>
-            <p class="log_text">{{ tree.name }}</p>
+            <p class="log_text" style="margin-bottom:0px">{{ tree.name }}</p>
         </div>
-        <!-- TODO include all users with access to tree -->
         <div style="width: 60px">
             <a class="go_to_button btn btn-secondary" href="{{ url }}">Go To</a>
         </div>
     </div>
+    <p class="log_subtext"> User IDs with access: {{ tree.users }}</p>
 </div>

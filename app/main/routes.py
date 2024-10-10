@@ -77,6 +77,8 @@ def login_request():
 
         try:
             login(username_or_email, password, remember)
+            user = db.session.query(User).filter((User.username == username_or_email) | (User.email == username_or_email)).first()
+            log_notif(f"User {User.get_username(user)} logged in", get_all_admin_ids(), " Login") #notify all admins of succesful login
         except LoginError as error:
             return render_template("login.html", loginForm=form, logoutForm=logoutForm, error=error)
 
@@ -89,7 +91,7 @@ def login_request():
 #form submissions for logout
 @main_bp.route("/logout-form", methods=["POST"])
 def logout_request():
-    log_notif(f"User {User.get_username(current_user)} just logged out", get_all_admin_ids(), " Logout") #notify all admins of logout
+    log_notif(f"User {User.get_username(current_user)} logged out", get_all_admin_ids(), " Logout") #notify all admins of logout
     logout_user()
     return redirect(url_for("main_bp.home_page"))
     
@@ -197,7 +199,7 @@ def reset_form():
     ids = get_all_admin_ids()
     if user_id not in ids: #if resetter is a user
         ids.append(user_id)
-    log_notif(f"User {User.get_username(user)} just reset their password", ids, " Reset") #notify all admins (and user) of password reset
+    log_notif(f"User {User.get_username(user)} reset their password", ids, " Reset") #notify all admins (and user) of password reset
 
     loginForm = LoginForm()
     logoutForm = LogoutForm()
@@ -207,9 +209,52 @@ def reset_form():
     else: #otherwise, send user back to login when finished
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Password reset succesfully, please login") 
 
+@main_bp.route('/biography/<name>', methods=['GET', 'POST'])
+def biography(name):
+    check = check_login()
+    if check != None:
+        return check
+ 
+    # Fetch person's biography details from Neo4j
+    person = get_person_bio(name)
+    
+    if not person:
+        return "Biography not found.", 404
 
-@main_bp.route('/biography/edit', methods=['GET', 'POST'])
-def edit_biography():
+    # Fetch comments related to this person
+    comments = Comment.query.all()
+    comment_form = CommentForm()
+
+    if comment_form.validate_on_submit():
+        new_comment = Comment(
+            username=current_user.username,
+            text=comment_form.comment.data,
+            timestamp=datetime.now()
+        )
+        db.session.add(new_comment)
+        db.session.commit()
+
+        flash('Comment added successfully')
+        log_notif(f"User {User.get_username(current_user)}  commented on {name} from Tree {tree_name}", 
+                  get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Comment", "/biography/" + name) #notify all admins/users with access about comment
+        
+        return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
+
+    # Pass the fetched biography details and comments to the template
+    return render_template('biography.html', 
+                           full_name=person['name'], 
+                           dob=person.get('dob', 'Unknown'), 
+                           bio=person.get('biography', 'No biography available'), 
+                           location=person.get('location', 'Unknown'),
+                           email=person.get('email', 'No email provided'),
+                           phone_number=person.get('phone_number', 'No phone number provided'),
+                           address=person.get('address', 'No address provided'),
+                           comments=comments, 
+                           comment_form=comment_form,
+                           admin=User.is_admin(current_user))
+
+@main_bp.route('/biography/edit/<tree_name>', methods=['GET', 'POST'])
+def edit_biography(tree_name):
     check = check_login_admin()
     if check != None:
         return check
@@ -220,7 +265,7 @@ def edit_biography():
 
     # Fetch nodes (FullName) for the select box for the form 
     with driver.session() as session:
-        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
+        result = session.run(f"MATCH (n:{tree_name}) RETURN n.FullName AS name")
         nodes = [(record["name"], record["name"]) for record in result]
         
     # Set choices for the FullName dropdown field
@@ -252,8 +297,8 @@ def edit_biography():
             )
         
         flash(f'Biography for {person_name} has been updated successfully.')
-        log_notif(f"User {User.get_username(current_user)} just edited the bio of {person_name} from family TODO", 
-                  get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Bio Edit", "/biography/" + person_name) #notify all admins/users with access about bio edit
+        log_notif(f"User {User.get_username(current_user)} edited the bio of {person_name} from Tree {tree_name}", 
+                  get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Bio Edit", "/biography/" + person_name) #notify all admins/users with access about bio edit
         
         return redirect(url_for('main_bp.biography', name=person_name,
                                 notifications=get_users_notifs(current_user), 
@@ -387,7 +432,7 @@ def log():
                            notifications=get_users_notifs(current_user), 
                            logged_in_as=User.get_username(current_user))
 
-    
+
 # Function to fetch biography from Neo4j
 def get_person_bio(full_name):
     query = """

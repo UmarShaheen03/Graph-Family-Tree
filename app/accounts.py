@@ -88,7 +88,7 @@ def init_database():
         tree = Tree(
             name=name[0],
             create_time=datetime.now(),
-            users=""
+            users="0, 1, 2, 3"
         )
         db.session.add(tree)
 
@@ -149,8 +149,6 @@ def login(email_or_username, password, remember):
         raise LoginError("Incorrect password")
     
     login_user(user, remember=remember)
-    log_notif(f"User {User.get_username(user)} just logged in", get_all_admin_ids(), " Login") #notify all admins of succesful login
-
 
 
 def reset_email(receiver_email):

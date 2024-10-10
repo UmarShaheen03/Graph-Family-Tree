@@ -1,11 +1,12 @@
 <div class="log_box">
     <div style="justify-content:space-between; display:flex;">
-        <div style="width: 300px">
+        <div style="width: 250px">
             <p class="log_subtext">Created on {{ user.create_time.strftime("%m/%d/%Y, %H:%M") }}</p>
             <p class="log_text">{{ user.username }}</p>
         </div>
-        <div style="width: 100px">
-            <p class="log_subtext">Admin = {{ user.admin }}</p>
+        <div style="width: 150px">
+            <p class="log_subtext" style="text-align: right; padding-right: 3px;">Admin: {{ user.admin }}</p>
+            <p class="log_subtext" style="text-align: right; padding-right: 3px;">User ID: {{ user.user_id }}</p>
         </div>
     </div>
 </div>

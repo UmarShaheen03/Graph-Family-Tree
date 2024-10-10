@@ -1,4 +1,4 @@
-from app.models import User, Notification
+from app.models import User, Notification, Tree
 from app.databases import db
 from datetime import datetime
 from config import WEBSITE_URL
@@ -186,12 +186,11 @@ def get_all_admin_ids(): #returns list of all admin users' ids
         admin_ids.append(User.get_id(user))
     return admin_ids
 
-def get_all_ids_with_tree(id): #returns list of all users with access to this tree
+def get_all_ids_with_tree(name): #returns list of all users with access to this tree
     ids = []
-    #TODO once multi tree support is done
-    results = []
-    for user in results:
-        ids.append(User.get_id(user))
+    results = db.session.query(Tree).filter(Tree.name == name).all()
+    for id in results.split(", "):
+        ids.append(int(id))
     return ids
 
 def get_all_ids_with_daily():
