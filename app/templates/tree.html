@@ -134,8 +134,10 @@
         var standInRoot = roots[0];  // If only one root, use it directly
     }
 
-    const width = document.getElementById('graph-container').clientWidth;
+    // const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
+    const width = document.getElementById('graph-container');
+    // const height = document.getElementById('graph-container');
     const cx = width * 0.5; // adjust as needed to fit
     const cy = height * 0.5; // adjust as needed to fit
     const radius = Math.min(width, height) / 2 - 30;
