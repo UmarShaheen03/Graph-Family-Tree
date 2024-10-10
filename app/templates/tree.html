@@ -15,7 +15,7 @@
         <div class="col-lg-3">
             <div class="card shadow-lg rounded-lg border-0 vh-100">
                 <div class="card-body p-2">
-                    <h5 class="text-center mb-2">MODIFY GRAPH</h5>
+                    <h5 class="text-center mb-2 mt-2">MODIFY GRAPH</h5>
                     <form action="" method="post" novalidate class="Form">
                         {{ form_modify.hidden_tag() }}
                         
@@ -71,7 +71,7 @@
             {{ form_search.hidden_tag() }}
             <div class="row align-items-center">
                 <div class="col-auto">
-                    {{ form_search.fullname(id="fullname", class="form-select-searchable w-75") }}
+                    {{ form_search.fullname(id="fullname", class="form-select-searchable w-100") }}
                 </div>
                 <div class="col-auto">
                     {{ form_search.submit_search(id="Search", class="btn btn-primary btn-lg rounded-pill") }}
