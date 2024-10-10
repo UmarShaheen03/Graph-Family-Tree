@@ -9,24 +9,28 @@
     margin-top:1.5%
 }
 
+.form-group > .select2-container {
+    width: 100% !important;
+}
+
 @media (min-width: 992px) {
     #graph-container {
         width: 73vw;
+    }
+
+    .card {
+        height: 100vh;
     }
 }
 
 @media (max-width: 576px) {
     .col-auto > .select2-container {
-        width: 200% !important;
+        width: 225% !important;
     }
 
     #Search {
-        margin-left: 150%;
+        margin-left: 220%;
     }
-}
-
-.form-group > .select2-container {
-    width: 100% !important;
 }
 
 .highlighted {
