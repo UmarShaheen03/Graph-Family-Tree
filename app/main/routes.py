@@ -881,3 +881,5 @@ def Request_Multiple_Tree():
         return redirect(url_for('main_bp.tree', tree_name=form.Tree_Name.data))
 
     return render_template("request_tree.html", form=form)
+
+@main_bp.route("/approve_tree")
