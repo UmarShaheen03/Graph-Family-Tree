@@ -1,47 +1,8 @@
-<style>
-.notif_box {
-    border-color: lightgray;
-    border-radius: 3px;
-    border-width: 2px;
-    border-style: solid;
-    margin-bottom: 3px;
-    margin-left: 1rem;
-    padding-left: 2px;
-}
-
-.notif_timestamp {
-    color: var(--bs-secondary-color);
-    font-size: smaller;
-    margin: 0px;
-}
-
-.seen_button {
-    padding: 0;
-    width: 20px;
-    height: 20px;
-    font-size: smaller;
-    float: right;
-}
-
-.go_to_button {
-    padding: 0;
-    width: 50px;
-    height: 20px;
-    font-size: smaller;
-    float: left;
-}
-
-.notif_text {
-    margin-top: 0px;
-    margin-bottom: 5px;
-}
-</style>
-
-<div class="notif_box" id="notif_{{ notif.id }}">
+<div class="log_box">
     <div style="justify-content:space-between; display:flex;">
         <div style="width: 320px">
-            <p class="notif_timestamp">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
-            <p class="notif_text">{{ notif.text }}</p>
+            <p class="log_subtext">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
+            <p class="log_text">{{ notif.text }}</p>
         </div>
         <div style="width: 60px">
             {% if notif.goto != None %}

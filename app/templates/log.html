@@ -2,6 +2,44 @@
 
 {% block headBlock %}
     <title>Log</title>
+    <style>
+        .log_box {
+            border-color: lightgray;
+            border-radius: 3px;
+            border-width: 2px;
+            border-style: solid;
+            margin-bottom: 3px;
+            margin-left: 1rem;
+            padding-left: 2px;
+        }
+        
+        .log_subtext {
+            color: var(--bs-secondary-color);
+            font-size: smaller;
+            margin: 0px;
+        }
+        
+        .seen_button {
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            font-size: smaller;
+            float: right;
+        }
+        
+        .go_to_button {
+            padding: 0;
+            width: 50px;
+            height: 20px;
+            font-size: smaller;
+            float: left;
+        }
+        
+        .log_text {
+            margin-top: 0px;
+            margin-bottom: 5px;
+        }
+    </style>
 {% endblock %}
 
 {% block bodyBlock %}
