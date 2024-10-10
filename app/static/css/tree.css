@@ -1,7 +1,7 @@
 #graph-container {
     /* background-color: rgb(115, 113, 119); */
     width: 96vw;
-    height: 83vh;
+    height: 85vh;
     border: none;
     overflow: hidden;
     padding:0%;
@@ -12,6 +12,16 @@
 @media (min-width: 992px) {
     #graph-container {
         width: 73vw;
+    }
+}
+
+@media (max-width: 576px) {
+    .col-auto > .select2-container {
+        width: 200% !important;
+    }
+
+    #Search {
+        margin-left: 150%;
     }
 }
 
