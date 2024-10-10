@@ -257,7 +257,7 @@
     }
 
     function initialiseGraph(rootNode) {
-        var currentRoot = rootNode;
+        // var currentRoot = rootNode;
         console.log("currentRoot: " + currentRoot);
         // Build the tree layout using the stratified hierarchy
         const root = tree(d3.hierarchy(rootNode)
@@ -267,6 +267,8 @@
         root.each(d => {
             d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
         });
+
+        currentRoot = root;
 
         // Tooltip setup
         const tooltip = d3.select("#tooltip")
@@ -333,8 +335,6 @@
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
             .text(d => d.data.name);
-
-        // console.log("desc: " + currentRoot.descendants);
     }
 
     // Function to zoom into a specific node
@@ -373,7 +373,7 @@
                 children: descendants
             });
 
-            currentRoot = newRoot;
+            // currentRoot = newRoot;
             updateGraph(newRoot);  // Function to update the graph with new data
 
             // Close context menu
@@ -416,7 +416,7 @@
         }
     });
 
-    currentRoot = d3.hierarchy(standInRoot);
+    // currentRoot = d3.hierarchy(standInRoot);
     initialiseGraph(standInRoot);
 
 </script>
