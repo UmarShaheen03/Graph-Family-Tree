@@ -159,9 +159,6 @@
         // .attr("transform", `translate(${width / 2},${height / 2})`);  // Centering the radial layout
         .attr("transform", "translate(0, 0) scale(1)");  // Centering the radial layout
     
-    // // Track the current zoom state (transform)
-    // let currentZoomState = d3.zoomIdentity;  // Initialize with identity transform
-
     const tree = d3.tree()
         .size([2 * Math.PI, radius])
         .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
@@ -348,9 +345,13 @@
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
 
+        // Calculate the new transform
+        const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 500, height / 2 - y * scale - 300).scale(scale);
+
+        // Apply the transition
         svg.transition()
             .duration(750)
-            .call(zoom.transform, d3.zoomIdentity.translate(width / 2 - x * scale -500, height / 2 - y * scale -300).scale(scale));
+            .call(zoom.transform, newTransform);  // Programmatically zoom to the node
     }
 
     // Event handler for form submission
