@@ -14,15 +14,20 @@ from flask import url_for
 import sys
 
 def get_users_notifs(user): #check through notif db for all notifs with user id
-    id = User.get_id(user)
-    ignored = User.get_ignored(user)
+    if user != -1:
+        id = User.get_id(user)
+        ignored = User.get_ignored(user)
+    else:
+        id = -1
+        ignored = ""
+
     notifications = db.session.query(Notification).filter(Notification.user_id == id).order_by(desc(Notification.time)).all()
 
     #clear any ignored notifs automatically
     for notif in notifications:
         if notif.type != None:
             if notif.type in ignored:
-                db.session.query(Notification).filter(Notification.id == notif.id).delete()
+                db.session.query(Notification).filter(Notification.id == notif.id).filter(Notification.user_id == id).delete()
                 notifications.remove(notif)
         
     db.session.commit()
@@ -31,6 +36,7 @@ def get_users_notifs(user): #check through notif db for all notifs with user id
 def log_notif(text, users, type, goto = None): #users is a list of ids to send the notif to
     new_id = db.session.query(Notification).order_by(Notification.id.desc()).first().id
     users.append(-1) #master log, send backup of all notifs to it
+
     if (goto != None):
         goto = WEBSITE_URL + goto
 
@@ -219,8 +225,6 @@ def get_all_ids_with_weekly():
 #   ~ comments (viewable to users, linked to tree)
 
 #TODO
-# - full notification template for master log/email
-# - polish email
 # - create master log
 # - add all the tree/account stuff once thats done
 # - integrate requests into notifs (check umar's branch?)

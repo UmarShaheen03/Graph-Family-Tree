@@ -22,21 +22,6 @@ def run_once_on_start():
     email_thread = Thread(target=check_for_emails)
     email_thread.start() #TODO may be leaking?
     print("created email thread")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("edited bio", [3], " Bio Edit", "")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged in", [3], " Login")
-    log_notif("logged out", [3], " Logout")
-    send_emails([3])
     #replaces code of this function with none, so it only runs once
     run_once_on_start.__code__ = (lambda:None).__code__
 
@@ -761,6 +746,16 @@ def request_multiple_tree():
                            notifications=get_users_notifs(current_user), 
                            logged_in_as=User.get_username(current_user))
 
+@main_bp.route("/log")
+def log():
+    check = check_login_admin()
+    if check != None:
+        return check
+    
+    return render_template("log.html",
+                           master_notifications=get_users_notifs(-1),
+                           notifications=get_users_notifs(current_user), 
+                           logged_in_as=User.get_username(current_user))
 
     
 # Function to fetch biography from Neo4j
