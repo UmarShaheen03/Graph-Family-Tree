@@ -193,6 +193,14 @@ def get_all_ids_with_tree(name): #returns list of all users with access to this 
         ids.append(int(id))
     return ids
 
+def get_all_trees_with_id(id):
+    result = []
+    trees = db.session.query(Tree).all()
+    for tree in trees:
+        if str(id) in tree.users:
+            result.append(tree)
+    return result
+
 def get_all_ids_with_daily():
     ids = []
     results = db.session.query(User).filter(User.email_preference == "Daily").all()
@@ -227,6 +235,6 @@ def get_all_ids_with_weekly():
 #   ~ comments (viewable to users, linked to tree)
 
 #TODO
-# - tree integration (check josh's branch?)
+# - integrate bio with multi tree
 # - integrate requests into notifs (check umar's branch?)
 # - testing! yay!
