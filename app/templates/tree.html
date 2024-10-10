@@ -105,34 +105,33 @@
     var links = {{ relationships|tojson }};
     var selectedNode = null;
 
-    // Step 1: Build a lookup map of nodes
+    //Build a lookup map of nodes
     var nodeMap = {};
     nodes.forEach(node => {
         nodeMap[node.name] = { ...node, children: [] };
     });
 
-    // Step 2: Track added nodes to prevent duplicates
-    var addedNodes = new Set();
+    var addedNodes = new Set();     //Track added nodes to prevent duplicates
 
-    // Step 3: Build the hierarchy by linking child nodes to their parents
+
+    //Build the hierarchy by linking child nodes to their parents
     links.forEach(link => {
         const parentNode = nodeMap[link.source];
         const childNode = nodeMap[link.target];
 
-        // Step 4: Only add childNode if it hasn't been added yet
+        //Only add childNode if it hasn't been added yet
         if (parentNode && childNode && !addedNodes.has(childNode.name)) {
             parentNode.children.push(childNode);  // Link the child node to its parent
             addedNodes.add(childNode.name);  // Mark this node as added
         }
     });
 
-    // Step 5: Detect root nodes (nodes that are not children of any other node)
+    //Detect root nodes (nodes that are not children of any other node)
     var roots = nodes.filter(node => 
         !links.some(link => link.target === node.name)
     ).map(rootNode => nodeMap[rootNode.name]);
 
-    // If multiple roots exist, create a stand-in root and link all detected roots to it
-    if (roots.length > 1) {
+    if (roots.length > 1) {     // If multiple roots exist, create a stand-in root and link all detected roots to it
         var standInRoot = { name: "Stand-In Root", hierarchy: 0, lineage: 0, children: roots };
     } else {
         var standInRoot = roots[0];  // If only one root, use it directly
@@ -140,10 +139,8 @@
 
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
-    // const width = document.getElementById('graph-container');
-    // const height = document.getElementById('graph-container');
-    const cx = width * 0.5; // adjust as needed to fit
-    const cy = height * 0.5; // adjust as needed to fit
+    const cx = width * 0.5;
+    const cy = height * 0.5;
     const radius = Math.min(width, height) / 2 - 30;
 
     // Setup zoom
@@ -160,41 +157,27 @@
         .attr("style", "width: 100%; height: auto; font: 10px sans-serif;")
         .call(zoom)
         .append("g")
-        // .attr("transform", `translate(${width / 2},${height / 2})`);  // Centering the radial layout
         .attr("transform", "translate(0, 0) scale(1)");  // Centering the radial layout
     
     const tree = d3.tree()
         .size([2 * Math.PI, radius])
         .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
 
-    // Build the tree layout using the stratified hierarchy
-    const root = tree(d3.hierarchy(standInRoot)
-        .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
-
-    // Adjust the radius manually to increase distance between generations
-    root.each(d => {
-        d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
-    });
-
-    // Tooltip setup
-    const tooltip = d3.select("#tooltip")
-        .style("opacity", 0);  // Initially hidden
-
     // Color scale based on hierarchy levels
     const colorScale = d3.scaleOrdinal()
-        .domain(d3.range(0, 10))  // Levels 0-9
-        .range([
-            '#3D0E61', 
-            '#461177', 
-            '#4E148C', 
-            '#5829A7', 
-            '#613DC1', 
-            '#7364D2', 
-            '#858AE3', 
-            '#8EB5F0',
-            '#93CAF6', 
-            '#97DFFC'  
-        ]);
+    .domain(d3.range(0, 10))  // Levels 0-9
+    .range([
+        '#3D0E61', 
+        '#461177', 
+        '#4E148C', 
+        '#5829A7', 
+        '#613DC1', 
+        '#7364D2', 
+        '#858AE3', 
+        '#8EB5F0',
+        '#93CAF6', 
+        '#97DFFC'  
+    ]);
 
     function modifyGraphAction(action) {
         const nodeName = selectedNode.name;
@@ -230,68 +213,6 @@
             window.location.href = "/biography/" + encodeURIComponent(selectedNode.name);  // Redirect to view bio page
         }
     }
-
-    // Add links
-    svg.append("g")
-        .attr("fill", "none")
-        .attr("stroke", "#555")
-        .attr("stroke-opacity", 0.4)
-        .attr("stroke-width", 1.5)
-        .selectAll("path")
-        .data(root.links().filter(link => link.source.data.name !== "Stand-In Root"))  // Filter out stand-in root links
-        .join("path")
-        .attr("d", d3.linkRadial()
-            .angle(d => d.x)
-            .radius(d => d.y));
-
-    // Add nodes
-    const node = svg.append("g")
-        .selectAll("g")
-        .data(root.descendants().filter(d => d.data.name !== "Stand-In Root"))  // Filter out stand-in root node
-        .join("g")
-        .attr("transform", d => `
-            rotate(${d.x * 180 / Math.PI - 90}) 
-            translate(${d.y},0)`);
-
-    node.append("circle")
-        .attr("fill", d => colorScale(d.depth % 10))  // Assign color based on hierarchy level
-        .attr("r", 5)
-        .on("mouseover", function (event, d) {
-            tooltip.transition().duration(200).style("opacity", 0.9);
-            tooltip.html(d.data.name)  // Display node name in tooltip
-                .style("left", (event.pageX + 5) + "px")
-                .style("top", (event.pageY - 28) + "px");
-
-            highlightDirectLineage(d);  // Custom function for highlighting
-        })
-        .on("mouseout", function () {
-            tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
-            unhighlightConnections();
-        })
-        .on("contextmenu", function(event, d) {
-            event.preventDefault();
-            selectedNode = d.data;
-
-            // Show custom context menu
-            const menu = document.getElementById('context-menu');
-            menu.style.left = event.pageX + 'px';
-            menu.style.top = event.pageY + 'px';
-            menu.style.display = 'block';
-
-            menu.dataset.nodeName = d.data.name;
-        });
-
-    node.append("text")
-        .attr("dy", "0.31em")
-        .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
-        .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
-        .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
-        .attr("paint-order", "stroke")
-        .attr("stroke", "white")
-        .attr("fill", "currentColor")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-width", 3)
-        .text(d => d.data.name);
 
     // Function to highlight the direct lineage (ancestors and descendants)
     function highlightDirectLineage(d) {
@@ -333,6 +254,85 @@
         svg.selectAll("path").classed("highlighted", false);
         svg.selectAll("circle").attr("fill", d => colorScale(d.depth % 10));  // Reset to original colors
     }
+
+    function initialiseGraph(rootNode) {
+        // Build the tree layout using the stratified hierarchy
+        const root = tree(d3.hierarchy(rootNode)
+            .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
+
+        // Adjust the radius manually to increase distance between generations
+        root.each(d => {
+            d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
+        });
+
+        // Tooltip setup
+        const tooltip = d3.select("#tooltip")
+            .style("opacity", 0);  // Initially hidden
+
+        // Add links
+        svg.append("g")
+            .attr("fill", "none")
+            .attr("stroke", "#555")
+            .attr("stroke-opacity", 0.4)
+            .attr("stroke-width", 1.5)
+            .selectAll("path")
+            .data(root.links().filter(link => link.source.data.name !== "Stand-In Root"))  // Filter out stand-in root links
+            .join("path")
+            .attr("d", d3.linkRadial()
+                .angle(d => d.x)
+                .radius(d => d.y));
+
+        // Add nodes
+        const node = svg.append("g")
+            .selectAll("g")
+            .data(root.descendants().filter(d => d.data.name !== "Stand-In Root"))  // Filter out stand-in root node
+            .join("g")
+            .attr("transform", d => `
+                rotate(${d.x * 180 / Math.PI - 90}) 
+                translate(${d.y},0)`);
+
+        node.append("circle")
+            .attr("fill", d => colorScale(d.depth % 10))  // Assign color based on hierarchy level
+            .attr("r", 5)
+            .on("mouseover", function (event, d) {
+                tooltip.transition().duration(200).style("opacity", 0.9);
+                tooltip.html(d.data.name)  // Display node name in tooltip
+                    .style("left", (event.pageX + 5) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+
+                highlightDirectLineage(d);
+            })
+            .on("mouseout", function () {
+                tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
+                unhighlightConnections();
+            })
+            .on("contextmenu", function(event, d) {
+                event.preventDefault();
+                selectedNode = d.data;
+
+                // Show custom context menu
+                const menu = document.getElementById('context-menu');
+                menu.style.left = event.pageX + 'px';
+                menu.style.top = event.pageY + 'px';
+                menu.style.display = 'block';
+
+                menu.dataset.nodeName = d.data.name;
+            });
+
+        node.append("text")
+            .attr("dy", "0.31em")
+            .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+            .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+            .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+            .attr("paint-order", "stroke")
+            .attr("stroke", "white")
+            .attr("fill", "currentColor")
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-width", 3)
+            .text(d => d.data.name);
+    }
+
+    initialiseGraph(standInRoot);
 
     document.addEventListener('click', function () {
         document.getElementById('context-menu').style.display = 'none';
@@ -392,51 +392,13 @@
     function updateGraph(rootNode) {
         // Remove existing nodes and links
         svg.selectAll("*").remove();
-
-        // Rebuild the tree with new rootNode
-        const root = tree(d3.hierarchy(rootNode));
-        
-        // Redefine your node and link generation logic here
-        root.each(d => {
-            d.y = d.depth * 100;
-        });
-
-        // Re-add nodes, links, and tooltip interactions as defined previously
-        svg.append("g")
-            .attr("fill", "none")
-            .attr("stroke", "#555")
-            .attr("stroke-opacity", 0.4)
-            .attr("stroke-width", 1.5)
-            .selectAll("path")
-            .data(root.links())
-            .join("path")
-            .attr("d", d3.linkRadial()
-                .angle(d => d.x)
-                .radius(d => d.y));
-
-        const node = svg.append("g")
-            .selectAll("g")
-            .data(root.descendants())
-            .join("g")
-            .attr("transform", d => `rotate(${d.x * 180 / Math.PI - 90}) translate(${d.y},0)`);
-
-        node.append("circle")
-            .attr("fill", d => colorScale(d.depth % 10))
-            .attr("r", 5);
-
-        node.append("text")
-            .attr("dy", "0.31em")
-            .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
-            .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
-            .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
-            .text(d => d.data.name);
+    
+        initialiseGraph(rootNode);
     }
 
     document.getElementById('resetGraph').addEventListener('click', function() {
-    updateGraph(standInRoot);  // Reinitialize the graph with the original root node
-});
-
-
+        updateGraph(standInRoot);  // Reinitialize the graph with the original root node
+    });
 </script>
 
 <!-- Modify graph script -->
