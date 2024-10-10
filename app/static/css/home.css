@@ -37,6 +37,10 @@ body{
   .welcome>h1{
     font-weight: 600;
   }
+
+  .welcome>p{
+    padding-top: 1rem;
+  }
  
 
  
@@ -191,6 +195,25 @@ body{
     margin-right: auto;
   }
 }
+
+#usermanual{
+  text-align: center;
+ }
+
+ #usermanual>button{
+  border: none;
+  background-color: purple;
+  color: white;
+  padding: 0.5rem 1rem;
+  margin-bottom: 3rem;
+  font-size: larger;
+  border-radius: 1000px;
+  transition: all,ease, 0.3s;
+ }
+ #usermanual>button:hover{
+  background-color: rgb(100, 3, 100);
+  transform: scale(1.2);
+ }
  /* width */
  ::-webkit-scrollbar {
    width: 10px;
