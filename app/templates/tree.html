@@ -340,7 +340,6 @@
 
     // Function to zoom into a specific node
     function zoomToNode(node) {
-        console.log(node);
         const scale = 2.5; // Adjust zoom scale as needed
 
         // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
@@ -349,66 +348,10 @@
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
 
-        alert(x + ", " + y + " " );
-
         svg.transition()
             .duration(750)
             .call(zoom.transform, d3.zoomIdentity.translate(width / 2 - x * scale -500, height / 2 - y * scale -300).scale(scale));
-            // .call(zoom.transform, d3.zoomIdentity.translate(x, y).scale(scale));
-            // .call(zoom.transform, d3.zoomIdentity.translate(x,y));
     }
-
-    // function zoomToNode(node) {
-    //     const scale = 2; // Adjust zoom scale as needed
-
-    //     // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
-    //     const angle = node.x - Math.PI / 2;  // No need to subtract PI/2 for correct orientation here
-    //     const radius = node.y;
-    //     const x = Math.cos(angle) * radius;
-    //     const y = Math.sin(angle) * radius;
-
-    //     // Update the zoom behavior's internal state along with the SVG transformation
-    //     svg.transition()
-    //         .duration(750)
-    //         .call(
-    //             zoom.transform, 
-    //             d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale)
-    //         );
-
-    //     // Properly update zoom's internal state
-    //     svg.call(
-    //         zoom.transform, 
-    //         d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale)
-    //     );
-    // }
-
-    // function zoomToNode(node) {
-    //     const scale = 2; // Adjust zoom scale as needed
-
-    //     // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
-    //     const angle = node.x;
-    //     const radius = node.y;
-    //     const x = Math.cos(angle) * radius;
-    //     const y = Math.sin(angle) * radius;
-
-    //     // Create the new zoom transform (translate and scale)
-    //     const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale);
-
-    //     // Update the zoom state globally
-    //     currentZoomState = newTransform;
-
-    //     // Apply zoom transition and update the zoom transform
-    //     svg.transition()
-    //         .duration(750)
-    //         .call(zoom.transform, newTransform);  // Apply the new transform to the zoom behavior
-    // }
-
-    // svg.call(
-    //     zoom.on("zoom", (event) => {
-    //         currentZoomState = event.transform;  // Save the current transform
-    //         svg.attr("transform", currentZoomState);  // Apply the transform to the SVG
-    //     })
-    // );
 
     // Event handler for form submission
     document.getElementById('Search').addEventListener('click', function(event) {
