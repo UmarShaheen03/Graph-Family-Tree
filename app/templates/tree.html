@@ -136,8 +136,8 @@
 
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
-    const cx = width * 0.8; // adjust as needed to fit
-    const cy = height * 0.8; // adjust as needed to fit
+    const cx = width * 0.5; // adjust as needed to fit
+    const cy = height * 0.5; // adjust as needed to fit
     const radius = Math.min(width, height) / 2 - 30;
 
     // Setup zoom
@@ -163,6 +163,11 @@
     // Build the tree layout using the stratified hierarchy
     const root = tree(d3.hierarchy(standInRoot)
         .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
+
+    // Adjust the radius manually to increase distance between generations
+    root.each(d => {
+        d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
+    });
 
     // Tooltip setup
     const tooltip = d3.select("#tooltip")
