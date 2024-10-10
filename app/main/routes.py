@@ -667,6 +667,9 @@ def create_tree():
                 for relationship_query in Relationships.splitlines():
                     session.run(relationship_query)
 
+            log_notif(f"User {User.get_username(current_user)} created a new Tree {name}", 
+            get_all_admin_ids(), " New Tree", "tree/" + name)
+
             return redirect(url_for('main_bp.tree', tree_name=name))
 
     return render_template("create_tree.html", form=form, error_message=error_message)
@@ -715,7 +718,10 @@ def tree(tree_name):
                 """
                 # Create or update relationship
                 session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
-            print("Data processed. Redirecting to index.")
+
+            log_notif(f"User {User.get_username(current_user)} added Person {form_modify.name.data} to Tree {tree_name}", 
+            get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Tree Create", "tree/" + tree_name)
+                
             return redirect(url_for("main_bp.tree", tree_name=tree_name))
         
         elif form_modify.action.data == "edit":
@@ -725,6 +731,10 @@ def tree(tree_name):
                     MATCH (n:{tree_name} {{FullName: $old_name}})
                     SET n.FullName = $new_name
                 """, old_name=form_modify.old_name.data, new_name=form_modify.new_name.data)
+
+            log_notif(f"User {User.get_username(current_user)} renamed Person {form_modify.old_name.data} from Tree {tree_name} to {form_modify.new_name.data}", 
+            get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Tree Update", "tree/" + tree_name)
+
             return redirect(url_for("main_bp.tree", tree_name=tree_name))
 
         elif form_modify.action.data == "delete":
@@ -734,6 +744,10 @@ def tree(tree_name):
                     MATCH (n:{tree_name} {{FullName: $person_to_delete}})
                     DETACH DELETE n
                 """, person_to_delete=form_modify.person_to_delete.data)
+
+            log_notif(f"User {User.get_username(current_user)} deleted Person {form_modify.person_to_delete.data} from Tree {tree_name}", 
+            get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Tree Delete", "tree/" + tree_name)
+
             return redirect(url_for("main_bp.tree", tree_name=tree_name))
 
         elif form_modify.action.data == "shift":
@@ -766,8 +780,10 @@ def tree(tree_name):
                     MERGE (a)-[r:PARENT_TO]->(b)
                 """
                 session.run(update_relationship_query, full_name=form_modify.person_to_shift.data, Parent=form_modify.new_parent.data)
+                
+                log_notif(f"User {User.get_username(current_user)} moved Person {form_modify.person_to_shift.data} from Tree {tree_name} to under {form_modify.new_parent.data}", 
+                          get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Tree Move", "tree/" + tree_name)
 
-                print("Person shifted, old parent relationship deleted, and hierarchy updated. Redirecting to index.")
                 return redirect(url_for("main_bp.tree", tree_name=tree_name))
 
     # Fetch nodes and relationships for rendering the tree
