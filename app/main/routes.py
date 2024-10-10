@@ -205,125 +205,6 @@ def reset_form():
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Password reset succesfully, please login") 
 
 
-
-
-@main_bp.route("/tree/<tree_id>")
-def tree_page():
-    check = check_login()
-    if check != None:
-        return check
-    
-    tree_id = request.args.get('tree_id')  # Get the tree id from the URL parameter
-    tree_name = db.session.query(Tree).filter(Tree.id == tree_id).first()
-
-    #TODO check if user has access to this tree
-
-    if tree_name == None:
-        return redirect(url_for("main_bp.home_page"))
-    else:
-        tree_name = tree_name.name
-
-    form=Search_Node()
-    with driver.session() as session:
-        query=f"""
-    MATCH (p:{tree_name})
-    RETURN p.FullName AS name"""
-        result = session.run(query)
-        nodes = [(record["name"], record["name"]) for record in result]
-    # Set choices for the FullName dropdown field
-    form.fullname.choices = nodes
-
-    node_query = f"""
-    MATCH (p:{tree_name})
-    RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
-    """
-
-    relationship_query = f"""
-    MATCH (p:{tree_name})-[r:PARENT_TO]->(c:{tree_name})
-    RETURN p.FullName AS parent, c.FullName AS child
-    """
-
-    nodes = []
-    links = []
-
-    # Fetch all nodes
-    with driver.session() as session:
-        node_result = session.run(node_query)
-        for record in node_result:
-            name = record["name"]
-            hierarchy = record["hierarchy"]
-            lineage = record["lineage"]  # Fetch the lineage property
-
-            # Add node if not already in the list (to avoid duplicates)
-            if not any(node['name'] == name for node in nodes):
-                nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
-
-    # Fetch all relationships
-    with driver.session() as session:
-        relationship_result = session.run(relationship_query)
-        for record in relationship_result:
-            parent_name = record["parent"]
-            child_name = record["child"]
-
-            # Add link from parent to child
-            links.append({'source': parent_name, 'target': child_name})
-
-    return render_template('trees.html', nodes=nodes, relationships=links,form=form,tree_name=tree_name,
-            notifications=get_users_notifs(current_user), 
-            logged_in_as=User.get_username(current_user))
-
-@main_bp.route('/biography/<name>', methods=['GET', 'POST'])
-def biography(name):
-    check = check_login()
-    if check != None:
-        return check
- 
-    # Fetch person's biography details from Neo4j
-    person = get_person_bio(name)
-    
-    if not person:
-        return "Biography not found.", 404
-
-    # Fetch comments related to this person
-    comments = Comment.query.all()
-    comment_form = CommentForm()
-
-    if comment_form.validate_on_submit():
-        new_comment = Comment(
-            username=current_user.username,
-            text=comment_form.comment.data,
-            timestamp=datetime.now()
-        )
-        db.session.add(new_comment)
-        db.session.commit()
-
-        log_notif(f"User {User.get_username(current_user)} just commented on person {name} from the family TODO", 
-        get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Comment", "/biography/" + name) #notify all admins/users with access about moved person
-
-        flash('Comment added successfully')
-
-        #no user check, as need to be logged in to visit this page            
-        return redirect(url_for('main_bp.biography', name=name, 
-            notifications=get_users_notifs(current_user), 
-            logged_in_as=User.get_username(current_user)))  # Pass 'name' to redirect properly
-
-    # Pass the fetched biography details and comments to the template
-    return render_template('biography.html', 
-                           full_name=person['name'], 
-                           dob=person.get('dob', 'Unknown'), 
-                           bio=person.get('biography', 'No biography available'), 
-                           location=person.get('location', 'Unknown'),
-                           email=person.get('email', 'No email provided'),
-                           phone_number=person.get('phone_number', 'No phone number provided'),
-                           address=person.get('address', 'No address provided'),
-                           comments=comments, 
-                           comment_form=comment_form,
-                           admin=User.is_admin(current_user),
-                           notifications=get_users_notifs(current_user), 
-                           logged_in_as=User.get_username(current_user))
-
-
-
 @main_bp.route('/biography/edit', methods=['GET', 'POST'])
 def edit_biography():
     check = check_login_admin()
@@ -380,174 +261,6 @@ def edit_biography():
                            logged_in_as=User.get_username(current_user))
     
     
-
-@main_bp.route("/modify_graph/<tree_id>", methods=['GET', 'POST'])
-def modify_graph():
-    """The Add node page"""
-    check = check_login_admin()
-    if check != None:
-        return check
-    
-    tree_id = request.args.get('tree_id')  # Get the tree id from the URL parameter
-    tree_name = db.session.query(Tree).filter(Tree.id == tree_id).first()
-
-    #TODO check if user has access to this tree
-
-    if tree_name == None:
-        return redirect(url_for("main_bp.home_page")) #invalid tree TODO redirect elswewhere?
-    else:
-        tree_name = tree_name.name
-    
-    form = AddNodeForm()
-    
-    # Fetch nodes for the select box for form 
-    with driver.session() as session:
-        result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
-        nodes = [(record["name"], record["name"]) for record in result]
-        
-    form.parent.choices = nodes
-    form.new_parent.choices = nodes
-    form.person_to_delete.choices = nodes
-    form.person_to_shift.choices = nodes
-    form.old_name.choices = nodes
-
-    if form.validate_on_submit():
-        if form.action.data == "add":
-            with driver.session() as session:
-                # Retrieve the parent's hierarchy
-                parent_hierarchy_query = """
-                MATCH (p:Person {FullName: $Parent})
-                RETURN p.Hierarchy AS parent_hierarchy
-                """
-                parent_result = session.run(
-                    parent_hierarchy_query, Parent=form.parent.data
-                )
-                
-                parent_hierarchy = parent_result.single()["parent_hierarchy"]
-
-                # Add new node with hierarchy as parent's hierarchy + 1
-                session.run(
-                    """
-                    CREATE (n:Person {FullName: $full_name, Hierarchy: $new_hierarchy})
-                    """,
-                    full_name=form.name.data,
-                    new_hierarchy=parent_hierarchy + 1  # Child's hierarchy is parent's + 1
-                )
-
-                # Build the dynamic query string to add a relationship
-                query = """
-                MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
-                MERGE (a)-[r:PARENT_OF]->(b)
-                """
-
-                # Create or update relationship
-                session.run(
-                    query,
-                    full_name=form.name.data,
-                    Parent=form.parent.data
-                )
-
-            print("Data processed. Redirecting to index.")
-
-            log_notif(f"User {User.get_username(current_user)} just added a new person, {form.name.data}, to family TODO", 
-            get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Tree Create") #notify all admins/users with access about new person
-
-            return redirect(url_for("main_bp.tree_page"), #TODO 
-                            notifications=get_users_notifs(current_user), 
-                            logged_in_as=User.get_username(current_user))
-        else:
-            print("Selected action is not 'Add Person'.")
-    else:
-        # Add debugging output
-        print("Form validation failed.")
-        print(form.errors)  # Print form validation errors if any
-
-    
-    
-    if form.action.data == "edit":
-            with driver.session() as session:
-                # Add node
-                session.run(
-                    """
-                   MATCH (n:Person {FullName: $old_name})
-                   SET n.FullName = $new_name
-                   """,
-    old_name=form.old_name.data,
-    new_name=form.new_name.data
-                )
-
-            log_notif(f"User {User.get_username(current_user)} just changed the name of person {form.old_name.data} to {form.new_name.data}, in the family TODO", 
-            get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Tree Update") #notify all admins/users with access about removed person
-
-            return redirect(url_for("main_bp.tree_page"), 
-                            notifications=get_users_notifs(current_user), 
-                            logged_in_as=User.get_username(current_user))
-    
-
-    if form.action.data == "delete":
-        with driver.session() as session:
-        # Delete person logic
-           session.run(
-            """
-            MATCH (n:Person {FullName: $person_to_delete})
-            DETACH DELETE n
-            """,
-            person_to_delete=form.person_to_delete.data
-        )
-           
-        log_notif(f"User {User.get_username(current_user)} just removed the person {form.person_to_delete.data} from the family TODO", 
-        get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Tree Remove") #notify all admins/users with access about removed person
-
-        return redirect(url_for("main_bp.tree_page"), #TODO
-                        notifications=get_users_notifs(current_user), 
-                        logged_in_as=User.get_username(current_user))
-    
-    if form.action.data == "shift":
-        with driver.session() as session:
-        # Retrieve the new parent's hierarchy
-            parent_hierarchy_query = """
-        MATCH (p:Person {FullName: $Parent})
-        RETURN p.Hierarchy AS parent_hierarchy
-        """
-            parent_result = session.run(parent_hierarchy_query, Parent=form.new_parent.data)
-            parent_hierarchy = parent_result.single()["parent_hierarchy"]
-
-        # Update the hierarchy of the person being shifted
-            update_hierarchy_query = """
-            MATCH (b:Person {FullName: $full_name})
-            SET b.Hierarchy = $new_hierarchy
-            """
-            session.run(
-            update_hierarchy_query,
-            full_name=form.person_to_shift.data,
-            new_hierarchy=parent_hierarchy + 1  # New hierarchy is parent's hierarchy + 1
-        )
-
-        # Create or update the relationship between the new parent and the person being shifted
-            update_relationship_query = """
-        MATCH (a:Person {FullName: $Parent}), (b:Person {FullName: $full_name})
-        MERGE (a)-[r:PARENT_OF]->(b)
-        """
-            session.run(
-                update_relationship_query,
-                full_name=form.person_to_shift.data,
-                Parent=form.new_parent.data
-        )
-
-            print("Person shifted and hierarchy updated. Redirecting to index.")
-
-            log_notif(f"User {User.get_username(current_user)} moved person {form.person_to_shift.data} to be under {form.new_parent.data} in family TODO", 
-            get_all_admin_ids() + get_all_ids_with_tree("TODO"), " Tree Move") #notify all admins/users with access about moved person
-
-            return redirect(url_for("main_bp.tree_page"),
-                            notifications=get_users_notifs(current_user), 
-                            logged_in_as=User.get_username(current_user))
-        
-    return render_template('modify_graph.html', form=form,
-                           notifications=get_users_notifs(current_user), 
-                           logged_in_as=User.get_username(current_user))
-
-
 
 #NOTIFICATION ROUTES
 @main_bp.route("/unsubscribe/<user_id>", methods=['GET', 'POST'])
@@ -898,8 +611,8 @@ def check_login_admin():
     else:
         return None
 
-@main_bp.route("/Create_Tree", methods=['GET', 'POST'])
-def Create_Tree():
+@main_bp.route("/create_tree", methods=['GET', 'POST'])
+def create_tree():
     form = submit_File()
     error_message = None  # Initialize an error message variable
     if form.validate_on_submit():
@@ -909,7 +622,7 @@ def Create_Tree():
             # Check if the file is a CSV
             if not file.filename.endswith('.csv'):
                 error_message = 'Invalid file format. Please upload a CSV file.'
-                return render_template("Create_Tree.html", form=form, error_message=error_message)
+                return render_template("create_tree.html", form=form, error_message=error_message)
 
             file_data = file.read().decode('utf-8')
             DATA = []
@@ -957,14 +670,13 @@ def Create_Tree():
                 for relationship_query in Relationships.splitlines():
                     session.run(relationship_query)
 
-            return redirect(url_for('main_bp.Multiple_Tree', tree_name=name))
+            return redirect(url_for('main_bp.tree', tree_name=name))
 
-    return render_template("Create_Tree.html", form=form, error_message=error_message)
+    return render_template("create_tree.html", form=form, error_message=error_message)
 
 
-@main_bp.route("/Multiple_Tree", methods=['GET', 'POST'])
-def Multiple_Tree():
-    tree_name = request.args.get('tree_name')  # Get the tree name from the URL parameter
+@main_bp.route("/tree/<tree_name>", methods=['GET', 'POST'])
+def tree(tree_name):
     form = Search_Node()
     
     # Fetch nodes for the form
@@ -1007,7 +719,7 @@ def Multiple_Tree():
                 # Create or update relationship
                 session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
             print("Data processed. Redirecting to index.")
-            return redirect(url_for("main_bp.Multiple_Tree", tree_name=tree_name))
+            return redirect(url_for("main_bp.tree", tree_name=tree_name))
         
         elif form_modify.action.data == "edit":
             with driver.session() as session:
@@ -1016,7 +728,7 @@ def Multiple_Tree():
                     MATCH (n:{tree_name} {{FullName: $old_name}})
                     SET n.FullName = $new_name
                 """, old_name=form_modify.old_name.data, new_name=form_modify.new_name.data)
-            return redirect(url_for("main_bp.Multiple_Tree", tree_name=tree_name))
+            return redirect(url_for("main_bp.tree", tree_name=tree_name))
 
         elif form_modify.action.data == "delete":
             with driver.session() as session:
@@ -1025,7 +737,7 @@ def Multiple_Tree():
                     MATCH (n:{tree_name} {{FullName: $person_to_delete}})
                     DETACH DELETE n
                 """, person_to_delete=form_modify.person_to_delete.data)
-            return redirect(url_for("main_bp.Multiple_Tree", tree_name=tree_name))
+            return redirect(url_for("main_bp.tree", tree_name=tree_name))
 
         elif form_modify.action.data == "shift":
             with driver.session() as session:
@@ -1059,7 +771,7 @@ def Multiple_Tree():
                 session.run(update_relationship_query, full_name=form_modify.person_to_shift.data, Parent=form_modify.new_parent.data)
 
                 print("Person shifted, old parent relationship deleted, and hierarchy updated. Redirecting to index.")
-                return redirect(url_for("main_bp.Multiple_Tree", tree_name=tree_name))
+                return redirect(url_for("main_bp.tree", tree_name=tree_name))
 
     # Fetch nodes and relationships for rendering the tree
     node_query = f"""
@@ -1082,6 +794,7 @@ def Multiple_Tree():
             # Add node if not already in the list (to avoid duplicates)
             if not any(node['name'] == name for node in nodes):
                 nodes.append({'name': name, 'hierarchy': hierarchy, 'lineage': lineage})
+
     # Fetch all relationships
     with driver.session() as session:
         relationship_result = session.run(relationship_query)
@@ -1090,9 +803,10 @@ def Multiple_Tree():
             child_name = record["child"]
             # Add link from parent to child
             links.append({'source': parent_name, 'target': child_name})
-    return render_template('Multiple_Trees.html', nodes=nodes, relationships=links, form=form, tree_name=tree_name,form_modify=form_modify)
 
-@main_bp.route("/Request_Tree", methods=['GET', 'POST'])
+    return render_template('tree.html', nodes=nodes, relationships=links, form=form, tree_name=tree_name,form_modify=form_modify)
+
+@main_bp.route("/request_tree", methods=['GET', 'POST'])
 def Request_Multiple_Tree():
     form = Request_Tree()
     with driver.session() as session:
@@ -1103,6 +817,6 @@ def Request_Multiple_Tree():
 
     if form.validate_on_submit():
         # Redirect to Multiple_Tree with the selected tree name as a parameter
-        return redirect(url_for('main_bp.Multiple_Tree', tree_name=form.Tree_Name.data))
+        return redirect(url_for('main_bp.tree', tree_name=form.Tree_Name.data))
 
-    return render_template("Request_Tree.html", form=form)
+    return render_template("request_tree.html", form=form)

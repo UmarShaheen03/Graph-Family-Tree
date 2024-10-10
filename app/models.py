@@ -75,9 +75,9 @@ class Comment(db.Model):
     user = db.relationship('User', back_populates='comments') 
 
 class Tree(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    name = db.Column(db.String)
+    name = db.Column(db.String, primary_key=True)
+    users = db.Column(db.String) #long string of all user ids with access to this tree
+    create_time = db.Column(db.DateTime)
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -86,6 +86,7 @@ class Notification(db.Model):
     time = db.Column(db.DateTime, default=datetime.utcnow)
     goto = db.Column(db.String, nullable=True) #optional, url to go to when clicked
     type = db.Column(db.String) #what type of notif it is
+
     #type values are: 
     # "Login", "Logout", "Reset", "Signup" (account related) 
     # "Admin Request", "Tree Request", "Request" (request related)

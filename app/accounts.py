@@ -77,10 +77,10 @@ def init_database():
         time=datetime.now()
     )
 
+    #get all tree names from the neo4j server
     dehdashti_tree = Tree(
         id=0,
-        user_id=0,
-        name="Dehdashti"
+        name="Person"
     )
   
 

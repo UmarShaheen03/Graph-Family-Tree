@@ -22,13 +22,13 @@
         <ul class="list-group">
           <!-- Default Dehdashti Family Tree -->
           <li class="list-group-item">
-            <a href="" class="tree-link">Dehdashti Family Tree</a>
+            <a href="{{ url_for('main_bp.tree', tree_name='Person') }}" class="tree-link">Dehdashti Family Tree</a>
           </li>
       
           <!-- Accessible Trees for the User -->
           {% for tree in accessible_trees %}
           <li class="list-group-item">
-            <a href="{{ url_for('tree_page', tree_id=tree.id) }}" class="tree-link">{{ tree.name }}</a>
+            <a href="{{ url_for('main_bp.tree', tree_name=tree.name) }}" class="tree-link">{{ tree.name }} Family Tree</a>
           </li>
           {% else %}
           <p>You do not have access to any other family trees yet.<p>
