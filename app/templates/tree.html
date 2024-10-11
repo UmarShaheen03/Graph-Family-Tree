@@ -270,31 +270,6 @@
         svg.selectAll("circle").attr("fill", d => colorScale(d.depth % 8));  // Reset to original colors
     }
 
-    // Function to calculate radius based on depth (exponential increase)
-    function calculateRadius(depth) {
-        const baseRadius = 100;  // Base radius value for depth 1
-        const factor = 1.8;      // Factor by which the radius increases with depth
-        return baseRadius * Math.pow(factor, depth);  // Radius increases exponentially with depth
-    }
-
-    // Adjust node positions with equal spacing for each generation
-    function adjustNodeLayout(root) {
-        // Group nodes by depth (generation)
-        const levels = d3.group(root.descendants(), d => d.depth);
-
-        // For each depth (generation), calculate the radial positions
-        levels.forEach((nodesAtDepth, depth) => {
-            const radius = calculateRadius(depth);  // Get radius for this generation
-            const angleStep = (2 * Math.PI) / nodesAtDepth.length;  // Equal spacing around the circle
-
-            nodesAtDepth.forEach((node, i) => {
-                const angle = i * angleStep;  // Position each node evenly around the circle
-                node.x = angle;  // Angular position (in radians)
-                node.y = radius;  // Radial distance from the center (depends on depth)
-            });
-        });
-    }
-
     function initialiseGraph(rootNode) {
         // var currentRoot = rootNode;
         console.log("currentRoot: " + currentRoot);
@@ -302,12 +277,10 @@
         const root = tree(d3.hierarchy(rootNode)
             .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
 
-        // // Adjust the radius manually to increase distance between generations
-        // root.each(d => {
-        //     d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
-        // });
-
-        adjustNodeLayout(root);
+        // Adjust the radius manually to increase distance between generations
+        root.each(d => {
+            d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
+        });
 
         currentRoot = root;
 
