@@ -2,7 +2,7 @@ import sqlalchemy as sa
 from app.models import User
 from flask_login import current_user
 from flask import Flask, flash, render_template, redirect, request, session, url_for
-from wtforms import EmailField, FieldList, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
+from wtforms import EmailField, FieldList, FileField, FormField, SelectField, SelectMultipleField, StringField, DateField, IntegerField, PasswordField, TextAreaField, SubmitField, BooleanField, widgets
 from wtforms.validators import DataRequired, NumberRange, Email, ValidationError, EqualTo, Length, Optional
 from flask_wtf import CSRFProtect, FlaskForm
 
@@ -143,3 +143,49 @@ class Search_Node (FlaskForm):
         choices=[]  # Populate this dynamically in your view
     )
     submit_search = SubmitField("Search")
+
+class submit_File (FlaskForm):
+    file=FileField("Upload Your CSV file")
+    name=StringField("Name of the tree")
+    submit=SubmitField('Submit')
+
+
+class Request_Tree (FlaskForm):
+    tree_name = SelectField(
+        'Select Tree Name',
+        choices=[]  # Populate this dynamically in your view
+    )
+    submit = SubmitField("Submit Request")
+
+class EmailPreference(FlaskForm):
+    preference = SelectField(
+        "Choose how often would you like emails, and submit (emails are sent 5pm daily, or 5pm Friday if weekly).",
+        choices=["Daily","Weekly","None"],
+        validators=[DataRequired()]
+    )
+    submit=SubmitField("Submit Preferences")
+
+class IgnoreNotifs (FlaskForm):
+    login=BooleanField("Logins", default=False)
+    logout=BooleanField("Logouts", default=False)
+    reset=BooleanField("Password Resets", default=False)
+    signup=BooleanField("Sign Ups", default=False)
+
+    admin_req=BooleanField("Admin Requests", default=False)
+    tree_req=BooleanField("Tree Requests", default=False)
+    req_accepted=BooleanField("Request Accept", default=False)
+
+    comment=BooleanField("New Comments", default=False)
+    bio_edit=BooleanField("Biography Edits", default=False)
+
+    new_tree=BooleanField("New Tree", default=False)
+    tree_create=BooleanField("New Person", default=False)
+    tree_move=BooleanField("Person Moved", default=False)
+    tree_update=BooleanField("Person Renamed", default=False)
+    tree_delete=BooleanField("Person Removed", default=False)
+
+    submit=SubmitField("Submit Preferences")
+    # "Login", "Logout", "Reset", "Signup" (account related) 
+    # "Admin Request", "Tree Request", "Request" (request related)
+    # "Comment", "Bio Edit" (bio related)
+    # "New Tree", "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)

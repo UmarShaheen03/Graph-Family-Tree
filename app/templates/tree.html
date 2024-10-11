@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block headBlock %}
+    <title> Family Graph</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tree.css') }}"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
@@ -9,6 +10,7 @@
 {% endblock %}
 
 {% block bodyBlock %}
+<h1 id="Multi_Tree">{{ tree_name }} Family Graph</h1>
 <div class="container-fluid">
     <div class="row">
         <!-- Modify Graph -->
@@ -209,6 +211,17 @@
         document.getElementById('context-menu').style.display = 'none';
     }
 
+
+    // Tooltip setup
+    const tooltip = d3.select("body").append("div")
+        .attr("id", "tooltip")
+        .style("position", "absolute")
+        .style("background-color", "white")
+        .style("border", "1px solid #ccc")
+        .style("padding", "5px")
+        .style("border-radius", "4px")
+        .style("opacity", 0);  // Initially hidden
+
     function goToBiography() {
         if (selectedNode) {
             window.location.href = "/biography/" + encodeURIComponent(selectedNode.name);  // Redirect to view bio page
@@ -307,7 +320,7 @@
 
                 highlightDirectLineage(d);
             })
-            .on("mouseout", function () {
+            .on("mouseout", function() {
                 tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
                 unhighlightConnections();
             })
@@ -380,7 +393,6 @@
     let windowWidth768px = window.matchMedia("(min-width:768px)")
     let windowWidth992px = window.matchMedia("(min-width:992px)")
     let windowWidth1200px = window.matchMedia("(min-width:1200px)")
-
 
     function drillDown(node) {
         if (selectedNode){

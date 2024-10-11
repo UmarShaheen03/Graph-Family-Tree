@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block headBlock %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tree.css') }}">
+<title>Create Tree Page</title>
+{% endblock %}
+
+{% block bodyBlock %}
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg p-4">
+                    <h1 class="text-center mb-4">Request Tree</h1>
+                    <form method="post">
+                        {{ form.hidden_tag() }}
+
+                        <div class="form-group">
+                            <label for="tree_name" class="h4">{{ form.Tree_Name.label }}</label>
+                            {{ form.Tree_Name(class="form-control form-control-lg") }}
+                        </div>
+
+                        <div class="form-group text-center mt-4">
+                            {{ form.submit(class="btn btn-primary btn-lg w-50") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+{% endblock %}
+

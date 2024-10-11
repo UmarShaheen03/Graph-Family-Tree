@@ -1,0 +1,84 @@
+<style>
+    .notif_box {
+        border-color: var(--bs-secondary-color);
+        border-bottom-width: 2px;
+        border-bottom-style: solid;
+    }
+
+    .notif_timestamp {
+        color: var(--bs-secondary-color);
+        font-size: smaller;
+        margin: 0px;
+    }
+
+    .seen_button {
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        font-size: smaller;
+        float: right;
+    }
+
+    .go_to_button {
+        padding: 0;
+        width: 50px;
+        height: 20px;
+        font-size: smaller;
+        float: left;
+    }
+
+    .notif_text {
+        margin-bottom: 5px
+    }
+    
+</style>
+
+<div class="notif_box" id="notif_{{ notif.id }}">
+    <div style="justify-content:space-between; display:flex;">
+        <div style="width: 320px">
+            <p class="notif_timestamp">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
+            <p class="notif_text">{{ notif.text }}</p>
+        </div>
+        <div style="width: 80px">
+            {% if notif.goto != None %}
+                {% if notif.type == " Tree Request" or notif.type == " Admin Request" %}
+                <a class="go_to_button btn btn-secondary" style="width:40px" onclick="are_you_sure_yes('{{ notif.goto }}', '{{ notif.id }}')">Yes</a>
+                <a class="seen_button btn btn-secondary" style="width:30px" onclick="are_you_sure_no('{{ notif.id }}')">No</a>
+                {% else %}
+                <a class="go_to_button btn btn-secondary" href="{{ notif.goto }}">Go To</a>
+                <a class="seen_button btn btn-secondary" onclick="seen('{{ notif.id }}')">X</a>
+                {% endif %}
+            {% else %}
+            <a class="seen_button btn btn-secondary" onclick="seen('{{ notif.id }}')">X</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function seen(id) {
+        $.post("/mark_as_seen/" + id, function(){}) //remove from db
+        document.getElementById("notif_" + id).remove(); //remove from page
+        document.getElementById("notif_count").innerText -= 1; //decrease count
+
+        if (document.getElementById("notif_count").innerText == 0) { //if count hits 0
+            document.getElementById("notif_count").remove(); //remove count
+            document.getElementById("notif_bell").classList.remove("bi-bell-full"); //change to white empty bell
+            document.getElementById("notif_bell").classList.add("bi-bell"); 
+            document.getElementById("notif_bell").style.color = "var(--bs-navbar-hover-color)";
+        }
+    }
+    
+    function are_you_sure_yes(goto, id) {
+        if (confirm("Are you sure you want to accept?")) {
+            seen(id);
+            window.location.href = goto;
+        }
+    }
+
+    function are_you_sure_no(id) {
+        if (confirm("Are you sure you want to reject?")) {
+            seen(id);
+        }
+    }
+</script>

@@ -1,29 +1,53 @@
 {% extends "base.html" %}
 
 {% block headBlock %}
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/pulse/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/biography.css') }}">
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4eneOOeiHunYMHble0GvihiawcOy3xsc&callback=initMap" async defer></script>
 <title>Biography Page</title>
 {% endblock %}
 
 {% block bodyBlock %}
 <div class="biography-container">
+    <div class="biography-header">
+        <h1>Biography for {{full_name if full_name else "None"}} </h1>
+    </div>
     <div class="card">
-        <div class="biography-header">
-            <h1>Biography for {{full_name if full_name else "None"}} </h1>
+        <div class="row">
+            <div class="col-md-4 text-center d-flex flex-column align-items-center">
+                <div class="profile-image-frame">
+                    {% if profile_image %}
+                    <img id="profilePreview" src="{{ url_for('static', filename='profile_image') }}" class="biography-image">
+                    {% else %}
+                    <img id="profilePreview" src="{{ url_for('static', filename='default-profile.png') }}" class="biography-image">
+                    {% endif %}
+                </div>
+               
+                <form method="post" action="{{ url_for('main_bp.biography', name=full_name) }}" enctype="multipart/form-data">
+                    <input type="file" id="profile_image" name="profile_image" accept="image/*" class="d-none" onchange="previewImage(event)">
+                    <label for="profile_image" type="submit" class="btn btn-primary btn-lg btn-custom rounded-pill">Choose image</label>
+                </form>
+
+            </div>
+            <div class="col-md-8">
+                <div class="biography-details">
+                    <p><strong>Full Name:</strong> {{full_name if full_name else "None"}}</p>
+                    <p><strong>Date of Birth:</strong> {{dob if dob else "None"}}</p>
+                    <p><strong>Biography:</strong> {{bio if bio else "None"}}</p>
+                    <p><strong>Location:</strong> {{location if location else "None"}}</p>
+                    <div id="map" style="height: 400px; width: 100%; margin-top: 10px;"></div>
+                    
+
+                    <p><strong>Email:</strong> {{email if email else "None"}}</p>
+                    <p><strong>Phone Number:</strong> {{phone_number if phone_number else "None"}}</p>
+                    <p><strong>Address:</strong> {{address if address else "None"}}</p>
+                    {% if admin %}
+                        <button class="btn btn-primary btn-lg btn-custom rounded-pill" onclick="location.href='/biography/edit'">Edit Bio</button>
+                    {% endif %}
+                </div>    
+
+            </div>
         </div>
-        <div class="biography-details">
-            <p><strong>Full Name:</strong> {{full_name if full_name else "None"}}</p>
-            <p><strong>Date of Birth:</strong> {{dob if dob else "None"}}</p>
-            <p><strong>Biography:</strong> {{bio if bio else "None"}}</p>
-            <p><strong>Location:</strong> {{location if location else "None"}}</p>
-            <p><strong>Email:</strong> {{email if email else "None"}}</p>
-            <p><strong>Phone Number:</strong> {{phone_number if phone_number else "None"}}</p>
-            <p><strong>Address:</strong> {{address if address else "None"}}</p>
-            {% if admin %}
-                <button class="btn btn-primary btn-lg btn-custom rounded-pill" onclick="location.href='/biography/edit'">Edit Bio</button>
-            {% endif %}
-        </div>
+        
     </div>
 </div>
 
@@ -56,6 +80,55 @@
         </form>
     </div>
 </div>
+<script>
+    function previewImage(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const output = document.getElementById('profilePreview');
+            output.src = reader.result;
+        };
+        reader.readAsDataURL(event.target.files[0]);
+    }
+    
+    function initMap() {
+        
+        var geocoder = new google.maps.Geocoder();
+        var location = "{{ location }}";  
+
+        var defaultLocation = {lat: -31.97868759085506, lng: 115.81803988679991}; 
+
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 15,
+            center: defaultLocation  
+        });
+
+        var marker = new google.maps.Marker({
+            map: map,
+            position: defaultLocation,  
+            visible: true
+        });
+        
+        geocodeAddress(geocoder, map, marker, location);
+    }
+
+    function geocodeAddress(geocoder, map, marker, location) {
+        if (location !== "None") { 
+            geocoder.geocode({'address': location}, function(results, status) {  
+                if (status === 'OK') {
+                    map.setCenter(results[0].geometry.location);  
+                    marker.setPosition(results[0].geometry.location);  
+                    marker.setVisible(true);
+                } else {
+                    alert('Geocode was not successful for the following reason: ' + status);
+                }
+            });
+        } else {
+          
+            marker.setPosition(defaultLocation);
+            marker.setVisible(true);
+        }
+    }
+</script>
 {% endblock %}
 
 
