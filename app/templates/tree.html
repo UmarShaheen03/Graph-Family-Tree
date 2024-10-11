@@ -3,39 +3,148 @@
 {% block headBlock %}
     <title> Family Graph</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tree.css') }}"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <title>Dehdashti Family Graph</title>
 {% endblock %}
 
 {% block bodyBlock %}
 <h1 id="Multi_Tree">{{ tree_name }} Family Graph</h1>
-<div class="d-md-flex flex-md-row container">
-   
-    <div id="graph-container">
-        {{ form.hidden_tag() }}
-        <!-- <label for="fullname" style="font-weight: bold; font-size: 14px; margin-right: 10px;">{{form.fullname.label}}</label> -->
-        {{ form.fullname(id="fullname", style="margin-left: 10px; padding: 8px; border: 1px solid #ccc; border-radius: 5px; width: 200px; font-size: 14px;") }}
-        {{ form.submit(id="Search", style="background-color: #593196; color: white; padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;") }}
-        
-        <svg id="graph"></svg>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Modify Graph -->
+        <div class="col-lg-3">
+            <div class="card shadow-lg rounded-lg border-0">
+                <div class="card-body p-2">
+                    <h5 class="text-center mb-2 mt-2">MODIFY GRAPH</h5>
+                    <form action="" method="post" novalidate class="Form">
+                        {{ form_modify.hidden_tag() }}
+                        
+                        <div class="form-group mb-4">
+                            <label for="action" class="form-label fw-bold">{{ form_modify.action.label }}</label>
+                            {{ form_modify.action(class="form-select form-select-lg") }}
+                        </div>
+
+                        <div id="name-group" class="form-group mb-4" style="display:none;">
+                            <label for="name" class="form-label fw-bold">{{ form_modify.name.label }}</label>
+                            {{ form_modify.name(class="form-control form-control-lg") }}
+                        </div>
+
+                        <div id="new-name-group" class="form-group mb-4" style="display:none;">
+                            <label for="new_name" class="form-label fw-bold">{{ form_modify.new_name.label }}</label>
+                            {{ form_modify.new_name(class="form-control form-control-lg") }}
+                        </div>
+
+                        <div id="old-name-group" class="form-group mb-4" style="display:none;">
+                            <label for="old_name" class="form-label fw-bold">{{ form_modify.old_name.label }}</label>
+                            {{ form_modify.old_name(class="form-select form-select-lg form-select-searchable") }}
+                        </div>
+
+                        <div id="person-to-shift-group" class="form-group mb-4" style="display:none;">
+                            <label for="person_to_shift" class="form-label fw-bold">{{ form_modify.person_to_shift.label }}</label>
+                            {{ form_modify.person_to_shift(class="form-select form-select-lg form-select-searchable") }}
+                        </div>
+
+                        <div id="person-to-delete-group" class="form-group mb-4" style="display:none;">
+                            <label for="person_to_delete" class="form-label fw-bold">{{ form_modify.person_to_delete.label }}</label>
+                            {{ form_modify.person_to_delete(class="form-select form-select-lg form-select-searchable") }}
+                        </div>
+
+                        <div id="parent-group" class="form-group mb-4">
+                            <label for="parent" class="form-label fw-bold">{{ form_modify.parent.label }}</label>
+                            {{ form_modify.parent(class="form-select form-select-lg form-select-searchable") }}
+                        </div>
+
+                        <div id="new-parent-group" class="form-group mb-4" style="display:none;">
+                            <label for="new_parent" class="form-label fw-bold">{{ form_modify.new_parent.label }}</label>
+                            {{ form_modify.new_parent(class="form-select form-select-lg form-select-searchable") }}
+                        </div>
+
+                        <div class="d-grid gap-2 mb-3">
+                            {{ form_modify.submit_modify(class="btn btn-primary btn-lg rounded-pill") }}
+                        </div>
+                    </form>
+                    <div class="col-auto">
+                        <button id="resetGraph" class="btn btn-secondary btn-lg rounded-pill">Reset Graph</button>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-9 vh-100 mt-2">
+            <p></p>
+            {{ form_search.hidden_tag() }}
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    {{ form_search.fullname(id="fullname", class="form-select-searchable") }}
+                </div>
+                <div class="col-auto">
+                    {{ form_search.submit_search(id="Search", class="btn btn-primary btn-lg rounded-pill") }}
+                </div>
+            </div>
+            <div id="graph-container">                
+                <svg id="graph"></svg>
+            </div>
+            <div id="tooltip"></div>
+        </div>
     </div>
-    <div id="tooltip"></div>
 </div>
+
+<!-- Custom Context Menu -->
+<ul id="context-menu" class="custom-menu" style="display:none; position:absolute; z-index:1000;">
+    <li onclick="modifyGraphAction('edit')">Edit Node</li>
+    <li onclick="modifyGraphAction('delete')">Delete Node</li>
+    <li onclick="modifyGraphAction('shift')">Shift Node</li>
+    <li onclick="modifyGraphAction('add')">Add Child</li>
+    <li onclick="goToBiography()">View Biography</li>
+    <li onclick="drillDown()">Drill Down</li> <!-- New Drill Down option -->
+</ul>
+
 <script src="https://d3js.org/d3.v7.min.js"></script>
+
 <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
+    var selectedNode = null;
+    var currentRoot = null;
+
+    //Build a lookup map of nodes
+    var nodeMap = {};
+    nodes.forEach(node => {
+        nodeMap[node.name] = { ...node, children: [] };
+    });
+
+    var addedNodes = new Set();     //Track added nodes to prevent duplicates
+
+
+    //Build the hierarchy by linking child nodes to their parents
+    links.forEach(link => {
+        const parentNode = nodeMap[link.source];
+        const childNode = nodeMap[link.target];
+
+        //Only add childNode if it hasn't been added yet
+        if (parentNode && childNode && !addedNodes.has(childNode.name)) {
+            parentNode.children.push(childNode);  // Link the child node to its parent
+            addedNodes.add(childNode.name);  // Mark this node as added
+        }
+    });
+
+    //Detect root nodes (nodes that are not children of any other node)
+    var roots = nodes.filter(node => 
+        !links.some(link => link.target === node.name)
+    ).map(rootNode => nodeMap[rootNode.name]);
+
+    if (roots.length > 1) {     // If multiple roots exist, create a stand-in root and link all detected roots to it
+        var standInRoot = { name: "Stand-In Root", hierarchy: 0, lineage: 0, children: roots };
+    } else {
+        var standInRoot = roots[0];  // If only one root, use it directly
+    }
 
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radiusStep = 200;
-
-    // Filter out links where the hierarchy difference is not 1
-    links = links.filter(link => {
-        const sourceNode = nodes.find(n => n.name === link.source);
-        const targetNode = nodes.find(n => n.name === link.target);
-        return Math.abs(sourceNode.hierarchy - targetNode.hierarchy) === 1;
-    });
+    const cx = width * 0.5;
+    const cy = height * 0.5;
+    const radius = Math.min(width, height) / 2 - 30;
 
     // Setup zoom
     const zoom = d3.zoom()
@@ -47,8 +156,59 @@
     const svg = d3.select("#graph")
         .attr("width", width)
         .attr("height", height)
+        .attr("viewBox", [-cx, -cy, width, height])
+        .attr("style", "width: 100%; height: auto; font: 10px sans-serif;")
         .call(zoom)
-        .append("g");
+        .append("g")
+        .attr("transform", "translate(0, 0) scale(1)");  // Centering the radial layout
+    
+    const tree = d3.tree()
+        .size([2 * Math.PI, radius])
+        .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
+
+    // Color scale based on hierarchy levels
+    const colorScale = d3.scaleOrdinal()
+    .domain(d3.range(0, 8))  // Levels 0-7
+    .range([
+        '#10002B', 
+        '#240046', 
+        '#3C096C', 
+        '#5A189A', 
+        '#7B2CBF', 
+        '#9D4EDD', 
+        '#C77DFF', 
+        '#E0AAFF' 
+    ]);
+
+    function modifyGraphAction(action) {
+        const nodeName = selectedNode.name;
+
+        // Auto-select the action in the form
+        const actionField = document.querySelector('select[name="action"]');
+        actionField.value = action;
+        actionField.dispatchEvent(new Event('change')); // Trigger the form's change event to toggle fields
+
+        // Auto-fill the relevant fields based on the selected action
+        if (action === 'edit') {
+            $('select[name="old_name"]').val(nodeName).trigger('change'); // Set value for Select2
+            $('input[name="new_name"]').val(''); // Clear the new name field
+        } else if (action === 'delete') {
+            $('select[name="person_to_delete"]').val(nodeName).trigger('change'); // Set value for Select2
+        } else if (action === 'shift') {
+            $('select[name="person_to_shift"]').val(nodeName).trigger('change'); // Set value for Select2
+            $('select[name="new_parent"]').val(null).trigger('change'); // Clear the new parent field in Select2
+        } else if (action === 'add') {
+            $('input[name="name"]').val(''); // Clear the name field
+            $('select[name="parent"]').val(nodeName).trigger('change'); // Set value for Select2
+        }
+
+        // Trigger form updates to show/hide fields after filling the data
+        actionField.dispatchEvent(new Event('change'));
+        
+        // Close the context menu
+        document.getElementById('context-menu').style.display = 'none';
+    }
+
 
     // Tooltip setup
     const tooltip = d3.select("body").append("div")
@@ -60,127 +220,232 @@
         .style("border-radius", "4px")
         .style("opacity", 0);  // Initially hidden
 
-    // Color scale based on hierarchy
-    const color = d3.scaleOrdinal()
-        .domain([1, 2, 3])
-        .range(['Mauve', 'Violet', 'MediumOrchid', 'Orchid', 'Plum', 'Thistle', 'Lavender']);
-
-    // Group nodes by hierarchy level
-    function groupNodesByHierarchy(nodes) {
-        return d3.group(nodes, d => d.hierarchy);
+    function goToBiography() {
+        if (selectedNode) {
+            window.location.href = "/biography/" + encodeURIComponent(selectedNode.name);  // Redirect to view bio page
+        }
     }
 
-    // Circular layout with parent-child alignment, sorted by Lineage
-    function visualizeGraph(nodes, links) {
-        const groupedNodes = groupNodesByHierarchy(nodes);
+    // Function to highlight the direct lineage (ancestors and descendants)
+    function highlightDirectLineage(d) {
+        highlightAncestors(d);
+        highlightDescendants(d);
+    }
 
-        // Place nodes in a circular fashion by hierarchy
-        groupedNodes.forEach((group, hierarchy) => {
-            const sortedGroup = Array.from(group).sort((a, b) => d3.ascending(a.lineage, b.lineage));
-            const angleStep = (2 * Math.PI) / sortedGroup.length;
-            const radius = hierarchy * radiusStep;
+    // Function to highlight ancestors recursively
+    function highlightAncestors(d) {
+        if (d.parent) {
+            highlightLink(d.parent, d);  // Highlight link between parent and current node
+            highlightAncestors(d.parent);  // Recursively highlight ancestors
+        }
+    }
 
-            sortedGroup.forEach((node, i) => {
-                const angle = i * angleStep;
-                node.x = centerX + Math.cos(angle) * radius;
-                node.y = centerY + Math.sin(angle) * radius;
-                node.angle = angle;
+    // Function to highlight descendants recursively
+    function highlightDescendants(d) {
+        if (d.children) {
+            d.children.forEach(child => {
+                highlightLink(d, child);  // Highlight link between node and each child
+                highlightDescendants(child);  // Recursively highlight descendants
             });
+        }
+    }
+
+    // Highlight the link between two nodes
+    function highlightLink(source, target) {
+        svg.selectAll("path")
+            .filter(link => link.source.data.name === source.data.name && link.target.data.name === target.data.name)
+            .classed("highlighted", true);
+
+        svg.selectAll("circle")
+            .filter(n => n.data.name === source.data.name || n.data.name === target.data.name)
+            .attr("fill", "#ff5722");  // Change color of highlighted nodes
+    }
+
+    // Unhighlight all connections
+    function unhighlightConnections() {
+        svg.selectAll("path").classed("highlighted", false);
+        svg.selectAll("circle").attr("fill", d => colorScale(d.depth % 8));  // Reset to original colors
+    }
+
+    function initialiseGraph(rootNode) {
+        // var currentRoot = rootNode;
+        console.log("currentRoot: " + currentRoot);
+        // Build the tree layout using the stratified hierarchy
+        const root = tree(d3.hierarchy(rootNode)
+            .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
+
+        // Adjust the radius manually to increase distance between generations
+        root.each(d => {
+            d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
         });
 
-        // Add links first (always visible)
-        svg.selectAll(".link")
-            .data(links)
-            .enter().append("line")
-            .attr("class", "link")
-            .attr("x1", d => nodes.find(node => node.name === d.source).x)
-            .attr("y1", d => nodes.find(node => node.name === d.source).y)
-            .attr("x2", d => nodes.find(node => node.name === d.target).x)
-            .attr("y2", d => nodes.find(node => node.name === d.target).y)
-            .attr("stroke", "#ff0000")  // Link color set to red
-            .attr("stroke-width", 2)    // Set width for visibility
-            .style("visibility", "visible")  // Explicitly set visibility
-            .style("opacity", 1);  // Ensure full opacity
+        currentRoot = root;
 
-        // Draw nodes
-        const nodeElements = svg.selectAll(".node")
-            .data(nodes)
-            .enter().append("g")
-            .attr("class", "node")
-            .on("mouseover", function(event, d) {
+        // Tooltip setup
+        const tooltip = d3.select("#tooltip")
+            .style("opacity", 0);  // Initially hidden
+
+        // Add links
+        svg.append("g")
+            .attr("fill", "none")
+            .attr("stroke", "#555")
+            .attr("stroke-opacity", 0.4)
+            .attr("stroke-width", 1.5)
+            .selectAll("path")
+            .data(root.links().filter(link => link.source.data.name !== "Stand-In Root"))  // Filter out stand-in root links
+            .join("path")
+            .attr("d", d3.linkRadial()
+                .angle(d => d.x)
+                .radius(d => d.y));
+
+        // Add nodes
+        const node = svg.append("g")
+            .selectAll("g")
+            .data(root.descendants().filter(d => d.data.name !== "Stand-In Root"))  // Filter out stand-in root node
+            .join("g")
+            .attr("transform", d => `
+                rotate(${d.x * 180 / Math.PI - 90}) 
+                translate(${d.y},0)`);
+
+        node.append("circle")
+            .attr("fill", d => colorScale(d.depth % 8))  // Assign color based on hierarchy level
+            .attr("r", 5)
+            .on("mouseover", function (event, d) {
                 tooltip.transition().duration(200).style("opacity", 0.9);
-                tooltip.html(d.name)  // Display node name in tooltip
-                    .style("left", (event.pageX + 10) + "px")
-                    .style("top", (event.pageY - 10) + "px");
+                tooltip.html(d.data.name)  // Display node name in tooltip
+                    .style("left", (event.pageX + 5) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+
+                highlightDirectLineage(d);
             })
             .on("mouseout", function() {
                 tooltip.transition().duration(500).style("opacity", 0);  // Hide tooltip
+                unhighlightConnections();
             })
-            .call(d3.drag()
-                .on("start", function (event, d) {
-                    d3.select(this).raise().classed("active", true);
-                })
-                .on("drag", function (event, d) {
-                    d.x = event.x;
-                    d.y = event.y;
-                    d3.select(this).select("circle").attr("cx", d.x).attr("cy", d.y);
-                    d3.select(this).select("text").attr("x", d.x + 30).attr("y", d.y + 5);
-                    svg.selectAll(".link")
-                        .filter(link => link.source === d.name || link.target === d.name)
-                        .attr("x1", link => nodes.find(node => node.name === link.source).x)
-                        .attr("y1", link => nodes.find(node => node.name === link.source).y)
-                        .attr("x2", link => nodes.find(node => node.name === link.target).x)
-                        .attr("y2", link => nodes.find(node => node.name === link.target).y);
-                })
-                .on("end", function (event, d) {
-                    d3.select(this).classed("active", false);
-                })
-            );
+            .on("contextmenu", function(event, d) {
+                event.preventDefault();
+                selectedNode = d.data;
 
-        // Add circle for each node
-        nodeElements.append("circle")
-            .attr("r", 25)
-            .attr("cx", d => d.x)
-            .attr("cy", d => d.y)
-            .attr("fill", d => color(d.hierarchy));
+                // Show custom context menu
+                const menu = document.getElementById('context-menu');
+                menu.style.left = event.pageX + 'px';
+                menu.style.top = event.pageY + 'px';
+                menu.style.display = 'block';
 
-        // Add text label for each node
-        nodeElements.append("text")
-            .attr("x", d => d.x + 30)
-            .attr("y", d => d.y + 5)
-            .text(d => d.name)
-            .attr("font-size", "14px")
-            .attr("font-weight", "lighter");
+                menu.dataset.nodeName = d.data.name;
+            });
+
+        node.append("text")
+            .attr("dy", "0.31em")
+            .attr("x", d => d.x < Math.PI === !d.children ? 6 : -6)
+            .attr("text-anchor", d => d.x < Math.PI === !d.children ? "start" : "end")
+            .attr("transform", d => `rotate(${d.x >= Math.PI ? 180 : 0})`)
+            .attr("paint-order", "stroke")
+            .attr("stroke", "white")
+            .attr("fill", "currentColor")
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-width", 3)
+            .text(d => d.data.name);
     }
-
-    // Call visualizeGraph with the fetched nodes and links
-    visualizeGraph(nodes, links);
 
     // Function to zoom into a specific node
     function zoomToNode(node) {
+        console.log('zoomToNode');
+        console.log(node);
         const scale = 2; // Adjust zoom scale as needed
-        const x = node.x;
-        const y = node.y;
 
+        // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
+        const angle = node.x - Math.PI / 2;  // Subtract PI/2 to rotate to normal Cartesian plane
+        const radius = node.y;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+
+        console.log(x,y);
+
+        let newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 150, height / 2 - y * scale - 250).scale(scale);
+
+        if (windowWidth576px.matches){
+            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 200, height / 2 - y * scale - 250).scale(scale);
+        }
+
+        if (windowWidth768px.matches){
+            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 300, height / 2 - y * scale - 250).scale(scale);
+        }
+
+        if (windowWidth992px.matches){
+            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 375, height / 2 - y * scale - 300).scale(scale);
+        }
+        
+        if (windowWidth1200px.matches){
+            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 500, height / 2 - y * scale - 350).scale(scale);
+        }
+        // const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale);
+
+        // Apply the transition
         svg.transition()
             .duration(750)
-            .call(zoom.transform, d3.zoomIdentity.translate(centerX - x * scale, centerY - y * scale).scale(scale));
+            .call(zoom.transform, newTransform);  // Programmatically zoom to the node
     }
 
+    let windowWidth576px = window.matchMedia("(min-width:576px)")
+    let windowWidth768px = window.matchMedia("(min-width:768px)")
+    let windowWidth992px = window.matchMedia("(min-width:992px)")
+    let windowWidth1200px = window.matchMedia("(min-width:1200px)")
+
+    function drillDown(node) {
+        if (selectedNode){
+            // Filter nodes and links to keep only the selected node's descendants
+            const descendants = nodeMap[selectedNode.name].children;
+
+            // Rebuild the graph, showing only the descendants
+            const newRoot = {
+                ...selectedNode,
+                children: descendants
+            };
+            updateGraph(newRoot);  // Function to update the graph with new data
+
+            // Close context menu
+            document.getElementById('context-menu').style.display = 'none';
+        }
+    }
+
+    function updateGraph(rootNode) {
+        // Remove existing nodes and links
+        svg.selectAll("*").remove();
+            
+        initialiseGraph(rootNode);
+    }
+
+    document.addEventListener('click', function () {
+        document.getElementById('context-menu').style.display = 'none';
+    });
+
+    document.getElementById('resetGraph').addEventListener('click', function() {
+        updateGraph(standInRoot);  // Reinitialize the graph with the original root node
+    });
+    
     // Event handler for form submission
     document.getElementById('Search').addEventListener('click', function(event) {
-        event.preventDefault();
+        event.preventDefault(); // Prevent default form submission
+
+        console.log("descendants" + currentRoot);
         const nodeName = document.getElementById('fullname').value;
-        const node = nodes.find(n => n.name === nodeName);
-        if (node) {
-            zoomToNode(node);
+        const nodeData = currentRoot.descendants().find(d => d.data.name === nodeName);  // Find the node in the hierarchical structure
+        console.log("searching for...");
+        console.log(nodeName, nodeData);
+
+        if (nodeData) {
+            zoomToNode(nodeData);  // Zoom to the found node
         } else {
-            alert("Node not found");
+            alert("Node not found: " + nodeName );
         }
     });
+
+    initialiseGraph(standInRoot);
+
 </script>
 
-
-
+<!-- Modify graph script -->
+<script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
 
 {% endblock %}
