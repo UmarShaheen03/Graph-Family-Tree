@@ -440,25 +440,34 @@ def request_tree():
     token = serializer.dumps(comb, salt="tree-request")
     approval_link = f"approve_tree?token={token}"
     print(approval_link)
+    #to dosend notification to all admins with the approval link and request using coopers notification structures.
+    admins = get_all_admin_ids()
     
-    # Redirect to Multiple_Tree with the selected tree name as a parameter
-    
-    #return redirect(url_for('main_bp.tree', tree_name=form.Tree_Name.data))
+    log_notif(f"{User.get_email(current_user)} is requesting access to the tree: {tree}", admins, "Tree Request", approval_link)
+    #To do change return statement. Potentially into a toast notification like admin request?
     return "request made successfully"
 
+
+
+# Todo: have a check to see if user is an admin
 @main_bp.route("/approve_tree", methods=['GET'])
 def approve_admin():
-    token = request.args.get('token')
+    check = check_login_admin()
+    print(check)
+    if check is None:
+        token = request.args.get('token')
 
-    try:
-        string = serializer.loads(token, salt="tree-request", max_age=86400)
-    except Exception as e:
-        return "Invalid or expired token."
+        try:
+            string = serializer.loads(token, salt="tree-request", max_age=86400)
+        except Exception as e:
+            return "Invalid or expired token."
     
-    split = string.split('/')
-    add_tree(split[0],split[1])
-    return "added successfully"
-
+        split = string.split('/')
+        add_tree(split[0],split[1])
+        return "added successfully"
+    else:
+        return "You don't have access to accept request"
+    
 def add_tree(uid,name):
     tree = Tree.query.filter_by(name = name).first()
     tree.users += "," +uid
