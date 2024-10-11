@@ -270,33 +270,6 @@
         svg.selectAll("circle").attr("fill", d => colorScale(d.depth % 8));  // Reset to original colors
     }
 
-    // Function to calculate radius based on depth (exponential increase)
-    function calculateRadius(depth) {
-        const baseRadius = 100;  // You can tweak the base radius value
-        const factor = 1.8;      // Exponential factor for radius growth
-        return baseRadius * Math.pow(factor, depth);  // Radius increases exponentially with depth
-    }
-
-    // Adjust node positions with constant sibling distance and exponential depth increase
-    function adjustNodeLayout(root) {
-        // For each node, calculate the radial position
-        root.each(node => {
-            const depth = node.depth;
-            const siblings = node.parent ? node.parent.children.length : 1;  // Number of siblings
-            const siblingIndex = node.parent ? node.parent.children.indexOf(node) : 0;
-
-            // Calculate radius based on depth
-            const radius = calculateRadius(depth);
-
-            // Evenly distribute nodes within their generation
-            const angleStep = (2 * Math.PI) / siblings;  // Evenly spread across a circle
-            const angle = siblingIndex * angleStep;  // Position based on sibling index
-
-            node.x = angle;  // Angular position (in radians)
-            node.y = radius;  // Radial distance from the center
-        });
-    }
-
     function initialiseGraph(rootNode) {
         // var currentRoot = rootNode;
         console.log("currentRoot: " + currentRoot);
@@ -309,7 +282,6 @@
             d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
         });
 
-        adjustNodeLayout(root);
         currentRoot = root;
 
         // Tooltip setup
