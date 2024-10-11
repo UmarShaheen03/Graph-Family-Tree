@@ -131,6 +131,12 @@ def forgot_password_page():
 def forgot_request():
     form = ForgotPassword()
     email = request.form.get("email")
+    user = db.session.query(User).filter(User.email == email).first()
+    if (user != None):
+        id = user.user_id
+        if (id == 0): #id 0 is a permanent account, can't change password
+            return render_template("forgot.html", forgotForm=form, submitted=False, error="Cannot reset PermaAdmin's password")
+    
     reset_email(email)
 
     return render_template("forgot.html", forgotForm=form, submitted=True)

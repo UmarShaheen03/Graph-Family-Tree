@@ -238,11 +238,10 @@ def get_all_ids_with_weekly():
 
 #TODO
 # - ensure all request/tree notifs are working
-# - limit navbar options (move notifs to global?)
 # - change redirects for ux
 # - fixed accounts
 # - default access to dehdashti
-# 
+# - add errors to more pages
 # - admin requests
 # - user requests (start unverified)
 # - default no notifs for users

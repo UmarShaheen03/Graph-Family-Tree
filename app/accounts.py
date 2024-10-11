@@ -35,13 +35,13 @@ def init_database():
 
     #create mock accounts
     perma_admin = User(
-        user_id=1,
+        user_id=0,
         username="PermaAdmin",
-        email="test@gmail.com", #TODO give a real email?
+        email="test@test.com", #TODO give a real email?
         verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("Can'tResetM3"))
+        password_hash=str(generate_password_hash("CantResetM3"))
     )
 
     nima = User(
@@ -75,10 +75,10 @@ def init_database():
         notifs_ignored=" Tree Create Tree Remove Tree Update Tree Delete Bio Edit Comments"
     )
 
-    cooper = User(
+    test_admin = User(
         user_id=4,
         username="admin_test",
-        email="cooptrooper04@gmail.com",
+        email="admin@test.com",
         verified=True,
         admin=True,
         create_time=datetime.now(),
@@ -109,10 +109,11 @@ def init_database():
 
 
     #add mock accounts to db
+    db.session.add(perma_admin)
     db.session.add(nima)
     db.session.add(group31)
     db.session.add(test_user)
-    db.session.add(cooper)
+    db.session.add(test_admin)
     #add first notification to db
     db.session.add(first_notif)
     db.session.commit()
