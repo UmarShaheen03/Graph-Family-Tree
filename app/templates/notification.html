@@ -41,9 +41,14 @@
         </div>
         <div style="width: 80px">
             {% if notif.goto != None %}
-            <a class="go_to_button btn btn-secondary" href="{{ notif.goto }}">Go To</a>
+                {% if notif.type == " Tree Request" or notif.type == " Admin Request" %}
+                <a class="go_to_button btn btn-secondary" style="width:40px" onclick="are_you_sure_yes('{{ notif.goto }}')">Yes</a>
+                <a class="seen_button btn btn-secondary" style="width:30px" onclick="are_you_sure_no('{{ notif.id }}')">No</a>
+                {% else %}
+                <a class="go_to_button btn btn-secondary" href="{{ notif.goto }}">Go To</a>
+                <a class="seen_button btn btn-secondary" onclick="seen('{{ notif.id }}')">X</a>
+                {% endif %}
             {% endif %}
-            <a class="seen_button btn btn-secondary" onclick="seen('{{ notif.id }}')">X</a>
         </div>
     </div>
 </div>
@@ -59,6 +64,18 @@
             document.getElementById("notif_bell").classList.remove("bi-bell-full"); //change to white empty bell
             document.getElementById("notif_bell").classList.add("bi-bell"); 
             document.getElementById("notif_bell").style.color = "var(--bs-navbar-hover-color)";
+        }
+    }
+    
+    function are_you_sure_yes(goto) {
+        if (confirm("Are you sure you want to accept?")) {
+            window.location.href = goto;
+        }
+    }
+
+    function are_you_sure_no(id) {
+        if (confirm("Are you sure you want to reject?")) {
+            seen(id);
         }
     }
 </script>
