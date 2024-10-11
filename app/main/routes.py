@@ -441,9 +441,9 @@ def request_tree():
     token = serializer.dumps(comb, salt="tree-request")
     approval_link = f"approve_tree?token={token}"
     print(approval_link)
-    #to dosend notification to all admins with the approval link and request using coopers notification structures.
+    #TODO send notification to all admins with the approval link and request using coopers notification structures.
     log_notif(f" User {User.get_username(current_user)} is requesting access to the Tree {tree}", get_all_admin_ids(), " Tree Request", approval_link)
-    #To do change return statement. Potentially into a toast notification like admin request?
+    #TODO change return statement. Potentially into a toast notification like admin request?
     return "request made successfully"
 
 
@@ -466,7 +466,8 @@ def approve_admin():
     
 def add_tree(uid,name):
     tree = Tree.query.filter_by(name = name).first()
-    tree.users += "," +uid
+    if (uid not in tree.users):
+        tree.users += ", " + uid
     db.session.commit()
 
 
