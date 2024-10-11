@@ -2,6 +2,11 @@
 
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
+WEBSITE_URL = "http://127.0.0.1:5000/" #TODO change when deploying
+
+NEO4J_URI='neo4j+ssc://633149e1.databases.neo4j.io' #TODO encrypt?
+NEO4J_USERNAME='neo4j'
+NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
 
 class Config:
     """General base config class"""
