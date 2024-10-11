@@ -235,6 +235,15 @@ def get_all_ids_with_weekly():
 #   ~ comments (viewable to users, linked to tree)
 
 #TODO
-# - integrate bio with multi tree
-# - integrate requests into notifs (check umar's branch?)
-# - testing! yay!
+# - ensure all request/tree notifs are working
+# - default no notifs for users
+# - limit navbar options
+# - change redirects for ux
+# - fixed accounts
+# - default access to dehdashti
+# 
+# - admin requests
+# - user requests (start unverified)
+#  
+# - testing
+# - documentation
