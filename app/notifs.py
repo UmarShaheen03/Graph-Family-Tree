@@ -239,7 +239,6 @@ def get_all_ids_with_weekly():
 #TODO
 # - ensure all request/tree notifs are working
 # - change redirects for ux
-# - fixed accounts
 # - default access to dehdashti
 # - add errors to more pages
 # - admin requests

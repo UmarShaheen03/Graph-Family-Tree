@@ -72,7 +72,7 @@ def init_database():
         admin=False,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("test1234")),
-        notifs_ignored=" Tree Create Tree Remove Tree Update Tree Delete Bio Edit Comments"
+        notifs_ignored=" Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
     )
 
     test_admin = User(
@@ -142,7 +142,9 @@ def signup(email, username, password, repeat, remember):
         user_id = new_id,
         username = username,
         email = email,
-        admin = False
+        verified = False,
+        admin = False,
+        notifs_ignored = " Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
     )
 
     user.set_password(password)
@@ -150,9 +152,9 @@ def signup(email, username, password, repeat, remember):
     db.session.add(user)
     db.session.commit()
 
+    #TODO put user requests here
 
-    #was getting error as type wasnt provided, currently filled with null will check with cooper
-    log_notif(f"New account created for user {User.get_username(user)}",get_all_admin_ids(), "NULL") #notify all admins of new account
+    log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids(), " Login") #notify all admins of new account
     login(username, password, remember)
     
 
