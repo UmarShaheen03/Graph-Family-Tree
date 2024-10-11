@@ -5,7 +5,11 @@
             <p class="log_text">{{ user.username }}</p>
         </div>
         <div style="width: 150px">
+            {% if not user.verified %}
+            <p class="log_subtext" style="text-align: right; padding-right: 3px;">Verified: False</p>
+            {% else %}
             <p class="log_subtext" style="text-align: right; padding-right: 3px;">Admin: {{ user.admin }}</p>
+            {% endif %}
             <p class="log_subtext" style="text-align: right; padding-right: 3px;">User ID: {{ user.user_id }}</p>
         </div>
     </div>

@@ -114,13 +114,13 @@ def init_database():
             tree = Tree(
                 name=name[0],
                 create_time=datetime.now(),
-                users=str(get_all_ids())
+                users=str(get_all_ids()).replace("[","").replace("]","")
             )
         else:
             tree = Tree(
                 name=name[0],
                 create_time=datetime.now(),
-                users=str(get_all_admin_ids())
+                users=str(get_all_admin_ids()).replace("[","").replace("]","")
             )
         db.session.add(tree)
     
@@ -152,14 +152,17 @@ def signup(email, username, password, repeat, remember):
         email = email,
         verified = False,
         admin = False,
+        create_time=datetime.now(),
         notifs_ignored = " Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
     )
 
     user.set_password(password)
     
     db.session.add(user)
-    dehdashti = db.session.query(Tree).filter(Tree.name == "Person").first()
-    dehdashti.users += str(new_id) + ", " #add new user to the dehdashti tree
+
+    #add new user to the dehdashti tree
+    dehdashti = db.session.query(Tree).filter(Tree.name == "Person").first() #TODO change from person, ask josh
+    dehdashti.users += ", " + str(user.user_id)
     db.session.commit()
 
     #TODO put user requests here
