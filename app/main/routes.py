@@ -893,9 +893,10 @@ def tree(tree_name):
         RETURN p.FullName AS name, p.Hierarchy AS hierarchy, p.Lineage AS lineage
     """
     relationship_query = f"""
-        MATCH (p:{tree_name})-[r:PARENT_TO]->(c:{tree_name})
+        MATCH (p:{tree_name})-[r:PARENT_OF]->(c:{tree_name})
         RETURN p.FullName AS parent, c.FullName AS child
     """
+
     nodes = []
     links = []
     # Fetch all nodes
@@ -917,6 +918,7 @@ def tree(tree_name):
             child_name = record["child"]
             # Add link from parent to child
             links.append({'source': parent_name, 'target': child_name})
+
     return render_template('tree.html', nodes=nodes, relationships=links, form_search=form, tree_name=tree_name,form_modify=form_modify)
 
 
