@@ -796,7 +796,7 @@ def tree(tree_name):
     form_modify.person_to_shift.choices = nodes_choices
     form_modify.old_name.choices = nodes_choices
     
-    if form_modify.submit.data and form_modify.validate_on_submit():
+    if form_modify.submit_modify.data and form_modify.validate_on_submit():
         if form_modify.action.data == "add":
             with driver.session() as session:
                 # Retrieve the parent's hierarchy
@@ -917,7 +917,7 @@ def tree(tree_name):
             child_name = record["child"]
             # Add link from parent to child
             links.append({'source': parent_name, 'target': child_name})
-    return render_template('tree.html', nodes=nodes, relationships=links, form=form, tree_name=tree_name,form_modify=form_modify)
+    return render_template('tree.html', nodes=nodes, relationships=links, form_search=form, tree_name=tree_name,form_modify=form_modify)
 
 
 
