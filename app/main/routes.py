@@ -755,7 +755,7 @@ def create_tree():
                         Relationships += (
                             f"MATCH (p:{name} {{FullName: '{Family_lines[i].strip()}', Hierarchy: {parent_hierarchy}, Lineage: {parent_lineage}}}) "
                             f"MATCH (c:{name} {{FullName: '{Family_lines[i + 1].strip()}', Hierarchy: {child_hierarchy}, Lineage: {child_lineage}}}) "
-                            f"MERGE (p)-[:PARENT_TO]->(c);\n"
+                            f"MERGE (p)-[:PARENT_OF]->(c);\n"
                         )
 
             # Add nodes and relationships to the Neo4j Database
@@ -815,7 +815,7 @@ def tree(tree_name):
                 # Build the dynamic query string to add a relationship
                 query = f"""
                     MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
-                    MERGE (a)-[r:PARENT_TO]->(b)
+                    MERGE (a)-[r:PARENT_OF]->(b)
                 """
                 # Create or update relationship
                 session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
@@ -870,7 +870,7 @@ def tree(tree_name):
 
                 # Step 1: Remove the current parent-child relationship for the person being shifted
                 remove_old_relationship_query = f"""
-                    MATCH (old_parent:{tree_name})-[r:PARENT_TO]->(b:{tree_name} {{FullName: $full_name}})
+                    MATCH (old_parent:{tree_name})-[r:PARENT_OF]->(b:{tree_name} {{FullName: $full_name}})
                     DELETE r
                 """
                 session.run(remove_old_relationship_query, full_name=form_modify.person_to_shift.data)
@@ -878,7 +878,7 @@ def tree(tree_name):
                 # Step 2: Create the new relationship between the new parent and the person being shifted
                 update_relationship_query = f"""
                     MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
-                    MERGE (a)-[r:PARENT_TO]->(b)
+                    MERGE (a)-[r:PARENT_OF]->(b)
                 """
                 session.run(update_relationship_query, full_name=form_modify.person_to_shift.data, Parent=form_modify.new_parent.data)
                 
