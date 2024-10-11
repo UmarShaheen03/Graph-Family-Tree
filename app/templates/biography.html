@@ -10,7 +10,7 @@
 {% block bodyBlock %}
 <div class="biography-container">
     <div class="biography-header">
-        <h1>Biography for {{full_name if full_name else "None"}} </h1>
+        <h1>Biography for {{name if name else "None"}} </h1>
     </div>
     <div class="card">
         <div class="row">
@@ -23,15 +23,16 @@
                     {% endif %}
                 </div>
                
-                <form method="post" action="{{ url_for('main_bp.biography', name=full_name) }}" enctype="multipart/form-data">
-                    <input type="file" id="profile_image" name="profile_image" accept="image/*" class="d-none" onchange="previewImage(event)">
+                <form method="post" action="{{ url_for('main_bp.biography', name=name) }}" enctype="multipart/form-data">
+                    <input type="file" id="profile_image" name="image" accept="image/*" class="d-none" onchange="previewImage(event)">
                     <label for="profile_image" type="submit" class="btn btn-primary btn-lg btn-custom rounded-pill">Choose image</label>
+                    <button type="submit" class="btn btn-primary btn-lg btn-custom rounded-pill">Upload Image</button>
                 </form>
 
             </div>
             <div class="col-md-8">
                 <div class="biography-details">
-                    <p><strong>Full Name:</strong> {{full_name if full_name else "None"}}</p>
+                    <p><strong>Full Name:</strong> {{name if name else "None"}}</p>
                     <p><strong>Date of Birth:</strong> {{dob if dob else "None"}}</p>
                     <p><strong>Biography:</strong> {{bio if bio else "None"}}</p>
                     <p><strong>Location:</strong> {{location if location else "None"}}</p>
@@ -72,7 +73,7 @@
 
     <div class="comment-form">
         <h3>Leave a Comment</h3>
-        <form method="post" action="{{ url_for('main_bp.biography', name=full_name) }}">
+        <form method="post" action="{{ url_for('main_bp.biography', name=name) }}">
             {{ comment_form.hidden_tag() }}
             <div class="form-group">
                 <textarea class="form-control" name="comment" rows="4" placeholder="Write your comment here..." required></textarea>
@@ -119,8 +120,6 @@
                     map.setCenter(results[0].geometry.location);  
                     marker.setPosition(results[0].geometry.location);  
                     marker.setVisible(true);
-                } else {
-                    alert('Geocode was not successful for the following reason: ' + status);
                 }
             });
         } else {

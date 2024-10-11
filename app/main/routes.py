@@ -4,6 +4,7 @@ import os
 import io
 from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file, send_from_directory
 from app.forms import *
+from app.forms import BiographyEditForm, ImageUploadForm
 from app.models import Biography, Comment, User
 from app.accounts import *
 from app import db
@@ -15,6 +16,7 @@ from werkzeug.utils import secure_filename
 from neo4j import Driver
 import sys #TODO using for debug printing, remove in final
 import logging
+
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -167,9 +169,13 @@ def tree_page():
     nodes, relationships = fetch_data()
     return render_template('Tree.html', nodes=nodes, relationships=relationships,form=form)
 
+
+app=Flask(__name__)
+app.config["IMAGE_UPLOADS"] = os.path.join('static', 'uploads') # Directory for storing uploaded images
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
@@ -177,11 +183,6 @@ def biography(name):
     if check != None:
         return check
  
-    # Fetch person's biography details from Neo4j
-    person = get_person_bio(name)
-    
-    if not person:
-        return "Biography not found.", 404
 
     # Fetch comments related to this person
     comments = Comment.query.all()
@@ -198,34 +199,38 @@ def biography(name):
         flash('Comment added successfully')
         return redirect(url_for('main_bp.biography', name=name))
     
-    biography = Biography.query.first()
-    upload_form = ImageUploadForm() 
-    person = get_person_bio(name)
-    if upload_form.validate_on_submit() and 'profile_image' in request.files:
-        file = request.files['profile_image']
-        if file.filename != '' and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            unique_filename = f"{uuid.uuid4().hex}_{filename}"
-            if not os.path.exists(current_app.config['UPLOAD_FOLDER']):
-                os.makedirs(current_app.config['UPLOAD_FOLDER'])
-            file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], unique_filename)
-            file.save(file_path)
-            image_path = os.path.join('uploads', unique_filename)
-            with driver.session() as session:
-                session.run(
-                    """
-                    MATCH (p:Person {FullName: $full_name})
-                    SET p.ProfileImage = $profile_image
-                    """,
-                    full_name=name,
-                    profile_image=image_path
-                )
-            flash('Profile image updated successfully.')
+    if request.method == 'POST' and 'image' in request.files:
+        image = request.files['image']
+
+        if image.filename != '' and allowed_file(image.filename):
+            try:
+                # Save the image to a local directory
+                filename = secure_filename(image.filename)
+                image_path = os.path.join(app.config["IMAGE_UPLOADS"], filename)
+
+                # Save the image
+                image.save(image_path)
+
+                # Store the file path in Neo4j
+                image_url = os.path.join(app.config["IMAGE_UPLOADS"], filename) # URL for accessing the image
+                update_person_image_in_neo4j(name, image_url)
+
+                flash("Image uploaded successfully.")
+                return redirect(url_for('main_bp.biography', name=name))
+            except Exception as e:
+                flash(f"An error occurred while uploading the image: {str(e)}")
+                return redirect(request.url)
         else:
-            flash('Invalid file type. Please upload a valid image.')
-        return redirect(url_for('biography', name=name))
+            flash("Invalid file type. Please upload a valid image.")
+            return redirect(request.url)
+        
+ 
+    # Fetch person's biography details from Neo4j
+    person = get_person_bio(name)
+    profile_image = person.get('image_url') if person.get('image_url') else None
+
     return render_template('biography.html', 
-                           full_name=person['name'], 
+                           name=person['name'], 
                            dob=person.get('dob', 'Unknown'), 
                            bio=person.get('biography', 'No biography available'), 
                            location=person.get('location', 'Unknown'),
@@ -235,9 +240,21 @@ def biography(name):
                            comments=comments, 
                            comment_form=comment_form,
                            admin=User.is_admin(current_user),
-                           profile_image=person.get('profile_image', None),
-                           upload_form=upload_form
+                           profile_image=person.get('image_url')
                            )
+
+def update_person_image_in_neo4j(name, image_url):
+    """Update the Person node in Neo4j with the image URL."""
+    with driver.session() as session:
+        session.run(
+            """
+            MATCH (p:Person {FullName: $name})
+            SET p.image_url = $image_url
+            """,
+            name=name,
+            image_url=image_url
+        )
+
 @main_bp.route('/biography/edit', methods=['GET', 'POST'])
 def edit_biography():
     check = check_login_admin()
@@ -251,8 +268,7 @@ def edit_biography():
     with driver.session() as session:
         result = session.run("MATCH (n:Person) RETURN n.FullName AS name")
         nodes = [(record["name"], record["name"]) for record in result]
-        
-    # Set choices for the FullName dropdown field
+     
     edit_form.fullname.choices = nodes
 
     # Check if the form is submitted and validated
@@ -263,7 +279,7 @@ def edit_biography():
         with driver.session() as session:
             session.run(
                 """
-                MATCH (p:Person {FullName: $full_name})
+                MATCH (p:Person {FullName: $name})
                 SET p.Date_Of_Birth = $DOB,
                     p.Biography = $Biography,
                     p.Location = $Location,
@@ -271,7 +287,7 @@ def edit_biography():
                     p.PhoneNumber = $PhoneNumber,
                     p.Address = $Address
                 """,
-                full_name=person_name,
+                name=person_name,
                 DOB=edit_form.dob.data,
                 Biography=edit_form.biography.data,
                 Location=edit_form.location.data,
@@ -288,9 +304,9 @@ def edit_biography():
     
     
 # Function to fetch biography from Neo4j
-def get_person_bio(full_name):
+def get_person_bio(name):
     query = """
-    MATCH (p:Person {FullName: $full_name})
+    MATCH (p:Person {FullName: $name})
     RETURN p.FullName AS name, 
            p.Hierarchy AS hierarchy, 
            p.Date_Of_Birth AS dob, 
@@ -299,10 +315,10 @@ def get_person_bio(full_name):
            p.Email AS email, 
            p.PhoneNumber AS phone_number, 
            p.Address AS address,
-           p.ProfileImage AS profile_image 
+           p.image_url AS image_url
     """
     with driver.session() as session:
-        result = session.run(query, full_name=full_name)
+        result = session.run(query, name=name)
         return result.single()
 
 
