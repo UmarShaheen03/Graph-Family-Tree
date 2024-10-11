@@ -223,7 +223,19 @@ def biography(name):
     
     if not person:
         return "Biography not found.", 404
-
+    if person:
+        with driver.session() as session:
+            # Query to get the labels of the node
+            query = """
+                MATCH (n {FullName: $name}) 
+                RETURN labels(n) AS labels
+            """
+            result = session.run(query, name=name)
+            record = result.single()
+            if record and record['labels']:
+                # Use the first label, assuming the node has only one main label
+                tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
+            print(tree_name)             
     # Fetch comments related to this person
     comments = Comment.query.all()
     comment_form = CommentForm()
