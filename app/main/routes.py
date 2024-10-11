@@ -425,6 +425,7 @@ def my_dashboard():
 
     return render_template('my_dashboard.html', preferenceForm=form1, ignoreForm=form2, treeForm = form3, 
                            accessible_trees=get_all_trees_with_id(User.get_id(current_user)),
+                           all_trees = db.session.query(Tree).all(),
                            preferences=User.get_ignored(current_user),
                            often=User.get_often(current_user),
                            admin=admin, #boolean for if admin or not #TODO make more secure?

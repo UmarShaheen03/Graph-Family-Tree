@@ -39,8 +39,12 @@
         <h3>Request Access to a Family Tree</h3>
         <form id="requestTreeAccessForm" action="/request_tree" method="post">
           <div class="form-group">
-            <label for="tree_id">{{treeForm.tree_name.label}}</label>
-            {{treeForm.tree_name}}
+            <label for="tree_name">{{ treeForm.tree_name.label }}</label>
+            <select id="tree_name" name="tree_name">
+            {% for tree in all_trees %}
+            <option value="{{tree.name}}">{{tree.name}}</option>
+            {% endfor %}
+            </select>
           </div>
           {{ treeForm.submit(class="btn btn-primary") }}
         </form>
