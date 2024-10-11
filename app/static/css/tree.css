@@ -13,7 +13,7 @@
     width: 100% !important;
 }
 
-#resetGraph {
+#resetGraph, #resetZoom {
     display: block;
     margin: auto;
     margin-bottom: 1rem;

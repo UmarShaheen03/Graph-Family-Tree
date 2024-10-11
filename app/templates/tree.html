@@ -67,7 +67,10 @@
                     </form>
                     <div class="col-auto">
                         <button id="resetGraph" class="btn btn-secondary btn-lg rounded-pill">Reset Graph</button>
-                    </div>                    
+                    </div>
+                    <div class="col-auto">
+                        <button id="resetZoom" class="btn btn-secondary btn-lg rounded-pill">Reset Zoom</button>
+                    </div>                        
                 </div>
             </div>
         </div>
@@ -165,7 +168,7 @@
         .attr("style", "width: 100%; height: auto; font: 10px sans-serif;")
         .call(zoom)
         .append("g")
-        .attr("transform", "translate(0, 0) scale(1)");  // Centering the radial layout
+        .attr("transform", "translate(0, 0) scale(0.3)");  // Centering the radial layout
     
     const tree = d3.tree()
         .size([2 * Math.PI, radius])
@@ -351,6 +354,21 @@
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
             .text(d => d.data.name);
+
+        svg.attr("transform", "translate(0, 0) scale(0.3)");
+    }
+
+    function zoomOut(){
+        alert("zoom out");
+        const scale = 0.1;
+        const x = 0;
+        const y = 0
+
+        // svg.transition()
+        //     .duration(750)
+        //     .call(zoom.transform, d3.zoomIdentity.translate(0,0).scale(scale));
+        
+        svg.attr("transform", "translate(0, 0) scale(0.3)");
     }
 
     // Function to zoom into a specific node
@@ -427,6 +445,10 @@
 
     document.getElementById('resetGraph').addEventListener('click', function() {
         updateGraph(standInRoot);  // Reinitialize the graph with the original root node
+    });
+
+    document.getElementById('resetZoom').addEventListener('click', function() {
+        zoomOut();  
     });
     
     // Event handler for form submission
