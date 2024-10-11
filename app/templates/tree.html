@@ -1,12 +1,10 @@
 {% extends "base.html" %}
-
 {% block headBlock %}
     <title> Family Graph</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/tree.css') }}"/>
 {% endblock %}
-
 {% block bodyBlock %}
-<h1 id="Multi_Tree">{{ tree_name }} Family Graph</h1>
+<h1 id="Multi_Tree">{{ tree_name }}  Family Graph</h1>
 <div class="d-md-flex flex-md-row container">
    
     <div id="graph-container">
@@ -19,11 +17,55 @@
     </div>
     <div id="tooltip"></div>
 </div>
+<div class="card shadow-lg rounded-lg border-0">
+    <div class="card-body p-5">
+        <form action="" method="post" novalidate class="Form">
+            {{ form_modify.hidden_tag() }}
+            
+            <div class="form-group mb-4">
+                <label for="action" class="form-label fw-bold">{{ form_modify.action.label }}</label>
+                {{ form_modify.action(class="form-select form-select-lg") }}
+            </div>
+            <div id="name-group" class="form-group mb-4" style="display:none;">
+                <label for="name" class="form-label fw-bold">{{ form_modify.name.label }}</label>
+                {{ form_modify.name(class="form-control form-control-lg") }}
+            </div>
+            <div id="new-name-group" class="form-group mb-4" style="display:none;">
+                <label for="new_name" class="form-label fw-bold">{{ form_modify.new_name.label }}</label>
+                {{ form_modify.new_name(class="form-control form-control-lg") }}
+            </div>
+            <div id="old-name-group" class="form-group mb-4" style="display:none;">
+                <label for="old_name" class="form-label fw-bold">{{ form_modify.old_name.label }}</label>
+                {{ form_modify.old_name(class="form-select form-select-lg") }}
+            </div>
+            <div id="person-to-shift-group" class="form-group mb-4" style="display:none;">
+                <label for="person_to_shift" class="form-label fw-bold">{{ form_modify.person_to_shift.label }}</label>
+                {{ form_modify.person_to_shift(class="form-select form-select-lg") }}
+            </div>
+            <div id="person-to-delete-group" class="form-group mb-4" style="display:none;">
+                <label for="person_to_delete" class="form-label fw-bold">{{ form_modify.person_to_delete.label }}</label>
+                {{ form_modify.person_to_delete(class="form-select form-select-lg") }}
+            </div>
+            <div id="parent-group" class="form-group mb-4">
+                <label for="parent" class="form-label fw-bold">{{ form_modify.parent.label }}</label>
+                {{ form_modify.parent(class="form-select form-select-lg") }}
+            </div>
+            <div id="new-parent-group" class="form-group mb-4" style="display:none;">
+                <label for="new_parent" class="form-label fw-bold">{{ form_modify.new_parent.label }}</label>
+                {{ form_modify.new_parent(class="form-select form-select-lg") }}
+            </div>
+            <div class="d-grid gap-2">
+                {{ form_modify.submit(class="btn btn-primary btn-lg rounded-pill") }}
+            </div>
+        </form>
+    </div>
+</div>
+</div>
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
 <script>
     var nodes = {{ nodes|tojson }};
     var links = {{ relationships|tojson }};
-
     const width = document.getElementById('graph-container').clientWidth;
     const height = document.getElementById('graph-container').clientHeight;
     const centerX = width / 2;
@@ -79,7 +121,6 @@
             const sortedGroup = Array.from(group).sort((a, b) => d3.ascending(a.lineage, b.lineage));
             const angleStep = (2 * Math.PI) / sortedGroup.length;
             const radius = hierarchy * radiusStep;
-
             sortedGroup.forEach((node, i) => {
                 const angle = i * angleStep;
                 node.x = centerX + Math.cos(angle) * radius;
@@ -151,6 +192,11 @@
             .text(d => d.name)
             .attr("font-size", "14px")
             .attr("font-weight", "lighter");
+
+        // Add double-click event to redirect to biography page
+        nodeElements.on("dblclick", function (event, d) {
+            window.location.href = "/biography/" + encodeURIComponent(d.name);  // Redirect to view bio page
+        });
     }
 
     // Call visualizeGraph with the fetched nodes and links
@@ -161,7 +207,6 @@
         const scale = 2; // Adjust zoom scale as needed
         const x = node.x;
         const y = node.y;
-
         svg.transition()
             .duration(750)
             .call(zoom.transform, d3.zoomIdentity.translate(centerX - x * scale, centerY - y * scale).scale(scale));
@@ -178,6 +223,7 @@
             alert("Node not found");
         }
     });
+
 </script>
 
 
