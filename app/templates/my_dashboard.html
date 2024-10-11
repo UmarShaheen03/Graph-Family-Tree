@@ -34,7 +34,7 @@
 
     
     <div class="col-md-8">
-      {% if not admin %}
+      {% if not is_admin %}
       <div class="box mb-4">
         <h3>Request Access to a Family Tree</h3>
         <form id="requestTreeAccessForm" action="/request_tree" method="post">
@@ -83,7 +83,7 @@
 
             <div style="display:inline-block;vertical-align:top;width:24%">
               <h4>Accounts</h4>
-              {% if admin %}
+              {% if is_admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.login.label(style="width:150%") }}
                 {{ ignoreForm.login(style="height:20px;margin:0") }}
@@ -105,7 +105,7 @@
 
             <div style="display:inline-block;vertical-align:top;width:24%;">
               <h4>Requests</h4>
-              {% if admin %}
+              {% if is_admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.admin_req.label(style="width:150%") }}
                 {{ ignoreForm.admin_req(style="height:20px;margin:0") }}
@@ -135,7 +135,7 @@
 
             <div style="display:inline-block;vertical-align:top;width:24%">
               <h4>Trees</h4>
-              {% if admin %}
+              {% if is_admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
                 {{ ignoreForm.new_tree.label(style="width:150%") }}
                 {{ ignoreForm.new_tree(style="height:20px;margin:0") }}
@@ -167,12 +167,8 @@
   </div>
 </div>
 
-
-<!--script src="{{ url_for('static', filename='js/dashboard.js') }}"></script -->
-
 <script>
   //scripts to set the defaults on all the forms
-  //uses jinja so i couldn't put it in the other file
 
   often = "{{ often }}"
   document.getElementById("preference").value = often;

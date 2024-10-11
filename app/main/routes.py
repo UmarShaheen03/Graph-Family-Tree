@@ -63,12 +63,7 @@ def login_page():
 def signup_page():
     signupForm = SignupForm()
 
-    if current_user.is_authenticated:
-        return render_template("signup.html", signupForm=signupForm,
-                               notifications=get_users_notifs(current_user), 
-                               logged_in_as=User.get_username(current_user))
-    else:
-        return render_template("signup.html", signupForm=signupForm)
+    return render_template("signup.html", signupForm=signupForm)
     
 
 #form submissions for login
@@ -117,36 +112,20 @@ def signup_request():
         try:
             signup(email, username, password, repeat, remember)
         except SignupError as error:
-            if current_user.is_authenticated:
-                return render_template("signup.html", signupForm=form, error=error,
-                               notifications=get_users_notifs(current_user), 
-                               logged_in_as=User.get_username(current_user))
-            else:
-                return render_template("signup.html", signupForm=form, error=error)
+            return render_template("signup.html", signupForm=form, error=error)
 
 
         #send to home page on success
         return redirect(url_for("main_bp.home_page"))
     
     else:
-        if current_user.is_authenticated:
-            return render_template("signup.html", loginForm=form, error="Invalid Form",
-                    notifications=get_users_notifs(current_user), 
-                    logged_in_as=User.get_username(current_user))
-        else:
-            return render_template("signup.html", loginForm=form, error="Invalid Form")
+        return render_template("signup.html", loginForm=form, error="Invalid Form")
    
 
 @main_bp.route("/forgot")
 def forgot_password_page():
     form = ForgotPassword()
-
-    if current_user.is_authenticated:
-        return render_template("forgot.html", forgotForm=form, submitted=False,
-                               notifications=get_users_notifs(current_user), 
-                               logged_in_as=User.get_username(current_user))
-    else:
-        return render_template("forgot.html", forgotForm=form, submitted=False)
+    return render_template("forgot.html", forgotForm=form, submitted=False)
 
 @main_bp.route("/forgot-form", methods=["POST"])
 def forgot_request():
@@ -154,12 +133,7 @@ def forgot_request():
     email = request.form.get("email")
     reset_email(email)
 
-    if current_user.is_authenticated:
-        return render_template("forgot.html", forgotForm=form, submitted=True,
-                               notifications=get_users_notifs(current_user), 
-                               logged_in_as=User.get_username(current_user))
-    else:
-        return render_template("forgot.html", forgotForm=form, submitted=True)
+    return render_template("forgot.html", forgotForm=form, submitted=True)
 
 @main_bp.route("/reset")
 def reset_password_page():
@@ -171,12 +145,7 @@ def reset_password_page():
         return redirect(url_for("main_bp.home_page"))
     
     form = ResetPassword()
-    if current_user.is_authenticated:
-        return render_template("reset.html", resetForm=form, token=token, user_id=user_id,
-                               notifications=get_users_notifs(current_user), 
-                               logged_in_as=User.get_username(current_user))
-    else:
-        return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
+    return render_template("reset.html", resetForm=form, token=token, user_id=user_id)
 
 @main_bp.route("/reset-form", methods=["POST"])
 def reset_form():
@@ -194,12 +163,7 @@ def reset_form():
     try:
         reset(user_id, password, repeat)
     except SignupError as error:
-        if current_user.is_authenticated:
-            return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id,
-                    notifications=get_users_notifs(current_user), 
-                    logged_in_as=User.get_username(current_user))
-        else:
-            return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
+        return render_template("reset.html", resetForm=form, error=error, token=token, user_id=user_id)
 
 
     user = db.session.query(User).filter(User.user_id == user_id).first()
@@ -307,13 +271,9 @@ def edit_biography(tree_name):
         log_notif(f"User {User.get_username(current_user)} edited the bio of {person_name} from Tree {tree_name}", 
                   get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Bio Edit", "/biography/" + person_name) #notify all admins/users with access about bio edit
         
-        return redirect(url_for('main_bp.biography', name=person_name,
-                                notifications=get_users_notifs(current_user), 
-                                logged_in_as=User.get_username(current_user)))
+        return redirect(url_for('main_bp.biography', name=person_name))
 
-    return render_template('edit_biography.html', biography=biography, edit_form=edit_form,
-                           notifications=get_users_notifs(current_user), 
-                           logged_in_as=User.get_username(current_user))
+    return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
     
     
 
@@ -326,17 +286,13 @@ def unsubscribe(user_id):
     if not current_user.is_authenticated: #if not logged in
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
     elif (int(user_id) != User.get_id(current_user)): #if logged in as a different user
-        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe",
-                                notifications=get_users_notifs(current_user), 
-                                logged_in_as=User.get_username(current_user))
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, info="Please login to your account to unsubscribe")
 
     user = db.session.query(User).filter(User.user_id == User.get_id(current_user)).first()
     user.set_often("None")
     db.session.commit()
 
-    return render_template("unsubscribe.html", email=User.get_email(current_user),
-                           notifications=get_users_notifs(current_user), 
-                           logged_in_as=User.get_username(current_user))
+    return render_template("unsubscribe.html", email=User.get_email(current_user))
 
 @main_bp.route("/mark_as_seen/<notif_id>", methods=['POST'])
 def seen_notif(notif_id):
@@ -431,10 +387,7 @@ def my_dashboard():
                            accessible_trees=get_all_trees_with_id(User.get_id(current_user)),
                            all_trees = db.session.query(Tree).all(),
                            preferences=User.get_ignored(current_user),
-                           often=User.get_often(current_user),
-                           admin=admin, #boolean for if admin or not #TODO make more secure?
-                           notifications=get_users_notifs(current_user), 
-                           logged_in_as=User.get_username(current_user)) 
+                           often=User.get_often(current_user)) 
 
 
 @main_bp.route("/request_tree", methods=['POST'])
@@ -488,9 +441,7 @@ def log():
                            users=users,
                            trees=trees,
                            master_notifications=get_users_notifs(-1),
-                           url=WEBSITE_URL,
-                           notifications=get_users_notifs(current_user), 
-                           logged_in_as=User.get_username(current_user))
+                           url=WEBSITE_URL)
 
 
 # Function to fetch biography from Neo4j
