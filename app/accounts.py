@@ -88,7 +88,7 @@ def init_database():
         tree = Tree(
             name=name[0],
             create_time=datetime.now(),
-            users="0, 1, 2, 3"
+            users="0, 1, 3"
         )
         db.session.add(tree)
 

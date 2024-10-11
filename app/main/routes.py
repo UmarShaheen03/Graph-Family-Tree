@@ -917,8 +917,6 @@ def tree(tree_name):
             child_name = record["child"]
             # Add link from parent to child
             links.append({'source': parent_name, 'target': child_name})
-
-    print(nodes)
     return render_template('tree.html', nodes=nodes, relationships=links, form=form, tree_name=tree_name,form_modify=form_modify)
 
 
