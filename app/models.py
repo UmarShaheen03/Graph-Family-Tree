@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False) 
     password_hash = db.Column(db.String, nullable=False)
+    verified = db.Column(db.Boolean)
     admin = db.Column(db.Boolean)
     create_time = db.Column(db.DateTime)
     reset_token = db.Column(db.String)
@@ -53,7 +54,16 @@ class User(UserMixin, db.Model):
         return User.query.get(int(user_id))
 
     def is_admin(self):
-        return (self.admin)
+        if self.is_authenticated:
+            return (self.admin)
+        else:
+            return False
+    
+    def is_verified(self):
+        if self.is_authenticated:
+            return (self.verified)
+        else:
+            return False
     
 
 class Biography(db.Model):

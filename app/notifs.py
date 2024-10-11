@@ -14,10 +14,12 @@ from flask import url_for
 import sys
 
 def get_users_notifs(user): #check through notif db for all notifs with user id
-    if user != -1:
+    if not user.is_authenticated: #no user
+        return []
+    elif user != -1: #normal user
         id = User.get_id(user)
         ignored = User.get_ignored(user)
-    else:
+    else: #master log
         id = -1
         ignored = ""
 
@@ -236,14 +238,14 @@ def get_all_ids_with_weekly():
 
 #TODO
 # - ensure all request/tree notifs are working
-# - default no notifs for users
-# - limit navbar options
+# - limit navbar options (move notifs to global?)
 # - change redirects for ux
 # - fixed accounts
 # - default access to dehdashti
 # 
 # - admin requests
 # - user requests (start unverified)
+# - default no notifs for users
 #  
 # - testing
 # - documentation

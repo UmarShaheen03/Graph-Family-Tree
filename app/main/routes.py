@@ -14,6 +14,8 @@ from datetime import datetime
 from flask_login import login_required, current_user, logout_user
 from itsdangerous import URLSafeTimedSerializer
 from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
+from jinja2 import Environment
+from functools import wraps
 
 main_bp = Blueprint('main_bp', __name__)
 # Connect to Neo4j
@@ -21,7 +23,7 @@ driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 serializer = URLSafeTimedSerializer("SecretKey")
 
-#test function, resets database and adds two mock users
+#test function, resets database, start email thread and adds mock users
 @main_bp.before_request
 def run_once_on_start():
     init_database()
@@ -31,15 +33,19 @@ def run_once_on_start():
     #replaces code of this function with none, so it only runs once
     run_once_on_start.__code__ = (lambda:None).__code__
 
+@main_bp.context_processor
+def inject_global_vars():
+    globals = {
+        "is_admin": User.is_admin(current_user),
+        "is_verified": User.is_verified(current_user),
+        "notifications": get_users_notifs(current_user)
+    }
+    return globals
+
 @main_bp.route("/")
 def home_page():
     """The landing page"""
-    if current_user.is_authenticated:
-        return render_template('home.html', 
-                               notifications=get_users_notifs(current_user), 
-                               logged_in_as=User.get_username(current_user))
-    else:
-        return render_template('home.html')
+    return render_template('home.html')
 
 """LOGIN AND SIGNUP PAGE/FORMS"""
 
@@ -49,9 +55,7 @@ def login_page():
     loginForm = LoginForm()
 
     if current_user.is_authenticated:
-        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm,
-                               notifications=get_users_notifs(current_user), 
-                               logged_in_as=User.get_username(current_user))
+        return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm, logged_in_as=User.get_username(current_user))
     else:
         return render_template("login.html", loginForm=loginForm, logoutForm=logoutForm)
 

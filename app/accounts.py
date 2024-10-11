@@ -34,40 +34,55 @@ def init_database():
     Tree.query.delete()
 
     #create mock accounts
+    perma_admin = User(
+        user_id=1,
+        username="PermaAdmin",
+        email="test@gmail.com", #TODO give a real email?
+        verified=True,
+        admin=True,
+        create_time=datetime.now(),
+        password_hash=str(generate_password_hash("Can'tResetM3"))
+    )
+
     nima = User(
-        user_id=0,
+        user_id=1,
         username="Nima Dehdashti",
         email="nima519@gmail.com",
+        verified=True,
         admin=True,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("CHANGEME"))
     )
 
     group31 = User(
-        user_id=1,
+        user_id=2,
         username="Group 31",
         email="cits3200group31@gmail.com",
+        verified=True,
         admin=True,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("CHANGEME"))
     )
 
     test_user = User(
-        user_id=2,
+        user_id=3,
         username="user_test",
         email="user@test.com",
+        verified=True,
         admin=False,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("test1234"))
+        password_hash=str(generate_password_hash("test1234")),
+        notifs_ignored=" Tree Create Tree Remove Tree Update Tree Delete Bio Edit Comments"
     )
 
-    cooper = User( #TODO remove this, only using it to quickly test email 
-        user_id=3,
-        username="cooper",
+    cooper = User(
+        user_id=4,
+        username="admin_test",
         email="cooptrooper04@gmail.com",
+        verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("test")),
+        password_hash=str(generate_password_hash("test1234")),
         notifs_ignored=" Logout"
     )
 
