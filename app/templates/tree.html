@@ -351,8 +351,23 @@
 
         console.log(x,y);
 
-        // Calculate the new transform
-        const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 500, height / 2 - y * scale - 300).scale(scale);
+        let newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 150, height / 2 - y * scale - 250).scale(scale);
+
+        if (windowWidth576px.matches){
+            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 200, height / 2 - y * scale - 250).scale(scale);
+        }
+
+        if (windowWidth768px.matches){
+            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 300, height / 2 - y * scale - 250).scale(scale);
+        }
+
+        if (windowWidth992px.matches){
+            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 375, height / 2 - y * scale - 300).scale(scale);
+        }
+        
+        if (windowWidth1200px.matches){
+            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 500, height / 2 - y * scale - 350).scale(scale);
+        }
         // const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale);
 
         // Apply the transition
@@ -360,6 +375,12 @@
             .duration(750)
             .call(zoom.transform, newTransform);  // Programmatically zoom to the node
     }
+
+    let windowWidth576px = window.matchMedia("(min-width:576px)")
+    let windowWidth768px = window.matchMedia("(min-width:768px)")
+    let windowWidth992px = window.matchMedia("(min-width:992px)")
+    let windowWidth1200px = window.matchMedia("(min-width:1200px)")
+
 
     function drillDown(node) {
         if (selectedNode){
