@@ -14,14 +14,14 @@ from flask import url_for
 import sys
 
 def get_users_notifs(user): #check through notif db for all notifs with user id
-    if not user.is_authenticated: #no user
-        return []
-    elif user != -1: #normal user
-        id = User.get_id(user)
-        ignored = User.get_ignored(user)
-    else: #master log
+    if user == -1: #master log
         id = -1
         ignored = ""
+    elif not user.is_authenticated: #no user
+        return []
+    else: #normal user
+        id = User.get_id(user)
+        ignored = User.get_ignored(user)
 
     notifications = db.session.query(Notification).filter(Notification.user_id == id).order_by(desc(Notification.time)).all()
 
@@ -188,6 +188,13 @@ def get_all_admin_ids(): #returns list of all admin users' ids
         admin_ids.append(User.get_id(user))
     return admin_ids
 
+def get_all_ids(): #returns list of all user ids
+    ids = []
+    results = db.session.query(User).all()
+    for user in results:
+        ids.append(User.get_id(user))
+    return ids
+
 def get_all_ids_with_tree(name): #returns list of all users with access to this tree
     ids = []
     results = db.session.query(Tree).filter(Tree.name == name).all()
@@ -239,11 +246,10 @@ def get_all_ids_with_weekly():
 #TODO
 # - ensure all request/tree notifs are working
 # - change redirects for ux
-# - default access to dehdashti
 # - add errors to more pages
 # - admin requests
 # - user requests (start unverified)
-# - default no notifs for users
-#  
+# - bug: checking user access check for comma
+#   
 # - testing
 # - documentation

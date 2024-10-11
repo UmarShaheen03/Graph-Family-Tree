@@ -3,7 +3,7 @@ from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
 from flask import current_app, url_for
-from app.notifs import log_notif, get_all_admin_ids
+from app.notifs import *
 import sys #TODO using for debug printing, remove in final
 from config import WEBSITE_URL, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 from jinja2 import Template
@@ -93,22 +93,7 @@ def init_database():
         time=datetime.now()
     )
 
-    #get all tree names from the neo4j server
-    with driver.session() as session:
-        # Retrieve distinct labels
-        result = session.run("MATCH (n) RETURN DISTINCT labels(n) AS labels")
-        choices = [(label, label) for record in result for label in record["labels"]]
-    
-    for name in choices:
-        tree = Tree(
-            name=name[0],
-            create_time=datetime.now(),
-            users="0, 1, 3"
-        )
-        db.session.add(tree)
-
-
-    #add mock accounts to db
+        #add mock accounts to db
     db.session.add(perma_admin)
     db.session.add(nima)
     db.session.add(group31)
@@ -116,6 +101,29 @@ def init_database():
     db.session.add(test_admin)
     #add first notification to db
     db.session.add(first_notif)
+    db.session.commit()
+
+    #get all tree names from the neo4j server
+    with driver.session() as session:
+        # Retrieve distinct labels
+        result = session.run("MATCH (n) RETURN DISTINCT labels(n) AS labels")
+        choices = [(label, label) for record in result for label in record["labels"]]
+    
+    for name in choices:
+        if (name[0] == "Person"):
+            tree = Tree(
+                name=name[0],
+                create_time=datetime.now(),
+                users=str(get_all_ids())
+            )
+        else:
+            tree = Tree(
+                name=name[0],
+                create_time=datetime.now(),
+                users=str(get_all_admin_ids())
+            )
+        db.session.add(tree)
+    
     db.session.commit()
 
 
@@ -150,6 +158,8 @@ def signup(email, username, password, repeat, remember):
     user.set_password(password)
     
     db.session.add(user)
+    dehdashti = db.session.query(Tree).filter(Tree.name == "Person").first()
+    dehdashti.users += str(new_id) + ", " #add new user to the dehdashti tree
     db.session.commit()
 
     #TODO put user requests here
