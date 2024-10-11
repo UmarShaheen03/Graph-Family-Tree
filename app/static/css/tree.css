@@ -13,6 +13,12 @@
     width: 100% !important;
 }
 
+#resetGraph {
+    display: block;
+    margin: auto;
+    margin-bottom: 1rem;
+}
+
 @media (min-width: 992px) {
     #graph-container {
         width: 73vw;
@@ -23,15 +29,15 @@
     }
 }
 
-/* @media (max-width: 576px) {
+@media (max-width: 576px) {
     .col-auto > .select2-container {
-        width: 225% !important;
+        width: 150% !important;
     }
 
     #Search {
-        margin-left: 220%;
+        margin-left: 110%;
     }
-} */
+}
 
 .highlighted {
     stroke: #ff5722; /* Highlight color */
