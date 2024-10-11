@@ -9,9 +9,21 @@
     margin-top:1.5%
 }
 
-.form-group > .select2-container {
+.select2-container {
     width: 100% !important;
 }
+
+/* #Search {
+    background-color: #593196; 
+    color: white; 
+    padding: 8px 16px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-size: 14px; 
+    /* margin-left: 10px; 
+    white-space: nowrap; /* Prevent the button text from wrapping 
+} */
 
 #resetGraph, #resetZoom {
     display: block;
@@ -57,17 +69,6 @@
     opacity: 0;
 }
 
-#Search {
-    background-color: #593196; 
-    color: white; 
-    padding: 8px 16px; 
-    border: none; 
-    border-radius: 5px; 
-    cursor: pointer; 
-    font-size: 14px; 
-    /* margin-left: 10px; */
-    white-space: nowrap; /* Prevent the button text from wrapping */
-}
 
 .custom-menu {
     list-style: none;

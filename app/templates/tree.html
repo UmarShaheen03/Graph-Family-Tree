@@ -21,42 +21,42 @@
                     <form action="" method="post" novalidate class="Form">
                         {{ form_modify.hidden_tag() }}
                         
-                        <div class="form-group mb-4">
+                        <div class="form-group mb-2">
                             <label for="action" class="form-label fw-bold">{{ form_modify.action.label }}</label>
                             {{ form_modify.action(class="form-select form-select-lg") }}
                         </div>
 
-                        <div id="name-group" class="form-group mb-4" style="display:none;">
+                        <div id="name-group" class="form-group mb-2" style="display:none;">
                             <label for="name" class="form-label fw-bold">{{ form_modify.name.label }}</label>
                             {{ form_modify.name(class="form-control form-control-lg") }}
                         </div>
 
-                        <div id="new-name-group" class="form-group mb-4" style="display:none;">
+                        <div id="new-name-group" class="form-group mb-2" style="display:none;">
                             <label for="new_name" class="form-label fw-bold">{{ form_modify.new_name.label }}</label>
                             {{ form_modify.new_name(class="form-control form-control-lg") }}
                         </div>
 
-                        <div id="old-name-group" class="form-group mb-4" style="display:none;">
+                        <div id="old-name-group" class="form-group mb-2" style="display:none;">
                             <label for="old_name" class="form-label fw-bold">{{ form_modify.old_name.label }}</label>
                             {{ form_modify.old_name(class="form-select form-select-lg form-select-searchable") }}
                         </div>
 
-                        <div id="person-to-shift-group" class="form-group mb-4" style="display:none;">
+                        <div id="person-to-shift-group" class="form-group mb-2" style="display:none;">
                             <label for="person_to_shift" class="form-label fw-bold">{{ form_modify.person_to_shift.label }}</label>
                             {{ form_modify.person_to_shift(class="form-select form-select-lg form-select-searchable") }}
                         </div>
 
-                        <div id="person-to-delete-group" class="form-group mb-4" style="display:none;">
+                        <div id="person-to-delete-group" class="form-group mb-2" style="display:none;">
                             <label for="person_to_delete" class="form-label fw-bold">{{ form_modify.person_to_delete.label }}</label>
                             {{ form_modify.person_to_delete(class="form-select form-select-lg form-select-searchable") }}
                         </div>
 
-                        <div id="parent-group" class="form-group mb-4">
+                        <div id="parent-group" class="form-group mb-2">
                             <label for="parent" class="form-label fw-bold">{{ form_modify.parent.label }}</label>
                             {{ form_modify.parent(class="form-select form-select-lg form-select-searchable") }}
                         </div>
 
-                        <div id="new-parent-group" class="form-group mb-4" style="display:none;">
+                        <div id="new-parent-group" class="form-group mb-2" style="display:none;">
                             <label for="new_parent" class="form-label fw-bold">{{ form_modify.new_parent.label }}</label>
                             {{ form_modify.new_parent(class="form-select form-select-lg form-select-searchable") }}
                         </div>
@@ -64,31 +64,27 @@
                         <div class="d-grid gap-2 mb-3">
                             {{ form_modify.submit_modify(class="btn btn-primary btn-lg rounded-pill") }}
                         </div>
-                    </form>
-                    <div class="col-auto">
-                        <button id="resetGraph" class="btn btn-secondary btn-lg rounded-pill">Reset Graph</button>
-                    </div>
-                    <div class="col-auto">
-                        <button id="resetZoom" class="btn btn-secondary btn-lg rounded-pill">Reset Zoom</button>
-                    </div>                        
+                    </form> 
+                    <label for="Search" class="mt-2 form-label fw-bold">Search for Person</label>
+                    <div class="row justify-content-center">
+                        {{ form_search.hidden_tag() }}
+                        <div class="mt-2">
+                            {{ form_search.fullname(id="fullname", class="form-select-searchable") }}
+                        </div>
+                        <div class="d-grid gap-2 mt-2">
+                            {{ form_search.submit_search(id="Search", class="btn btn-primary btn-lg rounded-pill") }}
+                        </div>
+                        <div class="mt-2 col-auto">
+                            <button id="resetGraph" class="btn btn-secondary rounded-pill">Reset Graph</button>
+                        </div>
+                        <div class="mt-2 col-auto">
+                            <button id="resetZoom" class="btn btn-secondary rounded-pill">Reset Zoom</button>
+                        </div>
+                    </div>                       
                 </div>
             </div>
         </div>
         <div class="col-lg-9 vh-100 mt-2">
-            <p></p>
-            {{ form_search.hidden_tag() }}
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    {{ form_search.fullname(id="fullname", class="form-select-searchable") }}
-                </div>
-                <div class="col-auto">
-                    {{ form_search.submit_search(id="Search", class="btn btn-primary btn-lg rounded-pill") }}
-                </div>
-                <div>
-                    <button id="Download" style="background-color: purple; color: white; border: none; border-radius: 5px;  font-size: 16px; cursor: pointer; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">Download</button>
-
-                </div>
-            </div>
             <div id="graph-container">                
                 <svg id="graph"></svg>
             </div>
@@ -108,7 +104,6 @@
 </ul>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
     var nodes = {{ nodes|tojson }};
@@ -469,28 +464,6 @@
     });
 
     initialiseGraph(standInRoot);
-
-    document.getElementById('Download').addEventListener('click', function() {
-  
-  const currentTransform = d3.zoomTransform(svg.node());
-  
-  
-  svg.transition()
-      .duration(750)
-      .call(zoom.transform, d3.zoomIdentity
-      .translate(-86.48138319941552,-21.892951824506817)
-      .scale(0.38565487746149063)
-      )
-      .on('end', function() {
-          triggerDownload(); 
-      });
-});
-function triggerDownload() {
-  const graph = document.getElementById('graph');
-  const data = new XMLSerializer().serializeToString(graph);
-  const image = new Blob([data], { type: 'image/svg+xml;charset=utf-8' });
-  saveAs(image, 'FamilyTree.svg'); 
-}
 
 </script>
 
