@@ -83,7 +83,7 @@ class Comment(db.Model):
     text = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', back_populates='comments') 
-
+    bio_id = db.Column(db.Integer, db.ForeignKey("biography.id"), nullable=False)
 
 class Tree(db.Model):
     name = db.Column(db.String, primary_key=True)

@@ -250,6 +250,8 @@ def get_all_ids_with_weekly():
 # - add errors to more pages
 # - move joshs download button
 # - delete non-verified accounts? with notif?
+# - fix what i can in bio
+# - make databases permanent
 #   
 # - testing
 # - documentation

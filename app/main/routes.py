@@ -197,7 +197,7 @@ def biography(name):
     if check != None:
         return check
  
-    # Fetch person's biography details from Neo4j
+    # Fetch person's biography details
     person = get_person_bio(name)
     
     if not person:
@@ -214,7 +214,7 @@ def biography(name):
             if record and record['labels']:
                 # Use the first label, assuming the node has only one main label
                 tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
-            print(tree_name)             
+
     # Fetch comments related to this person
     comments = Comment.query.all()
     comment_form = CommentForm()
@@ -223,14 +223,15 @@ def biography(name):
         new_comment = Comment(
             username=current_user.username,
             text=comment_form.comment.data,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
+            bio_id=Biography.query.filter(Biography.name == name).first().id
         )
         db.session.add(new_comment)
         db.session.commit()
 
         flash('Comment added successfully')
         log_notif(f"User {User.get_username(current_user)} commented on Person {name} from Tree {tree_name}", 
-                  get_all_ids_with_tree(tree_name), " Comment", "/biography/" + name) #notify all admins/users with access about comment
+                  get_all_ids_with_tree(tree_name), " Comment", "biography/" + name) #notify all admins/users with access about comment
         
         return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
 
@@ -244,8 +245,7 @@ def biography(name):
                            phone_number=person.get('phone_number', 'No phone number provided'),
                            address=person.get('address', 'No address provided'),
                            comments=comments, 
-                           comment_form=comment_form,
-                           admin=User.is_admin(current_user))
+                           comment_form=comment_form)
 
 @main_bp.route('/biography/edit', methods=['GET', 'POST'])
 def edit_biography():
@@ -306,15 +306,12 @@ def edit_biography():
                 Email=edit_form.email.data,
                 PhoneNumber=edit_form.phonenumber.data,
                 Address=edit_form.address.data
-            )
+            )        
+        
+        flash(f'Biography for {person_name} has been updated successfully.')
+        log_notif(f"User {User.get_username(current_user)} edited the biography of Person {person_name} from Tree {tree_name}", 
+            get_all_ids_with_tree(tree_name), " Bio Edit", "biography/" + person_name) #notify all admins/users with access about comment
 
-        flash(f'Biography for {person_name} has been updated successfully.')
-        
-        
-        flash(f'Biography for {person_name} has been updated successfully.')
-        log_notif(f"User {User.get_username(current_user)} edited the bio of {person_name} from Tree {tree_name}", 
-                  get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Bio Edit", "/biography/" + person_name) #notify all admins/users with access about bio edit
-        
         return redirect(url_for('main_bp.biography', name=person_name))
 
     return render_template('edit_biography.html', biography=biography, edit_form=edit_form,tree_name=tree_name)
