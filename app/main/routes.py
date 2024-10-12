@@ -202,16 +202,18 @@ def biography(name):
     # Handle image upload
     if request.method == 'POST' and 'image' in request.files:
         image = request.files['image']
-
+        print(f"Received image: {image.filename}", file=sys.stderr)
         if image.filename != '' and allowed_file(image.filename):
             try:
-                # Save the image to the uploads directory
+               
                 filename = secure_filename(image.filename)
                 image_path = os.path.join(app.config["IMAGE_UPLOADS"], filename)
                 image.save(image_path)
+                print(f"Image saved at: {os.path.abspath(image_path)}", file=sys.stderr)
+                print(f"Image URL for Neo4j: {image_url}", file=sys.stderr)
 
                 # Update the image URL in Neo4j
-                image_url = os.path.join('uploads', filename)  # Relative URL for the image
+                image_url = filename    # Relative URL for the image
                 update_person_image_in_neo4j(name, image_url)
 
                 flash("Image uploaded successfully.")

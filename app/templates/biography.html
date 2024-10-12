@@ -17,7 +17,10 @@
             <div class="col-md-4 text-center d-flex flex-column align-items-center">
                 <div class="profile-image-frame">
                     {% if profile_image %}
-                    <img id="profilePreview" src="{{ url_for('static', filename='profile_image') }}" class="biography-image">
+                    <img id="profilePreview" src="{{ url_for('static', filename=profile_image) }}" class="biography-image">
+
+
+
                     {% else %}
                     <img id="profilePreview" src="{{ url_for('static', filename='default-profile.png') }}" class="biography-image">
                     {% endif %}
