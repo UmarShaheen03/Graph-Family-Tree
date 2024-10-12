@@ -22,12 +22,16 @@
                     <img id="profilePreview" src="{{ url_for('static', filename='default-profile.png') }}" class="biography-image">
                     {% endif %}
                 </div>
-               
+                <p>Image upload form is here!</p>
                 <form method="post" action="{{ url_for('main_bp.biography', name=name) }}" enctype="multipart/form-data">
+                    <!-- Image upload input -->
                     <input type="file" id="profile_image" name="image" accept="image/*" class="d-none" onchange="previewImage(event)">
-                    <label for="profile_image" type="submit" class="btn btn-primary btn-lg btn-custom rounded-pill">Choose image</label>
-                    <button type="submit" class="btn btn-primary btn-lg btn-custom rounded-pill">Upload Image</button>
+                    <label for="profile_image" class="btn btn-primary btn-lg btn-custom rounded-pill">Choose Image</label>
+                
+                    <!-- Separate Save button -->
+                    <button type="submit" class="btn btn-primary btn-lg btn-custom rounded-pill">Save Image</button>
                 </form>
+                
 
             </div>
             <div class="col-md-8">

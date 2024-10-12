@@ -180,14 +180,14 @@ def allowed_file(filename):
 @main_bp.route('/biography/<name>', methods=['GET', 'POST'])
 def biography(name):
     check = check_login()
-    if check != None:
+    if check is not None:
         return check
- 
 
     # Fetch comments related to this person
     comments = Comment.query.all()
     comment_form = CommentForm()
 
+    # Handle new comment submission
     if comment_form.validate_on_submit():
         new_comment = Comment(
             username=current_user.username,
@@ -199,20 +199,19 @@ def biography(name):
         flash('Comment added successfully')
         return redirect(url_for('main_bp.biography', name=name))
     
+    # Handle image upload
     if request.method == 'POST' and 'image' in request.files:
         image = request.files['image']
 
         if image.filename != '' and allowed_file(image.filename):
             try:
-                # Save the image to a local directory
+                # Save the image to the uploads directory
                 filename = secure_filename(image.filename)
                 image_path = os.path.join(app.config["IMAGE_UPLOADS"], filename)
-
-                # Save the image
                 image.save(image_path)
 
-                # Store the file path in Neo4j
-                image_url = os.path.join(app.config["IMAGE_UPLOADS"], filename) # URL for accessing the image
+                # Update the image URL in Neo4j
+                image_url = os.path.join('uploads', filename)  # Relative URL for the image
                 update_person_image_in_neo4j(name, image_url)
 
                 flash("Image uploaded successfully.")
@@ -223,26 +222,26 @@ def biography(name):
         else:
             flash("Invalid file type. Please upload a valid image.")
             return redirect(request.url)
-        
- 
+
     # Fetch person's biography details from Neo4j
     person = get_person_bio(name)
-    profile_image = person.get('image_url') if person.get('image_url') else None
+    profile_image = person.get('image_url') if person.get('image_url') else 'default-profile.png'
 
-    return render_template('biography.html', 
-                           name=person['name'], 
-                           dob=person.get('dob', 'Unknown'), 
-                           bio=person.get('biography', 'No biography available'), 
-                           location=person.get('location', 'Unknown'),
-                           email=person.get('email', 'No email provided'),
-                           phone_number=person.get('phone_number', 'No phone number provided'),
-                           address=person.get('address', 'No address provided'),
-                           comments=comments, 
-                           comment_form=comment_form,
-                           admin=User.is_admin(current_user),
-                           profile_image=person.get('image_url')
-                           )
-
+    return render_template(
+        'biography.html',
+        name=person['name'], 
+        dob=person.get('dob', 'Unknown'), 
+        bio=person.get('biography', 'No biography available'), 
+        location=person.get('location', 'Unknown'),
+        email=person.get('email', 'No email provided'),
+        phone_number=person.get('phone_number', 'No phone number provided'),
+        address=person.get('address', 'No address provided'),
+        comments=comments, 
+        comment_form=comment_form,
+        admin=User.is_admin(current_user),
+        profile_image=profile_image  # This will dynamically show the user's image
+    )
+    
 def update_person_image_in_neo4j(name, image_url):
     """Update the Person node in Neo4j with the image URL."""
     with driver.session() as session:
