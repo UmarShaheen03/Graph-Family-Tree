@@ -63,9 +63,10 @@
                 <div class="media-body">
                     <h5 class="mt-0 mb-1">{{ comment.user.username }}</h5>
                     {{ comment.text }}
-                    <div class="text-muted">{{ comment.timestamp }}</div>
+                    <div class="text-muted">{{ comment.timestamp.strftime("%m/%d/%Y, %H:%M") }}</div>
                 </div>
             </li>
+            <br>
             {% endfor %}
         </ul>
     {% else %}

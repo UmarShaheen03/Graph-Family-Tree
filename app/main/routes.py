@@ -84,8 +84,12 @@ def login_request():
         except LoginError as error:
             return render_template("login.html", loginForm=form, logoutForm=logoutForm, error=error)
 
-        #send to home page on success TODO change to account page?
-        return redirect(url_for("main_bp.home_page"))
+        #send to dehdashti tree if verified
+        #TODO page that describes verification
+        if (user.verified):
+            return redirect(url_for("main_bp.tree", tree_name="Dehdashti"))
+        else:
+            return render_template("unverified.html")
     
     else:
         return render_template("login.html", loginForm=form, logoutForm=logoutForm, error="Invalid Form")
@@ -115,7 +119,9 @@ def signup_request():
             return render_template("signup.html", signupForm=form, error=error)
 
         #request verification status
-        return request_user()
+        request_user()
+        #send to unverified explanation
+        return render_template("unverified.html")
     
     else:
         return render_template("signup.html", loginForm=form, error="Invalid Form")
@@ -223,8 +229,8 @@ def biography(name):
         db.session.commit()
 
         flash('Comment added successfully')
-        log_notif(f"User {User.get_username(current_user)} commented on {name} from Tree {tree_name}", 
-                  get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Comment", "/biography/" + name) #notify all admins/users with access about comment
+        log_notif(f"User {User.get_username(current_user)} commented on Person {name} from Tree {tree_name}", 
+                  get_all_ids_with_tree(tree_name), " Comment", "/biography/" + name) #notify all admins/users with access about comment
         
         return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
 

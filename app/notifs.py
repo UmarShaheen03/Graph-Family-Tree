@@ -199,9 +199,9 @@ def get_all_ids(): #returns list of all user ids
 
 def get_all_ids_with_tree(name): #returns list of all users with access to this tree
     ids = []
-    results = db.session.query(Tree).filter(Tree.name == name).all()
-    for id in results.split(", "):
-        ids.append(int(id))
+    tree = db.session.query(Tree).filter(Tree.name == name).first()
+    for user in tree.users.split(", "):
+        ids.append(int(user))
     return ids
 
 def get_all_trees_with_id(id):
@@ -248,6 +248,8 @@ def get_all_ids_with_weekly():
 # - ensure all request/tree notifs are working
 # - change redirects for ux
 # - add errors to more pages
+# - move joshs download button
+# - delete non-verified accounts? with notif?
 #   
 # - testing
 # - documentation
