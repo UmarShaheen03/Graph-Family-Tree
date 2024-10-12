@@ -64,18 +64,6 @@ class User(UserMixin, db.Model):
             return (self.verified)
         else:
             return False
-    
-
-class Biography(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    dob = db.Column(db.String(50), nullable=True)
-    biography = db.Column(db.Text, nullable=True)
-    location = db.Column(db.String(100), nullable=True)
-    email = db.Column(db.String(100), nullable=True)
-    phonenumber = db.Column(db.Integer, nullable=True)
-    address = db.Column(db.String(100), nullable=True)
-
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -83,7 +71,7 @@ class Comment(db.Model):
     text = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', back_populates='comments') 
-    bio_id = db.Column(db.Integer, db.ForeignKey("biography.id"), nullable=False)
+    bio_name = db.Column(db.String)
 
 class Tree(db.Model):
     name = db.Column(db.String, primary_key=True)

@@ -4,7 +4,7 @@ import os
 import io
 from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file
 from app.forms import *
-from app.models import Biography, Comment, User
+from app.models import Comment, User
 from app.accounts import *
 from app.notifs import *
 from app import db
@@ -216,7 +216,7 @@ def biography(name):
                 tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
 
     # Fetch comments related to this person
-    comments = Comment.query.all()
+    comments = Comment.query.filter(Comment.bio_name == name).all()
     comment_form = CommentForm()
 
     if comment_form.validate_on_submit():
@@ -224,7 +224,7 @@ def biography(name):
             username=current_user.username,
             text=comment_form.comment.data,
             timestamp=datetime.now(),
-            bio_id=Biography.query.filter(Biography.name == name).first().id
+            bio_name=name
         )
         db.session.add(new_comment)
         db.session.commit()
