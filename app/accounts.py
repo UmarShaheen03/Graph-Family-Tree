@@ -110,19 +110,20 @@ def init_database():
         choices = [(label, label) for record in result for label in record["labels"]]
     
     for name in choices:
-        if (name[0] == "Person"):
+        if (name[0] == "Dehdashti"):
             tree = Tree(
                 name=name[0],
                 create_time=datetime.now(),
                 users=str(get_all_ids()).replace("[","").replace("]","")
             )
-        else:
+            db.session.add(tree)
+        elif (name[0] != "Person"):
             tree = Tree(
                 name=name[0],
                 create_time=datetime.now(),
                 users=str(get_all_admin_ids()).replace("[","").replace("]","")
             )
-        db.session.add(tree)
+            db.session.add(tree)
     
     db.session.commit()
 
@@ -161,7 +162,7 @@ def signup(email, username, password, repeat, remember):
     db.session.add(user)
 
     #add new user to the dehdashti tree
-    dehdashti = db.session.query(Tree).filter(Tree.name == "Person").first() #TODO change from person, ask josh
+    dehdashti = db.session.query(Tree).filter(Tree.name == "Dehdashti").first()
     dehdashti.users += ", " + str(user.user_id)
     db.session.commit()
 

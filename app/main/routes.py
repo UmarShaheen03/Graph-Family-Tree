@@ -452,6 +452,13 @@ def approve_admin():
 
     user = db.session.query(User).filter(User.user_id == int(string)).first()
     user.admin = True
+
+    #add admin to all trees access
+    trees = Tree.query.all()
+    for tree in trees:
+        if user.user_id not in tree.users: #avoid duplicates
+            tree.users += ", " + str(user.user_id)
+
     db.session.commit()
 
     log_notif(f"Your request for Admin status has been accepted", [user.user_id], " Request Accept")
