@@ -249,7 +249,6 @@ def get_all_ids_with_weekly():
 # - add errors to more pages
 # - admin requests
 # - user requests (start unverified)
-# - bug: checking user access check for comma
 #   
 # - testing
 # - documentation

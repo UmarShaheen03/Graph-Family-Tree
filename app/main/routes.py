@@ -403,16 +403,12 @@ def request_tree():
     comb = str(uid) +'/'+ tree
     token = serializer.dumps(comb, salt="tree-request")
     approval_link = f"approve_tree?token={token}"
-    print(approval_link)
-    #TODO send notification to all admins with the approval link and request using coopers notification structures.
     log_notif(f" User {User.get_username(current_user)} is requesting access to the Tree {tree}", get_all_admin_ids(), " Tree Request", approval_link)
-    #TODO change return statement. Potentially into a toast notification like admin request?
+    #TODO change return statement.
     return "request made successfully"
 
-
-
 @main_bp.route("/approve_tree", methods=['GET'])
-def approve_admin():
+def approve_tree():
     check = check_login_admin()
     if check != None:
         return check
@@ -424,14 +420,42 @@ def approve_admin():
         return "Invalid or expired token."
 
     split = string.split('/')
-    add_tree(split[0],split[1])
-    return "added successfully"
-    
-def add_tree(uid,name):
-    tree = Tree.query.filter_by(name = name).first()
-    if (uid not in tree.users):
-        tree.users += ", " + uid
+    tree = Tree.query.filter_by(name = split[1]).first()
+    if (split[0] not in tree.users):
+        tree.users += ", " + split[0]
     db.session.commit()
+    #TODO change return statement
+    return "added successfully"
+
+@main_bp.route("/request_admin", methods=['POST'])
+def request_admin():
+    uid = User.get_id(current_user)
+    comb = str(uid)
+    token = serializer.dumps(comb, salt="admin-request")
+    approval_link = f"approve_admin?token={token}"
+    log_notif(f" User {User.get_username(current_user)} is requesting admin access", get_all_admin_ids(), " Admin Request", approval_link)
+    #TODO change return statement
+    return "request made successfully"
+
+@main_bp.route("/approve_admin", methods=['GET'])
+def approve_admin():
+    check = check_login_admin()
+    if check != None:
+        return check
+    
+    token = request.args.get('token')
+    try:
+        string = serializer.loads(token, salt="admin-request", max_age=86400)
+    except Exception as e:
+        return "Invalid or expired token."
+
+    print(string)
+    user = db.session.query(User).filter(User.user_id == int(string)).first()
+    user.admin = True
+    db.session.commit()
+
+    #TODO change return statement
+    return "added successfully"
 
 
 @main_bp.route("/log")
