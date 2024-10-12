@@ -41,7 +41,8 @@ def init_database():
         verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("CantResetM3"))
+        password_hash=str(generate_password_hash("CantResetM3")),
+        notifs_ignored=""
     )
 
     nima = User(
@@ -51,7 +52,8 @@ def init_database():
         verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("CHANGEME"))
+        password_hash=str(generate_password_hash("CHANGEME")),
+        notifs_ignored=""
     )
 
     group31 = User(
@@ -61,7 +63,8 @@ def init_database():
         verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("CHANGEME"))
+        password_hash=str(generate_password_hash("CHANGEME")),
+        notifs_ignored=""
     )
 
     test_user = User(
