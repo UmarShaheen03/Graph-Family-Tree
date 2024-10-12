@@ -284,7 +284,7 @@
 
         // Adjust the radius manually to increase distance between generations
         root.each(d => {
-            d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
+            d.y = d.depth * 150;  // Increase the multiplier (150) to add more space between generations
         });
 
         currentRoot = root;
@@ -317,7 +317,7 @@
 
         node.append("circle")
             .attr("fill", d => colorScale(d.depth % 8))  // Assign color based on hierarchy level
-            .attr("r", 5)
+            .attr("r", 8)
             .on("mouseover", function (event, d) {
                 tooltip.transition().duration(200).style("opacity", 0.9);
                 tooltip.html(d.data.name)  // Display node name in tooltip
