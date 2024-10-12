@@ -321,7 +321,7 @@ def update_preferences():
     user.set_ignored(create_notifs_string(request))
     db.session.commit()
 
-    return redirect(url_for("main_bp.my_dashboard"))
+    return redirect(url_for("main_bp.my_dashboard", ignore_info="Preferences changed succesfully"))
 
 @main_bp.route("/often_form", methods=['POST'])
 def update_often():
@@ -333,7 +333,7 @@ def update_often():
     user.set_often(request.form.get("preference"))
     db.session.commit()
 
-    return redirect(url_for("main_bp.my_dashboard"))
+    return redirect(url_for("main_bp.my_dashboard", email_info="Preferences changed succesfully"))
     
 
 
@@ -369,12 +369,6 @@ def my_dashboard():
     if check is not None:
         return check 
     
-    check2 = check_login_admin()
-    if check2 is None:
-        admin = True
-    else:
-        admin = False
-    
     form1 = EmailPreference()
     form2 = IgnoreNotifs()
     form3 = Request_Tree()
@@ -384,16 +378,25 @@ def my_dashboard():
     noAccess = []
     for tree in all_trees:
         if tree not in accessible:
-            noAccess.append(tree.name)
-        else:
-            continue
-    form3.tree_name.choices = noAccess
+            noAccess.append(tree)
+
+    tree_info = request.args.get('tree_info')
+    admin_info = request.args.get('admin_info')
+    email_info = request.args.get('email_info')
+    ignore_info = request.args.get('ignore_info')
+
+    print(f"{tree_info}, {admin_info}, {email_info}, {ignore_info}")
 
     return render_template('my_dashboard.html', preferenceForm=form1, ignoreForm=form2, treeForm = form3, 
                            accessible_trees=get_all_trees_with_id(User.get_id(current_user)),
                            all_trees = db.session.query(Tree).all(),
+                           no_access_trees = noAccess,
                            preferences=User.get_ignored(current_user),
-                           often=User.get_often(current_user)) 
+                           often=User.get_often(current_user),
+                           tree_info=tree_info,
+                           admin_info=admin_info,
+                           email_info=email_info,
+                           ignore_info=ignore_info)
 
 
 @main_bp.route("/request_tree", methods=['POST'])
@@ -404,8 +407,7 @@ def request_tree():
     token = serializer.dumps(comb, salt="tree-request")
     approval_link = f"approve_tree?token={token}"
     log_notif(f" User {User.get_username(current_user)} is requesting access to the Tree {tree}", get_all_admin_ids(), " Tree Request", approval_link)
-    #TODO change return statement.
-    return "request made successfully"
+    return redirect(url_for("main_bp.my_dashboard", tree_info="Request made succesfully"))
 
 @main_bp.route("/approve_tree", methods=['GET'])
 def approve_tree():
@@ -424,7 +426,6 @@ def approve_tree():
     if (split[0] not in tree.users):
         tree.users += ", " + split[0]
     db.session.commit()
-    #TODO change return statement
     return "added successfully"
 
 @main_bp.route("/request_admin", methods=['POST'])
@@ -434,8 +435,7 @@ def request_admin():
     token = serializer.dumps(comb, salt="admin-request")
     approval_link = f"approve_admin?token={token}"
     log_notif(f" User {User.get_username(current_user)} is requesting admin access", get_all_admin_ids(), " Admin Request", approval_link)
-    #TODO change return statement
-    return "request made successfully"
+    return redirect(url_for("main_bp.my_dashboard", admin_info="Request made succesfully"))
 
 @main_bp.route("/approve_admin", methods=['GET'])
 def approve_admin():

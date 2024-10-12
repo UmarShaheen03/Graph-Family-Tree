@@ -41,13 +41,16 @@
           <div class="form-group">
             <label for="tree_name">{{ treeForm.tree_name.label }}</label>
             <select id="tree_name" name="tree_name">
-            {% for tree in all_trees %}
+            {% for tree in no_access_trees %}
             <option value="{{tree.name}}">{{tree.name}}</option>
             {% endfor %}
             </select>
           </div>
           {{ treeForm.submit(class="btn btn-primary") }}
         </form>
+        {% if tree_info != None %}
+        <p style="color:blue">{{ tree_info }}</p>
+        {% endif %}
       </div>
 
       <div class="box mb-4">
@@ -55,6 +58,9 @@
         <form action="/request_admin" method="post">
           <input type="submit" class="btn btn-primary" value="Request Admin Access"></input>
         </form>
+        {% if admin_info != None %}
+        <p style="color:blue">{{ admin_info }}</p>
+        {% endif %}
       </div>
       {% endif %}
 
@@ -69,6 +75,9 @@
             {{ preferenceForm.submit(class="btn btn-primary") }}
           </div>
         </form>
+        {% if email_info != None %}
+        <p style="color:blue">{{ email_info }}</p>
+        {% endif %}
       </div>
 
       <div class="box mb-4">
@@ -155,6 +164,9 @@
             </div>
             <p></p>
             {{ ignoreForm.submit(class="btn btn-primary") }}
+            {% if ignore_info != None %}
+            <p style="color:blue">{{ ignore_info }}</p>
+            {% endif %}
           </div>
         </form>
       </div>
