@@ -763,7 +763,7 @@ def approve_admin():
     #add admin to all trees access
     trees = Tree.query.all()
     for tree in trees:
-        if user.user_id not in tree.users: #avoid duplicates
+        if str(user.user_id) not in tree.users: #avoid duplicates
             tree.users += ", " + str(user.user_id)
 
     db.session.commit()
