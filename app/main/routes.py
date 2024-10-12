@@ -13,10 +13,12 @@ from flask_wtf import CSRFProtect, FlaskForm
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user
 from werkzeug.utils import secure_filename
-from neo4j import Driverfrom itsdangerous import URLSafeTimedSerializer
+from neo4j import Driver
+from itsdangerous import URLSafeTimedSerializer
 from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 from jinja2 import Environment
-from functools import wrapsimport logging
+from functools import wraps
+import logging
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -203,17 +205,18 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@main_bp.route('/biography/<name>', methods=['GET', 'POST'])
-def biography(name):
+@main_bp.route('/biography/<tree_name>/<name>', methods=['GET', 'POST'])
+def biography(tree_name, name):
     check = check_login()
     if check is not None:
         return check
  
     # Fetch person's biography details
-    person = get_person_bio(name)
+    person = get_person_bio(tree_name, name)
     
     if not person:
         return "Biography not found.", 404
+    
     if person:
         with driver.session() as session:
             # Query to get the labels of the node
@@ -554,9 +557,9 @@ def log():
 
 
 # Function to fetch biography from Neo4j
-def get_person_bio(name):
-    query = """
-    MATCH (p {FullName: $full_name})
+def get_person_bio(tree_name, name):
+    query = f"""
+    MATCH (p:{tree_name} {{FullName: $full_name}})
     RETURN p.FullName AS name, 
            p.Hierarchy AS hierarchy, 
            p.Date_Of_Birth AS dob, 
@@ -568,7 +571,7 @@ def get_person_bio(name):
            p.image_url AS image_url
     """
     with driver.session() as session:
-        result = session.run(query, name=name)
+        result = session.run(query, full_name=name)
         return result.single()
 
 

@@ -25,7 +25,8 @@
                     {% endif %}
                 </div>
                 <p>Image upload form is here!</p>
-                <form method="post" action="{{ url_for('main_bp.biography', name=name) }}" enctype="multipart/form-data">
+                <form method="post" action="{{ url_for('main_bp.biography', tree_name=tree_name, name=name) }}" enctype="multipart/form-data">
+
                     <!-- Image upload input -->
                     <input type="file" id="profile_image" name="image" accept="image/*" class="d-none" onchange="previewImage(event)">
                     <label for="profile_image" class="btn btn-primary btn-lg btn-custom rounded-pill">Choose Image</label>
@@ -83,7 +84,8 @@
 
     <div class="comment-form">
         <h3>Leave a Comment</h3>
-        <form method="post" action="{{ url_for('main_bp.biography', name=name) }}">
+        <form method="post" action="{{ url_for('main_bp.biography', tree_name=tree_name, name=name) }}">
+
             {{ comment_form.hidden_tag() }}
             <div class="form-group">
                 <textarea class="form-control" name="comment" rows="4" placeholder="Write your comment here..." required></textarea>
