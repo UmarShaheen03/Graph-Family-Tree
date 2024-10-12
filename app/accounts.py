@@ -25,6 +25,7 @@ class LoginError(Exception):
 
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
+#ONLY RUN TO INITIALISE DATABASES, if you run it again it will reset to a default state
 def init_database():
     #create tables
     db.create_all()
@@ -96,7 +97,7 @@ def init_database():
         time=datetime.now()
     )
 
-        #add mock accounts to db
+    #add mock accounts to db
     db.session.add(perma_admin)
     db.session.add(nima)
     db.session.add(group31)
