@@ -70,14 +70,15 @@
     }
     
     function are_you_sure_yes(goto, id) {
-        if (confirm("Are you sure you want to accept?")) {
+        if (confirm("Are you sure you want to accept this request?")) {
             seen(id);
-            window.location.href = goto;
+            $.post(goto);
+            alert("Request accepted succesfully");
         }
     }
 
     function are_you_sure_no(id) {
-        if (confirm("Are you sure you want to reject?")) {
+        if (confirm("Are you sure you want to reject this request?")) {
             seen(id);
         }
     }

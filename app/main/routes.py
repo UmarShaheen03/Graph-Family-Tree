@@ -409,7 +409,7 @@ def request_tree():
     log_notif(f" User {User.get_username(current_user)} is requesting access to the Tree {tree}", get_all_admin_ids(), " Tree Request", approval_link)
     return redirect(url_for("main_bp.my_dashboard", tree_info="Request made succesfully"))
 
-@main_bp.route("/approve_tree", methods=['GET'])
+@main_bp.route("/approve_tree", methods=['POST'])
 def approve_tree():
     check = check_login_admin()
     if check != None:
@@ -437,7 +437,7 @@ def request_admin():
     log_notif(f" User {User.get_username(current_user)} is requesting admin access", get_all_admin_ids(), " Admin Request", approval_link)
     return redirect(url_for("main_bp.my_dashboard", admin_info="Request made succesfully"))
 
-@main_bp.route("/approve_admin", methods=['GET'])
+@main_bp.route("/approve_admin", methods=['POST'])
 def approve_admin():
     check = check_login_admin()
     if check != None:
