@@ -2,7 +2,7 @@ from app.models import *
 from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
-from flask import current_app, url_for
+from flask import url_for
 from app.notifs import *
 
 from config import WEBSITE_URL, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
@@ -17,12 +17,14 @@ from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+#basic error classes, used for some exceptions in routes.py
 class SignupError(Exception):
     pass
 
 class LoginError(Exception):
     pass
 
+#neo4j database driver, used to get tree names
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 #ONLY RUN TO INITIALISE DATABASES, if you run it again it will reset to a default state
@@ -131,8 +133,7 @@ def init_database():
     
     db.session.commit()
 
-
-
+#creates a new unverified account, and logs them in
 def signup(email, username, password, repeat, remember):
     if password != repeat:
         raise SignupError("Passwords do not match")
@@ -173,8 +174,7 @@ def signup(email, username, password, repeat, remember):
     log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids(), " Login") #notify all admins of new account
     login(username, password, remember)
     
-
-
+#logs into an account
 def login(email_or_username, password, remember):
     user = db.session.query(User).filter((User.username == email_or_username) | (User.email == email_or_username)).first()
 
@@ -186,7 +186,7 @@ def login(email_or_username, password, remember):
     
     login_user(user, remember=remember)
 
-
+#generates and sends a reset email to a user
 def reset_email(receiver_email):
     #smtp ssl info
     port = 465 #ssl port
@@ -247,8 +247,7 @@ def reset_email(receiver_email):
     
     return
 
-
-
+#checks that reset tokens are valid
 def verify_reset(user_id, token):
     if user_id == None or token == None: #if missing params
         return False
@@ -267,8 +266,7 @@ def verify_reset(user_id, token):
     
     return True
 
-
-
+#resets a users password
 def reset(user_id, password, repeat):
     if password != repeat:
         raise SignupError("Passwords do not match")

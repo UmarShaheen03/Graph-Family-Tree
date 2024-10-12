@@ -1,21 +1,16 @@
 """Main route views"""
-
-import os
-import io
-from flask import Blueprint, Flask, render_template, flash, redirect, url_for, request, session, send_file
+from flask import Blueprint, render_template, flash, redirect, url_for, request
 from app.forms import *
 from app.models import Comment, User
 from app.accounts import *
 from app.notifs import *
 from app import db
 from neo4j import GraphDatabase
-from flask_wtf import CSRFProtect
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user
 from itsdangerous import URLSafeTimedSerializer
 from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
-from jinja2 import Environment
-from functools import wraps
+from threading import Thread
 
 main_bp = Blueprint('main_bp', __name__)
 # Connect to Neo4j
