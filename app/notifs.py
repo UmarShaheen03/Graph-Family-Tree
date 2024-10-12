@@ -157,13 +157,13 @@ def create_notifs_string(request):
         string += (" Signup")
 
     if (request.form.get("user_req")):
-        string += (" User Req")
+        string += (" User Request")
     if (request.form.get("admin_req")):
-        string += (" Admin Req")
+        string += (" Admin Request")
     if (request.form.get("tree_req")):
-        string += (" Tree Req")
+        string += (" Tree Request")
     if (request.form.get("req_accepted")):
-        string += (" Request")
+        string += (" Request Accept")
 
     if (request.form.get("comment")):
         string += (" Comment")
@@ -248,8 +248,8 @@ def get_all_ids_with_weekly():
 # - ensure all request/tree notifs are working
 # - change redirects for ux
 # - add errors to more pages
-# - user requests (start unverified)
 # - request accepted notification
+# - on admin accept, add id to all trees
 #   
 # - testing
 # - documentation

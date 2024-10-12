@@ -198,13 +198,16 @@
       document.getElementById("signup").checked = true;
   }
 
-  if (preferences.includes(" Admin Req")) {
+  if (preferences.includes(" User Request")) {
+      document.getElementById("user_req").checked = true;
+  }
+  if (preferences.includes(" Admin Request")) {
       document.getElementById("admin_req").checked = true;
   }
-  if (preferences.includes(" Tree Req")) {
+  if (preferences.includes(" Tree Request")) {
       document.getElementById("tree_req").checked = true;
   }
-  if (preferences.includes(" Request")) {
+  if (preferences.includes(" Request Accept")) {
       document.getElementById("req_accepted").checked = true;
   }
 

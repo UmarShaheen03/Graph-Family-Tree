@@ -187,6 +187,6 @@ class IgnoreNotifs (FlaskForm):
 
     submit=SubmitField("Submit Preferences")
     # "Login", "Logout", "Reset", "Signup" (account related) 
-    # "User Request", "Admin Request", "Tree Request", "Request" (request related)
+    # "User Request", "Admin Request", "Tree Request", "Request Accept" (request related)
     # "Comment", "Bio Edit" (bio related)
     # "New Tree", "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)

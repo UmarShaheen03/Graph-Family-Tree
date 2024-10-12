@@ -95,7 +95,7 @@ def login_request():
 def logout_request():
     log_notif(f"User {User.get_username(current_user)} logged out", get_all_admin_ids(), " Logout") #notify all admins of logout
     logout_user()
-    return redirect(url_for("main_bp.home_page"))
+    return redirect(url_for("main_bp.login_page"))
     
 #form submissions for signup
 @main_bp.route("/signup-form", methods=["POST"])
@@ -211,7 +211,7 @@ def biography(name):
         db.session.commit()
 
         flash('Comment added successfully')
-        log_notif(f"User {User.get_username(current_user)}  commented on {name} from Tree {tree_name}", 
+        log_notif(f"User {User.get_username(current_user)} commented on {name} from Tree {tree_name}", 
                   get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Comment", "/biography/" + name) #notify all admins/users with access about comment
         
         return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
@@ -425,7 +425,8 @@ def approve_tree():
     if (split[0] not in tree.users):
         tree.users += ", " + split[0]
     db.session.commit()
-    #TODO log request acceptance
+
+    log_notif(f"Your request to access Tree {split[1]} has been accepted", [int(split[0])], " Request Accept", "tree/" + split[1])
 
 
 @main_bp.route("/request_admin", methods=['POST'])
@@ -451,8 +452,10 @@ def approve_admin():
 
     user = db.session.query(User).filter(User.user_id == int(string)).first()
     user.admin = True
-    #TODO log request acceptance
     db.session.commit()
+
+    log_notif(f"Your request for Admin status has been accepted", [user.user_id], " Request Accept")
+
 
 @main_bp.route("/request_user", methods=['POST'])
 def request_user():
@@ -460,7 +463,7 @@ def request_user():
     comb = str(uid)
     token = serializer.dumps(comb, salt="user-request")
     approval_link = f"approve_user?token={token}"
-    log_notif(f" User {User.get_username(current_user)} is requesting verification", get_all_admin_ids(), " User Request", approval_link)
+    log_notif(f"User {User.get_username(current_user)} is requesting verification", get_all_admin_ids(), " User Request", approval_link)
     #TODO change redirect
     return redirect(url_for("main_bp.login_page"))
 
@@ -478,8 +481,10 @@ def approve_user():
 
     user = db.session.query(User).filter(User.user_id == int(string)).first()
     user.verified = True
-    #TODO log request acceptance
     db.session.commit()
+
+    log_notif(f"Your request for User status has been accepted", [user.user_id], " Request Accept")
+
 
 
 
@@ -641,8 +646,8 @@ def modify_graph():
                    MATCH (n:Person {FullName: $old_name})
                    SET n.FullName = $new_name
                    """,
-    old_name=form.old_name.data,
-    new_name=form.new_name.data
+                    old_name=form.old_name.data,
+                    new_name=form.new_name.data
                 )
             return redirect(url_for("main_bp.tree_page"))
     
