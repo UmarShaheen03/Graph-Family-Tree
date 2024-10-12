@@ -114,9 +114,8 @@ def signup_request():
         except SignupError as error:
             return render_template("signup.html", signupForm=form, error=error)
 
-
-        #send to home page on success
-        return redirect(url_for("main_bp.home_page"))
+        #request verification status
+        return request_user()
     
     else:
         return render_template("signup.html", loginForm=form, error="Invalid Form")
@@ -426,7 +425,8 @@ def approve_tree():
     if (split[0] not in tree.users):
         tree.users += ", " + split[0]
     db.session.commit()
-    return "added successfully"
+    #TODO log request acceptance
+
 
 @main_bp.route("/request_admin", methods=['POST'])
 def request_admin():
@@ -449,13 +449,38 @@ def approve_admin():
     except Exception as e:
         return "Invalid or expired token."
 
-    print(string)
     user = db.session.query(User).filter(User.user_id == int(string)).first()
     user.admin = True
+    #TODO log request acceptance
     db.session.commit()
 
-    #TODO change return statement
-    return "added successfully"
+@main_bp.route("/request_user", methods=['POST'])
+def request_user():
+    uid = User.get_id(current_user)
+    comb = str(uid)
+    token = serializer.dumps(comb, salt="user-request")
+    approval_link = f"approve_user?token={token}"
+    log_notif(f" User {User.get_username(current_user)} is requesting verification", get_all_admin_ids(), " User Request", approval_link)
+    #TODO change redirect
+    return redirect(url_for("main_bp.login_page"))
+
+@main_bp.route("/approve_user", methods=['POST'])
+def approve_user():
+    check = check_login_admin()
+    if check != None:
+        return check
+    
+    token = request.args.get('token')
+    try:
+        string = serializer.loads(token, salt="user-request", max_age=86400)
+    except Exception as e:
+        return "Invalid or expired token."
+
+    user = db.session.query(User).filter(User.user_id == int(string)).first()
+    user.verified = True
+    #TODO log request acceptance
+    db.session.commit()
+
 
 
 @main_bp.route("/log")
