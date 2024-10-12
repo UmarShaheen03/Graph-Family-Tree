@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block headBlock %}
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/pulse/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/biography.css') }}">
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4eneOOeiHunYMHble0GvihiawcOy3xsc&callback=initMap" async defer></script>
 <title>Biography Page</title>
@@ -49,8 +48,11 @@
                     <p><strong>Email:</strong> {{email if email else "None"}}</p>
                     <p><strong>Phone Number:</strong> {{phone_number if phone_number else "None"}}</p>
                     <p><strong>Address:</strong> {{address if address else "None"}}</p>
-                    {% if admin %}
-                        <button class="btn btn-primary btn-lg btn-custom rounded-pill" onclick="location.href='/biography/edit'">Edit Bio</button>
+
+                    {% if is_admin %}
+                    <form action="/biography/edit/{{ full_name }}" method="get">
+                        <input type="submit" value="Edit Bio" class="btn btn-primary btn-lg btn-custom rounded-pill"></input>
+                    </form>
                     {% endif %}
                 </div>    
 
@@ -69,9 +71,10 @@
                 <div class="media-body">
                     <h5 class="mt-0 mb-1">{{ comment.user.username }}</h5>
                     {{ comment.text }}
-                    <div class="text-muted">{{ comment.timestamp }}</div>
+                    <div class="text-muted">{{ comment.timestamp.strftime("%m/%d/%Y, %H:%M") }}</div>
                 </div>
             </li>
+            <br>
             {% endfor %}
         </ul>
     {% else %}

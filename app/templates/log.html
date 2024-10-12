@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block headBlock %}
+    <title>Log</title>
+    <style>
+        .log_box {
+            border-color: lightgray;
+            border-radius: 3px;
+            border-width: 2px;
+            border-style: solid;
+            margin-bottom: 3px;
+            margin-left: 1rem;
+            padding-left: 2px;
+        }
+        
+        .log_subtext {
+            color: var(--bs-secondary-color);
+            font-size: smaller;
+            margin: 0px;
+        }
+        
+        .seen_button {
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            font-size: smaller;
+            float: right;
+        }
+        
+        .go_to_button {
+            padding: 0;
+            width: 50px;
+            height: 20px;
+            font-size: smaller;
+            float: left;
+        }
+        
+        .log_text {
+            margin-top: 0px;
+            margin-bottom: 5px;
+        }
+    </style>
+{% endblock %}
+
+{% block bodyBlock %}
+
+<div class="d-md-flex flex-md-row container" style="padding-top:5%; padding-bottom:5%;">
+
+    <div style="display:inline-block; vertical-align:top; width:33%; padding-right:3%">
+        <h4>Notifications Log</h4>
+        {% for notif in master_notifications %}
+        {% with %}
+            {% set notif=notif %}
+            {% include "notification_for_log.html" %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    <div style="display:inline-block; vertical-align:top; width:33%; padding-right:3%">
+        <h4>All Users</h4>
+        {% for user in users %}
+        {% with %}
+            {% set user=user %}
+            {% include "user_for_log.html" %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+    <div style="display:inline-block; vertical-align:top; width:33%; padding-right:3%">
+        <h4>All Trees</h4>
+        {% for tree in trees %}
+        {% with %}
+            {% set tree=tree %}
+            {% set url = url + "tree/" + tree.name %}
+            {% include "tree_for_log.html" %}
+        {% endwith %}
+        {% endfor %}
+    </div>
+
+</div>
+
+{% endblock %}
