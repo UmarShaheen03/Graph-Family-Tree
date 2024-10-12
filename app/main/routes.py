@@ -204,31 +204,17 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 @main_bp.route('/biography/<tree_name>/<name>', methods=['GET', 'POST'])
 def biography(tree_name, name):
     check = check_login()
     if check is not None:
         return check
- 
+
     # Fetch person's biography details
     person = get_person_bio(tree_name, name)
     
     if not person:
         return "Biography not found.", 404
-    
-    if person:
-        with driver.session() as session:
-            # Query to get the labels of the node
-            query = """
-                MATCH (n {FullName: $name}) 
-                RETURN labels(n) AS labels
-            """
-            result = session.run(query, name=name)
-            record = result.single()
-            if record and record['labels']:
-                # Use the first label, assuming the node has only one main label
-                tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
 
     # Fetch comments related to this person
     comments = Comment.query.filter(Comment.bio_name == name).all()
@@ -246,20 +232,22 @@ def biography(tree_name, name):
         db.session.commit()
 
         flash('Comment added successfully')
-        log_notif(f"User {User.get_username(current_user)} commented on Person {name} from Tree {tree_name}", 
-                  get_all_ids_with_tree(tree_name), " Comment", "biography/" + name) #notify all admins/users with access about comment
+        log_notif(f"User {User.get_username(current_user)} commented on {name} from Tree {tree_name}", 
+                  get_all_ids_with_tree(tree_name), " Comment", f"biography/{tree_name}/{name}")
         
-        return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
+        return redirect(url_for('main_bp.biography', tree_name=tree_name, name=name))
 
     # Pass the fetched biography details and comments to the template
     return render_template('biography.html', 
-                           full_name=person['name'], 
-                           dob=person.get('dob', 'Unknown'), 
-                           bio=person.get('biography', 'No biography available'), 
+                           tree_name=tree_name,
+                           name=person['name'],
+                           dob=person.get('dob', 'Unknown'),
+                           bio=person.get('biography', 'No biography available'),
                            location=person.get('location', 'Unknown'),
                            email=person.get('email', 'No email provided'),
                            phone_number=person.get('phone_number', 'No phone number provided'),
                            address=person.get('address', 'No address provided'),
+                           profile_image=person.get('profile_image', 'default-profile.png'),
                            comments=comments, 
                            comment_form=comment_form)
 
