@@ -248,8 +248,6 @@ def get_all_ids_with_weekly():
 # - ensure all request/tree notifs are working
 # - change redirects for ux
 # - add errors to more pages
-# - request accepted notification
-# - on admin accept, add id to all trees
 #   
 # - testing
 # - documentation
