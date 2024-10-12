@@ -15,10 +15,12 @@
         <div class="row">
             <div class="col-md-4 text-center d-flex flex-column align-items-center">
                 <div class="profile-image-frame">
+                    <p>Profile Image URL: {{ profile_image }}</p>
+
                     {% if profile_image %}
                     <img id="profilePreview" src="{{ url_for('static', filename='uploads/' + profile_image) }}" class="biography-image">
                     {% else %}
-                    <img id="profilePreview" src="{{ url_for('static', filename='default-profile.png') }}" class="biography-image">
+                    <img id="profilePreview" src="{{ url_for('static', filename='uploads/default-profile.png') }}" class="biography-image">
                     {% endif %}
                 </div>
                 

@@ -16,6 +16,7 @@ from itsdangerous import URLSafeTimedSerializer
 from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 from jinja2 import Environment
 from functools import wraps
+from werkzeug.utils import secure_filename
 
 main_bp = Blueprint('main_bp', __name__)
 # Connect to Neo4j
@@ -202,6 +203,7 @@ def biography(name):
     if not person:
         return "Biography not found.", 404
     if person:
+        print(f"Profile Image URL: {person.get('image_url')}")
         with driver.session() as session:
             # Query to get the labels of the node
             query = """
@@ -213,6 +215,7 @@ def biography(name):
             if record and record['labels']:
                 # Use the first label, assuming the node has only one main label
                 tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
+         
      # Handle image upload
     if request.method == 'POST':
         if 'profile_image' in request.files:
@@ -220,7 +223,11 @@ def biography(name):
             if file and allowed_file(file.filename):
                 # Save the file
                 filename = secure_filename(file.filename)
-                filepath = os.path.join(app.config['IMAGE_UPLOADS'], filename)
+                upload_dir = current_app.config['IMAGE_UPLOADS']
+                
+                filepath = os.path.join(upload_dir, filename)
+                filepath = filepath.replace("\\", "/")
+                print(filepath + "-------------------------------------")
                 file.save(filepath)
 
                 # Update Neo4j with image URL
@@ -262,6 +269,7 @@ def biography(name):
                            email=person.get('email', 'No email provided'),
                            phone_number=person.get('phone_number', 'No phone number provided'),
                            address=person.get('address', 'No address provided'),
+                           profile_image=person.get('image_url'),
                            comments=comments, 
                            comment_form=comment_form)
 
@@ -572,7 +580,8 @@ def get_person_bio(full_name):
            p.Location AS location, 
            p.Email AS email, 
            p.PhoneNumber AS phone_number, 
-           p.Address AS address
+           p.Address AS address,
+           p.image_url AS image_url
     """
     with driver.session() as session:
         result = session.run(query, full_name=full_name)
