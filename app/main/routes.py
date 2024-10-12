@@ -247,13 +247,13 @@ def biography(name):
                            comments=comments, 
                            comment_form=comment_form)
 
-@main_bp.route('/biography/edit', methods=['GET', 'POST'])
-def edit_biography():
+@main_bp.route('/biography/edit/<person_name>', methods=['GET', 'POST'])
+def edit_biography(person_name):
     check = check_login_admin()
     if check != None:
         return check
+    
     # Get the person's name and default tree_name
-    person_name = request.args.get('name', None)  # Get person's name from the URL query
     tree_name = 'Person'  # Default label if no tree_name is found
 
     # If a person_name is provided, dynamically fetch the node's label
@@ -270,8 +270,6 @@ def edit_biography():
                 # Use the first label, assuming the node has only one main label
                 tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
         
-    
-    biography = Biography.query.first()
     edit_form = BiographyEditForm()
 # Fetch nodes (FullName) for the select box for the form
     with driver.session() as session:

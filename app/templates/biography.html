@@ -40,11 +40,11 @@
                     <p><strong>Email:</strong> {{email if email else "None"}}</p>
                     <p><strong>Phone Number:</strong> {{phone_number if phone_number else "None"}}</p>
                     <p><strong>Address:</strong> {{address if address else "None"}}</p>
+
                     {% if is_admin %}
-                    <button class="btn btn-primary btn-lg btn-custom rounded-pill" 
-                    onclick="location.href={{ url_for('main_bp.edit_biography', name=full_name if full_name else 'None') }}">
-                    Edit Bio
-                </button>
+                    <form action="/biography/edit/{{ full_name }}" method="get">
+                        <input type="submit" value="Edit Bio" class="btn btn-primary btn-lg btn-custom rounded-pill"></input>
+                    </form>
                     {% endif %}
                 </div>    
 
