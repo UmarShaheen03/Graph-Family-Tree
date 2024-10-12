@@ -81,6 +81,10 @@
                 <div class="col-auto">
                     {{ form_search.submit_search(id="Search", class="btn btn-primary btn-lg rounded-pill") }}
                 </div>
+                <div>
+                    <button id="Download" style="background-color: purple; color: white; border: none; border-radius: 5px;  font-size: 16px; cursor: pointer; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">Download</button>
+
+                </div>
             </div>
             <div id="graph-container">                
                 <svg id="graph"></svg>
@@ -101,6 +105,7 @@
 </ul>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
     var nodes = {{ nodes|tojson }};
@@ -442,6 +447,28 @@
     });
 
     initialiseGraph(standInRoot);
+
+    document.getElementById('Download').addEventListener('click', function() {
+  
+  const currentTransform = d3.zoomTransform(svg.node());
+  
+  
+  svg.transition()
+      .duration(750)
+      .call(zoom.transform, d3.zoomIdentity
+      .translate(-86.48138319941552,-21.892951824506817)
+      .scale(0.38565487746149063)
+      )
+      .on('end', function() {
+          triggerDownload(); 
+      });
+});
+function triggerDownload() {
+  const graph = document.getElementById('graph');
+  const data = new XMLSerializer().serializeToString(graph);
+  const image = new Blob([data], { type: 'image/svg+xml;charset=utf-8' });
+  saveAs(image, 'FamilyTree.svg'); 
+}
 
 </script>
 

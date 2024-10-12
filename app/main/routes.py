@@ -196,7 +196,19 @@ def biography(name):
     
     if not person:
         return "Biography not found.", 404
-
+    if person:
+        with driver.session() as session:
+            # Query to get the labels of the node
+            query = """
+                MATCH (n {FullName: $name}) 
+                RETURN labels(n) AS labels
+            """
+            result = session.run(query, name=name)
+            record = result.single()
+            if record and record['labels']:
+                # Use the first label, assuming the node has only one main label
+                tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
+            print(tree_name)             
     # Fetch comments related to this person
     comments = Comment.query.all()
     comment_form = CommentForm()
@@ -229,21 +241,38 @@ def biography(name):
                            comment_form=comment_form,
                            admin=User.is_admin(current_user))
 
-@main_bp.route('/biography/edit/<tree_name>', methods=['GET', 'POST'])
-def edit_biography(tree_name):
+@main_bp.route('/biography/edit', methods=['GET', 'POST'])
+def edit_biography():
     check = check_login_admin()
     if check != None:
         return check
+    # Get the person's name and default tree_name
+    person_name = request.args.get('name', None)  # Get person's name from the URL query
+    tree_name = 'Person'  # Default label if no tree_name is found
+
+    # If a person_name is provided, dynamically fetch the node's label
+    if person_name:
+        with driver.session() as session:
+            # Query to get the labels of the node
+            query = """
+                MATCH (n {FullName: $name}) 
+                RETURN labels(n) AS labels
+            """
+            result = session.run(query, name=person_name)
+            record = result.single()
+            if record and record['labels']:
+                # Use the first label, assuming the node has only one main label
+                tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
         
     
     biography = Biography.query.first()
     edit_form = BiographyEditForm()
-
-    # Fetch nodes (FullName) for the select box for the form 
+# Fetch nodes (FullName) for the select box for the form
     with driver.session() as session:
-        result = session.run(f"MATCH (n:{tree_name}) RETURN n.FullName AS name")
+        query = f"MATCH (n:{tree_name}) RETURN n.FullName AS name"
+        result = session.run(query)
         nodes = [(record["name"], record["name"]) for record in result]
-        
+
     # Set choices for the FullName dropdown field
     edit_form.fullname.choices = nodes
 
@@ -251,18 +280,19 @@ def edit_biography(tree_name):
     if edit_form.validate_on_submit():
         person_name = edit_form.fullname.data
         
-        # Update the person's information in the Neo4j graph database
+        # Dynamically set the label to match tree_name in the update query
         with driver.session() as session:
-            session.run(
-                """
-                MATCH (p:Person {FullName: $full_name})
+            update_query = f"""
+                MATCH (p:{tree_name} {{FullName: $full_name}})
                 SET p.Date_Of_Birth = $DOB,
                     p.Biography = $Biography,
                     p.Location = $Location,
                     p.Email = $Email,
                     p.PhoneNumber = $PhoneNumber,
                     p.Address = $Address
-                """,
+            """
+            session.run(
+                update_query,
                 full_name=person_name,
                 DOB=edit_form.dob.data,
                 Biography=edit_form.biography.data,
@@ -271,6 +301,9 @@ def edit_biography(tree_name):
                 PhoneNumber=edit_form.phonenumber.data,
                 Address=edit_form.address.data
             )
+
+        flash(f'Biography for {person_name} has been updated successfully.')
+        
         
         flash(f'Biography for {person_name} has been updated successfully.')
         log_notif(f"User {User.get_username(current_user)} edited the bio of {person_name} from Tree {tree_name}", 
@@ -278,7 +311,7 @@ def edit_biography(tree_name):
         
         return redirect(url_for('main_bp.biography', name=person_name))
 
-    return render_template('edit_biography.html', biography=biography, edit_form=edit_form)
+    return render_template('edit_biography.html', biography=biography, edit_form=edit_form,tree_name=tree_name)
     
     
 
@@ -514,7 +547,7 @@ def log():
 # Function to fetch biography from Neo4j
 def get_person_bio(full_name):
     query = """
-    MATCH (p:Person {FullName: $full_name})
+    MATCH (p {FullName: $full_name})
     RETURN p.FullName AS name, 
            p.Hierarchy AS hierarchy, 
            p.Date_Of_Birth AS dob, 
@@ -777,7 +810,7 @@ def create_tree():
                         Relationships += (
                             f"MATCH (p:{name} {{FullName: '{Family_lines[i].strip()}', Hierarchy: {parent_hierarchy}, Lineage: {parent_lineage}}}) "
                             f"MATCH (c:{name} {{FullName: '{Family_lines[i + 1].strip()}', Hierarchy: {child_hierarchy}, Lineage: {child_lineage}}}) "
-                            f"MERGE (p)-[:PARENT_TO]->(c);\n"
+                            f"MERGE (p)-[:PARENT_OF]->(c);\n"
                         )
 
             # Add nodes and relationships to the Neo4j Database
@@ -837,7 +870,7 @@ def tree(tree_name):
                 # Build the dynamic query string to add a relationship
                 query = f"""
                     MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
-                    MERGE (a)-[r:PARENT_TO]->(b)
+                    MERGE (a)-[r:PARENT_OF]->(b)
                 """
                 # Create or update relationship
                 session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
@@ -892,7 +925,7 @@ def tree(tree_name):
 
                 # Step 1: Remove the current parent-child relationship for the person being shifted
                 remove_old_relationship_query = f"""
-                    MATCH (old_parent:{tree_name})-[r:PARENT_TO]->(b:{tree_name} {{FullName: $full_name}})
+                    MATCH (old_parent:{tree_name})-[r:PARENT_OF]->(b:{tree_name} {{FullName: $full_name}})
                     DELETE r
                 """
                 session.run(remove_old_relationship_query, full_name=form_modify.person_to_shift.data)
@@ -900,7 +933,7 @@ def tree(tree_name):
                 # Step 2: Create the new relationship between the new parent and the person being shifted
                 update_relationship_query = f"""
                     MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
-                    MERGE (a)-[r:PARENT_TO]->(b)
+                    MERGE (a)-[r:PARENT_OF]->(b)
                 """
                 session.run(update_relationship_query, full_name=form_modify.person_to_shift.data, Parent=form_modify.new_parent.data)
                 
