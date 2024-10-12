@@ -15,7 +15,7 @@
         <div class="row">
             <div class="col-md-4 text-center d-flex flex-column align-items-center">
                 <div class="profile-image-frame">
-                    <p>Profile Image URL: {{ profile_image }}</p>
+                    
 
                     {% if profile_image %}
                     <img id="profilePreview" src="{{ url_for('static', filename='uploads/' + profile_image) }}" class="biography-image">
@@ -23,13 +23,13 @@
                     <img id="profilePreview" src="{{ url_for('static', filename='uploads/default-profile.png') }}" class="biography-image">
                     {% endif %}
                 </div>
-                
+                {% if is_admin %}
                 <form method="post" action="{{ url_for('main_bp.biography', name=full_name) }}" enctype="multipart/form-data">
                     <input type="file" id="profile_image" name="profile_image" accept="image/*" class="d-none" onchange="previewImage(event)">
-                    <label for="profile_image" class="btn btn-primary btn-lg btn-custom rounded-pill">Choose Image</label>
+                    <label for="profile_image" class="upload-link">Choose Image</label>
                     <button type="submit" class="btn btn-primary btn-lg btn-custom rounded-pill">Save Image</button>
                 </form>
-                
+                {% endif %}
 
             </div>
             <div class="col-md-8">

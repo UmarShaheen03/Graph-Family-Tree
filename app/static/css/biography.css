@@ -3,42 +3,53 @@
     margin: 0 auto;
     padding-top: 40px;
 }
+
 /* Card styling */
 .card {
     background-color: #ffffff;
     border-radius: 10px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px;
 }
+
 .biography-header {
     background-color: #603494;
     color: #fff;
     padding: 20px;
+    text-align: center;
 }
+
 .biography-header h1 {
     margin-bottom: 0;
 }
+
 .biography-details {
     padding: 20px;
     background-color: #f8f9fa;
 }
+
 .biography-details p {
-    margin-bottom: 50px;
+    margin-bottom: 20px;
     font-size: 1.1rem;
 }
+
 .comments-section {
     padding: 20px;
     background-color: #f8f9fa;
     margin-top: 40px;
     margin-bottom: 30px;
 }
+
 .comments-section h2 {
     margin-bottom: 20px;
     font-size: 1.5rem;
 }
+
 .btn-custom {
     background-color: #603494;
     color: white;
 }
+
 .btn-custom:hover {
     background-color: #432467;
     border-color: #301a4a;
@@ -49,9 +60,48 @@
     border-radius: 50px;
 }
 
+/* Link style for 'Choose Image' */
+.upload-link {
+    color: #603494;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-bottom: 20px;
+}
+
+.upload-link:hover {
+    color: #432467;
+}
+
+/* Centering image and buttons */
+.profile-image-frame {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
 .biography-image {
     width: 150px;
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
+    border: 5px solid #603494; 
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .biography-container {
+        padding: 20px;
+    }
+
+    .biography-details p {
+        font-size: 1rem;
+    }
+
+    .biography-image {
+        width: 120px;
+        height: 120px;
+    }
+
+    .comments-section {
+        padding: 15px;
+    }
 }
