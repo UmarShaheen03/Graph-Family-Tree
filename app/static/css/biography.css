@@ -48,3 +48,10 @@
 .btn-lg.rounded-pill {
     border-radius: 50px;
 }
+
+.biography-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+}

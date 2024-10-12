@@ -213,7 +213,26 @@ def biography(name):
             if record and record['labels']:
                 # Use the first label, assuming the node has only one main label
                 tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
+     # Handle image upload
+    if request.method == 'POST':
+        if 'profile_image' in request.files:
+            file = request.files['profile_image']
+            if file and allowed_file(file.filename):
+                # Save the file
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(app.config['IMAGE_UPLOADS'], filename)
+                file.save(filepath)
 
+                # Update Neo4j with image URL
+                with driver.session() as session:
+                    query = """
+                    MATCH (p {FullName: $full_name})
+                    SET p.image_url = $image_url
+                    """
+                    session.run(query, full_name=name, image_url=filename)
+
+                flash('Image uploaded successfully.')
+                return redirect(url_for('main_bp.biography', name=name))
     # Fetch comments related to this person
     comments = Comment.query.filter(Comment.bio_name == name).all()
     comment_form = CommentForm()
@@ -367,7 +386,10 @@ def update_often():
 
     return redirect(url_for("main_bp.my_dashboard", email_info="Preferences changed succesfully"))
     
-
+#function for checking if image has right extension
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 #functions for checking if the current user is logged in, and if they are an admin
