@@ -48,6 +48,11 @@
 .btn-custom {
     background-color: #603494;
     color: white;
+    border-radius: 50px;
+    padding: 10px 20px;
+    margin-top: 10px;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .btn-custom:hover {
@@ -56,16 +61,25 @@
     color: #f8f9fa;
 }
 
-.btn-lg.rounded-pill {
+.btn-danger {
+    background-color: #ff4d4d;
+    color: white;
     border-radius: 50px;
+    padding: 10px 20px;
+    width: 100%;
 }
 
-/* Link style for 'Choose Image' */
+.btn-danger:hover {
+    background-color: #d9534f;
+}
+
 .upload-link {
     color: #603494;
     cursor: pointer;
     text-decoration: underline;
-    margin-bottom: 20px;
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    display: block;
 }
 
 .upload-link:hover {
@@ -83,7 +97,21 @@
     height: 150px;
     border-radius: 50%;
     object-fit: cover;
-    border: 5px solid #603494; 
+    border: 5px solid #603494;
+}
+
+.image-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.image-options button,
+.image-options label {
+    width: 100%;
+    margin-top: 10px;
 }
 
 /* Responsive adjustments */
@@ -103,5 +131,9 @@
 
     .comments-section {
         padding: 15px;
+    }
+
+    .image-options {
+        flex-direction: column;
     }
 }

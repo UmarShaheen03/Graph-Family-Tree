@@ -341,6 +341,34 @@ def edit_biography(person_name):
     return render_template('edit_biography.html', biography=biography, edit_form=edit_form,tree_name=tree_name)
     
     
+@main_bp.route('/biography/delete_image/<name>', methods=['POST'])
+def delete_image(name):
+    # Fetch the person to get their current image URL
+    person = get_person_bio(name)
+
+    if person and person.get('image_url'):
+        image_url = person['image_url']
+
+        # Remove the image file from the local directory
+        upload_dir = current_app.config['IMAGE_UPLOADS']
+        full_path = os.path.join(upload_dir, os.path.basename(image_url))  # Ensure correct local path
+
+        try:
+            os.remove(full_path)
+        except OSError as e:
+            print(f"Error deleting image file: {e}")
+
+        # Update Neo4j to set the image URL to null
+        with driver.session() as session:
+            query = """
+            MATCH (p {FullName: $full_name})
+            SET p.image_url = null
+            """
+            session.run(query, full_name=name)
+
+        flash('Profile image deleted successfully.')
+
+    return redirect(url_for('main_bp.biography', name=name))
 
 #NOTIFICATION ROUTES
 @main_bp.route("/unsubscribe/<user_id>", methods=['GET', 'POST'])
