@@ -182,7 +182,7 @@ def biography(name):
     check = check_login()
     if check is not None:
         return check
-
+    print(f"Rendering biography for {name}") 
     # Fetch comments related to this person
     comments = Comment.query.all()
     comment_form = CommentForm()
