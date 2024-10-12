@@ -41,7 +41,7 @@
         </div>
         <div style="width: 80px">
             {% if notif.goto != None %}
-                {% if notif.type == " Tree Request" or notif.type == " Admin Request" %}
+                {% if notif.type == " Tree Request" or notif.type == " Admin Request" or notif.type == " User Request" %}
                 <a class="go_to_button btn btn-secondary" style="width:40px" onclick="are_you_sure_yes('{{ notif.goto }}', '{{ notif.id }}')">Yes</a>
                 <a class="seen_button btn btn-secondary" style="width:30px" onclick="are_you_sure_no('{{ notif.id }}')">No</a>
                 {% else %}

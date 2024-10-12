@@ -171,9 +171,10 @@ class IgnoreNotifs (FlaskForm):
     reset=BooleanField("Password Resets", default=False)
     signup=BooleanField("Sign Ups", default=False)
 
+    user_req=BooleanField("User Requests", default=False)
     admin_req=BooleanField("Admin Requests", default=False)
     tree_req=BooleanField("Tree Requests", default=False)
-    req_accepted=BooleanField("Request Accept", default=False)
+    req_accepted=BooleanField("Request Accepted", default=False)
 
     comment=BooleanField("New Comments", default=False)
     bio_edit=BooleanField("Biography Edits", default=False)

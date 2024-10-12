@@ -89,20 +89,20 @@
               <h4>Accounts</h4>
               {% if is_admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.login.label(style="width:150%") }}
+                {{ ignoreForm.login.label(style="width:180%") }}
                 {{ ignoreForm.login(style="height:20px;margin:0") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.logout.label(style="width:150%") }}
+                {{ ignoreForm.logout.label(style="width:180%") }}
                 {{ ignoreForm.logout(style="height:20px;margin:0;") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.signup.label(style="width:150%") }}
+                {{ ignoreForm.signup.label(style="width:180%") }}
                 {{ ignoreForm.signup(style="height:20px;margin:0;") }}
               </div>
               {% endif %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.reset.label(style="width:150%") }}
+                {{ ignoreForm.reset.label(style="width:180%") }}
                 {{ ignoreForm.reset(style="height:20px;margin:0;") }}
               </div>
             </div>
@@ -111,16 +111,20 @@
               <h4>Requests</h4>
               {% if is_admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.admin_req.label(style="width:150%") }}
+                {{ ignoreForm.user_req.label(style="width:180%") }}
+                {{ ignoreForm.user_req(style="height:20px;margin:0") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.admin_req.label(style="width:180%") }}
                 {{ ignoreForm.admin_req(style="height:20px;margin:0") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_req.label(style="width:150%") }}
+                {{ ignoreForm.tree_req.label(style="width:180%") }}
                 {{ ignoreForm.tree_req(style="height:20px;margin:0;") }}
               </div>
               {% endif %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.req_accepted.label(style="width:150%") }}
+                {{ ignoreForm.req_accepted.label(style="width:180%") }}
                 {{ ignoreForm.req_accepted(style="height:20px;margin:0;") }}
               </div>
             </div>
@@ -128,11 +132,11 @@
             <div style="display:inline-block;vertical-align:top;width:24%;">
               <h4>Biographies</h4>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.comment.label(style="width:150%") }}
+                {{ ignoreForm.comment.label(style="width:180%") }}
                 {{ ignoreForm.comment(style="height:20px;margin:0") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.bio_edit.label(style="width:150%") }}
+                {{ ignoreForm.bio_edit.label(style="width:180%") }}
                 {{ ignoreForm.bio_edit(style="height:20px;margin:0;") }}
               </div>
             </div>
@@ -141,24 +145,24 @@
               <h4>Trees</h4>
               {% if is_admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.new_tree.label(style="width:150%") }}
+                {{ ignoreForm.new_tree.label(style="width:180%") }}
                 {{ ignoreForm.new_tree(style="height:20px;margin:0") }}
               </div>
               {% endif %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_create.label(style="width:150%") }}
+                {{ ignoreForm.tree_create.label(style="width:180%") }}
                 {{ ignoreForm.tree_create(style="height:20px;margin:0") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_move.label(style="width:150%") }}
+                {{ ignoreForm.tree_move.label(style="width:180%") }}
                 {{ ignoreForm.tree_move(style="height:20px;margin:0;") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_update.label(style="width:150%") }}
+                {{ ignoreForm.tree_update.label(style="width:180%") }}
                 {{ ignoreForm.tree_update(style="height:20px;margin:0;") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_delete.label(style="width:150%") }}
+                {{ ignoreForm.tree_delete.label(style="width:180%") }}
                 {{ ignoreForm.tree_delete(style="height:20px;margin:0;") }}
               </div>
             </div>

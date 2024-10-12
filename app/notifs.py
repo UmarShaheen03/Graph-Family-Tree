@@ -156,6 +156,8 @@ def create_notifs_string(request):
     if (request.form.get("signup")):
         string += (" Signup")
 
+    if (request.form.get("user_req")):
+        string += (" User Req")
     if (request.form.get("admin_req")):
         string += (" Admin Req")
     if (request.form.get("tree_req")):
@@ -233,21 +235,21 @@ def get_all_ids_with_weekly():
 #   X logins (viewable to admins, linked to user)
 #   X password resets (viewable to admins, linked to user)
 #   X logouts (viewable to admins, linked to user)
-# waiting on requests to be done:
-#   - admin requests (viewable to admins, linked to user)
-#   - tree requests (viewable to admins, linked to user)
+#   - user requests
+#   X admin requests (viewable to admins, linked to user)
+#   X tree requests (viewable to admins, linked to user)
 #   - request acceptance (viewable to users, linked to user)
-# waiting on multi tree support to be done:
 #   X tree edits [CRUD] (viewable to users, linked to tree)
 #   X new tree creation
-#   ~ biography edits (viewable to users, linked to tree)
-#   ~ comments (viewable to users, linked to tree)
+#   ~ bio edits
+#   ~ comments
 
 #TODO
 # - ensure all request/tree notifs are working
 # - change redirects for ux
 # - add errors to more pages
 # - user requests (start unverified)
+# - request accepted notification
 #   
 # - testing
 # - documentation
