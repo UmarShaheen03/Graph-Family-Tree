@@ -43,7 +43,7 @@
             {% if notif.goto != None %}
                 {% if notif.type == " Tree Request" or notif.type == " Admin Request" or notif.type == " User Request" %}
                 <a class="go_to_button btn btn-secondary" style="width:40px" onclick="are_you_sure_yes('{{ notif.goto }}', '{{ notif.id }}')">Yes</a>
-                <a class="seen_button btn btn-secondary" style="width:30px" onclick="are_you_sure_no('{{ notif.id }}')">No</a>
+                <a class="seen_button btn btn-secondary" style="width:30px" onclick="are_you_sure_no('{{ notif.goto }}', '{{ notif.id }}', '{{ notif.type }}')">No</a>
                 {% else %}
                 <a class="go_to_button btn btn-secondary" href="{{ notif.goto }}">Go To</a>
                 <a class="seen_button btn btn-secondary" onclick="seen('{{ notif.id }}')">X</a>
@@ -77,9 +77,17 @@
         }
     }
 
-    function are_you_sure_no(id) {
+    function are_you_sure_no(goto, id, type) {
         if (confirm("Are you sure you want to reject this request?")) {
             seen(id);
+            if (type == " User Request") {
+                console.log(goto)
+                //reformat goto to instead go to /reject_user
+                new_goto = goto.replace("approve", "reject")
+                console.log(new_goto)
+                $.post(new_goto)
+                alert("User request denied. Account has been deleted")
+            }
         }
     }
 </script>

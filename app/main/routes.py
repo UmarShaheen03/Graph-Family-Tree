@@ -23,7 +23,7 @@ serializer = URLSafeTimedSerializer("SecretKey")
 @main_bp.before_request
 def run_once_on_start():
     #ONLY UNCOMMENT BELOW TO RESET DATABASE
-    #init_database()
+    init_database()
     email_thread = Thread(target=check_for_emails)
     email_thread.start() #TODO may be leaking?
     print("created email thread")
@@ -36,7 +36,8 @@ def inject_global_vars():
     globals = {
         "is_admin": User.is_admin(current_user),
         "is_verified": User.is_verified(current_user),
-        "notifications": get_users_notifs(current_user)
+        "notifications": get_users_notifs(current_user),
+        "website_url": WEBSITE_URL
     }
     return globals
 
@@ -796,6 +797,27 @@ def approve_user():
     db.session.commit()
 
     log_notif(f"Your request for User status has been accepted", [user.user_id], " Request Accept")
+
+#rejection of user verification requests
+@main_bp.route("/reject_user", methods=['POST'])
+def reject_user():
+    check = check_login_admin()
+    if check != None:
+        return check
+    
+    token = request.args.get('token')
+    try:
+        string = serializer.loads(token, salt="user-request", max_age=86400)
+    except Exception as e:
+        return "Invalid or expired token."
+    
+    user = db.session.query(User).filter(User.user_id == int(string)).first()
+
+    if (user.verified == False): #only allow deletion of unverified accounts
+        db.session.query(User).filter(User.user_id == int(string)).delete
+        db.session.commit()
+
+        log_notif(f"User {user.username}'s user request has been denied, and the account has been deleted", get_all_admin_ids(), " Request Accept")
 
 #form submission for ignored notifs
 @main_bp.route("/preference_form", methods=['POST'])
