@@ -85,7 +85,6 @@ def login_request():
             return render_template("login.html", loginForm=form, logoutForm=logoutForm, error=error)
 
         #send to dehdashti tree if verified
-        #TODO page that describes verification
         if (user.verified):
             return redirect(url_for("main_bp.tree", tree_name="Dehdashti"))
         else:
@@ -387,10 +386,7 @@ def check_login_admin():
         return check
     
     if not User.is_admin(current_user): #if user is not an admin
-        form = LoginForm()
-        logoutForm = LogoutForm()
-        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Admin permissions are required to view this page", logged_in_as=User.get_username(current_user))
-        #TODO: make this return requests page, so user can request to become admin
+        return redirect(url_for("main_bp.my_dashboard", admin_info="Admin permissions required, request them here"))
     
     else:
         return None
@@ -505,8 +501,6 @@ def request_user():
     token = serializer.dumps(comb, salt="user-request")
     approval_link = f"approve_user?token={token}"
     log_notif(f"User {User.get_username(current_user)} is requesting verification", get_all_admin_ids(), " User Request", approval_link)
-    #TODO change redirect
-    return redirect(url_for("main_bp.login_page"))
 
 @main_bp.route("/approve_user", methods=['POST'])
 def approve_user():
@@ -740,30 +734,6 @@ def modify_graph():
             print("Person shifted and hierarchy updated. Redirecting to index.")
             return redirect(url_for("main_bp.tree_page"))
     return render_template('modify_graph.html', form=form)
-
-#functions for checking if the user is logged in, and if they are an admin
-def check_login():
-    if not current_user.is_authenticated:
-        form = LoginForm()
-        logoutForm = LogoutForm()
-        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Please login or create an account to view this page")
-    
-    else:
-        return None
-    
-def check_login_admin():
-    check = check_login()
-    if check != None:
-        return check
-    
-    if not User.is_admin(current_user): #if user is not an admin
-        form = LoginForm()
-        logoutForm = LogoutForm()
-        return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Admin permissions are required to view this page", logged_in_as=User.get_username(current_user))
-        #TODO: make this return requests page, so user can request to become admin
-    
-    else:
-        return None
 
 @main_bp.route("/create_tree", methods=['GET', 'POST'])
 def create_tree():

@@ -4,7 +4,7 @@ from app.databases import db
 from werkzeug.security import generate_password_hash
 from flask import current_app, url_for
 from app.notifs import *
-import sys #TODO using for debug printing, remove in final
+
 from config import WEBSITE_URL, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 from jinja2 import Template
 from neo4j import GraphDatabase
@@ -166,8 +166,6 @@ def signup(email, username, password, repeat, remember):
     dehdashti.users += ", " + str(user.user_id)
     db.session.commit()
 
-    #TODO put user requests here
-
     log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids(), " Login") #notify all admins of new account
     login(username, password, remember)
     
@@ -220,7 +218,6 @@ def reset_email(receiver_email):
     message["To"] = receiver_email
 
     #html version of email
-    #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
     file = open("app/templates/email_reset.html", "r").read()
     html = Template(file).render(link=link)
     

@@ -95,10 +95,9 @@ def send_emails(ids):
 
         home_url = WEBSITE_URL + url_for("main_bp.home_page")
         unsub_url = WEBSITE_URL + url_for("main_bp.unsubscribe", user_id=id)
-        account_url = WEBSITE_URL + url_for("main_bp.unsubscribe", user_id=id) #TODO set this to accounts once done
+        account_url = WEBSITE_URL + url_for("main_bp.my_dashboard")
 
         #html version of email
-        #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
         file = open("app/templates/email_notif.html", "r").read()
         loader = FileSystemLoader(searchpath="./")
         template = Environment(loader=loader).from_string(file)
@@ -245,13 +244,12 @@ def get_all_ids_with_weekly():
 #   ~ comments
 
 #TODO
-# - ensure all request/tree notifs are working
-# - change redirects for ux
 # - add errors to more pages
 # - move joshs download button
 # - delete non-verified accounts? with notif?
 # - fix what i can in bio
 # - make databases permanent
+# - clean up routes functions
 #   
 # - testing
 # - documentation
