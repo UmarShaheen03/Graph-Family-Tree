@@ -1,10 +1,20 @@
 from unittest import TestCase
 import json
 import unittest
+import os
+from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
+from flask_wtf import CSRFProtect
+from .databases import db, login
+from .main.routes import main_bp
+
 
 from neo4j import GraphDatabase
+from .accounts import signup, init_database
+from .models import *
 
-# HOW TO RUN python -m unittest unit.py    
+
+# HOW TO RUN python -m unittest unit_tests.py    
 
 ## FYI my part tests the functional database not the web app itself. It tests for  correct connection to the neo4j driver 
 
@@ -13,6 +23,25 @@ NEO4J_URI='neo4j+ssc://633149e1.databases.neo4j.io'
 NEO4J_USERNAME='neo4j'
 NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+class Testing():
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'sqlite:///' + os.path.join(basedir, 'test.db')
+
+def create_app():
+    """Create and configure app"""
+    flask_app = Flask(__name__)
+    flask_app.config.from_object(Testing)
+    flask_app.config['IMAGE_UPLOADS'] = os.path.join(flask_app.root_path,'static', 'uploads')
+    csrf = CSRFProtect(flask_app)
+
+    db.init_app(flask_app)
+    login.init_app(flask_app)
+
+    flask_app.register_blueprint(main_bp)
+
+    return flask_app
 
 
 class FunctionalDatabase(unittest.TestCase):
@@ -177,7 +206,40 @@ Pierce_Hawthorne,Frank_Hawthorne,Evelyn_Hawthorne"""
       print("Successfully Parsed the file to create relationships")
 
 class SignupTests(unittest.TestCase):
-    pass
+    def setUp(self):
+        flask_app = create_app()
+        flask_app.app_context().push()
+        init_database() 
+    
+    def tearDown(self):
+        db.drop_all
+
+    def test_init_db(self):
+        first_user = db.session.query(User).first()
+        self.assertIsNotNone(first_user)
+        print(first_user.get_id())
+
+    #def test_blank_fields(self)
+    #    signup("email@email.com", "")
+    #    self.assert
+
+    #def test_invalid_email():
+        pass
+
+    #def test_passwords_dont_match():
+        pass
+
+    #def test_existing_username():
+        pass
+
+    #def test_existing_email():
+        pass
+
+    #def test_long_field():
+        pass
+
+    #def test_sqli():
+        pass
 
 
 if __name__ == '__main__':

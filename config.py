@@ -22,3 +22,5 @@ class Config:
     
     WTF_CSRF_ENABLED = False
 
+
+

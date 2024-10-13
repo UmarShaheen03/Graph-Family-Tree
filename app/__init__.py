@@ -25,8 +25,6 @@ def create_app():
     db.init_app(flask_app)
     login.init_app(flask_app)
 
-    migrate = Migrate(flask_app, db)
-
     flask_app.register_blueprint(main_bp)
 
     return flask_app
