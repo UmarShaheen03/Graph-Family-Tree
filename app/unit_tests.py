@@ -6,15 +6,15 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 from flask_wtf import CSRFProtect
 from .databases import db, login
-from .main.routes import main_bp
+from .main.routes import main_bp, signup_page
 
 
 from neo4j import GraphDatabase
-from .accounts import signup, init_database
+from .accounts import init_database, SignupError, LoginError
 from .models import *
+from .forms import *
 
-
-# HOW TO RUN python -m unittest unit_tests.py    
+# HOW TO RUN python -m unittest app/unit_tests.py (from avove app directory)  
 
 ## FYI my part tests the functional database not the web app itself. It tests for  correct connection to the neo4j driver 
 
@@ -26,6 +26,13 @@ NEO4J_PASSWORD='1b_L2Kp4ziyuxubevqHTgHDGxZ1VjYXROCFF2USqdNE'
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Testing():
+    STATIC_FOLDER = 'static'
+    TEMPLATES_FOLDER = 'templates'
+
+    WTF_CSRF_ENABLED = False
+    
+    SECRET_KEY = "test1234"
+
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'test.db')
 
@@ -206,22 +213,30 @@ Pierce_Hawthorne,Frank_Hawthorne,Evelyn_Hawthorne"""
       print("Successfully Parsed the file to create relationships")
 
 class SignupTests(unittest.TestCase):
+    #creates app using this files create_app method (which has test configs set)
+    app = create_app()
+    app.testing = True
+
     def setUp(self):
-        flask_app = create_app()
-        flask_app.app_context().push()
+        self.app.app_context().push()
         init_database() 
     
     def tearDown(self):
-        db.drop_all
-
+        db.drop_all()
+        #NEED TO KILL SERVER
+             
+    #test that there is atleast a user in the db
     def test_init_db(self):
         first_user = db.session.query(User).first()
         self.assertIsNotNone(first_user)
-        print(first_user.get_id())
 
-    #def test_blank_fields(self)
-    #    signup("email@email.com", "")
-    #    self.assert
+    #test signup without passing 
+    def test_invalid_form(self):
+        with self.app.test_client() as client:
+            sent = {'return_url': 'my_test_url'}
+            result = client.post("/signup-form", data=sent)
+            self.assertTrue(b"Invalid Form" in result.data)
+        
 
     #def test_invalid_email():
         pass

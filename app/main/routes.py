@@ -126,7 +126,7 @@ def signup_request():
         return render_template("unverified.html")
     
     else:
-        return render_template("signup.html", loginForm=form, error="Invalid Form")
+        return render_template("signup.html", signupForm=form, error="Invalid Form")
    
 #forgot password page
 @main_bp.route("/forgot")
