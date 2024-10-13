@@ -365,7 +365,11 @@
             .attr("fill", "currentColor")
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
-            .text(d => d.data.name);
+            // .text(d => d.data.name);
+            .text(d => {
+                const name = d.data.name;
+                return name.length > 24 ? name.slice(0, 21) + '...' : name;
+            });
         
         zoomOut()
     }
