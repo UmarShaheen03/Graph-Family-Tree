@@ -10,14 +10,31 @@
 {% endblock %}
 
 {% block bodyBlock %}
-<!-- <h1 id="Multi_Tree">{{ tree_name }} Family Graph</h1> -->
 <div class="container-fluid">
     <div class="row">
         <!-- Modify Graph -->
         <div class="col-lg-3">
             <div class="card shadow-lg rounded-lg border-0">
                 <div class="card-body p-2">
-                    <h5 id="Multi_Tree" class="text-center mb-2 mt-2">{{ tree_name }} Family Graph</h5>
+                    <h5 id="Multi_Tree" class="text-center mb-2 mt-2">{{ tree_name }} Family</h5>
+                    <label for="Search" class="mt-3 form-label fw-bold">Search for Person</label>
+                    <div class="row">
+                        {{ form_search.hidden_tag() }}
+                        <div class="mt-2">
+                            {{ form_search.fullname(id="fullname", class="form-select-searchable") }}
+                        </div>
+                        <div class="d-grid gap-2 mt-2">
+                            {{ form_search.submit_search(id="Search", class="btn btn-primary btn-lg rounded-pill") }}
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="mt-2 col-auto">
+                            <button id="resetGraph" class="btn btn-secondary rounded-pill">Reset Graph</button>
+                        </div>
+                        <div class="mt-2 col-auto">
+                            <button id="resetZoom" class="btn btn-secondary rounded-pill">Reset Zoom</button>
+                        </div>
+                    </div>    
                     <form action="" method="post" novalidate class="Form">
                         {{ form_modify.hidden_tag() }}
                         
@@ -64,28 +81,10 @@
                         <div class="d-grid gap-2">
                             {{ form_modify.submit_modify(class="btn btn-primary btn-lg rounded-pill") }}
                         </div>
-                    </form> 
-                    <label for="Search" class="mt-3 form-label fw-bold">Search for Person</label>
-                    <div class="row">
-                        {{ form_search.hidden_tag() }}
-                        <div class="mt-2">
-                            {{ form_search.fullname(id="fullname", class="form-select-searchable") }}
-                        </div>
-                        <div class="d-grid gap-2 mt-2">
-                            {{ form_search.submit_search(id="Search", class="btn btn-primary btn-lg rounded-pill") }}
-                        </div>
-                    </div>
-                    <div class="row justify-content-center">
-                        <div class="mt-2 col-auto">
-                            <button id="resetGraph" class="btn btn-secondary rounded-pill">Reset Graph</button>
-                        </div>
-                        <div class="mt-2 col-auto">
-                            <button id="resetZoom" class="btn btn-secondary rounded-pill">Reset Zoom</button>
-                        </div>
-                        <div class="mt-2 col-auto">
-                            <button id="Download" class="btn btn-secondary rounded-pill">Download</button>
-                        </div>
-                    </div>                       
+                    </form>   
+                    <div class="d-grid gap-2 mt-2">
+                        <button id="Download" class="btn btn-secondary rounded-pill">Download</button>
+                    </div>              
                 </div>
             </div>
         </div>
@@ -443,6 +442,10 @@
 
     document.getElementById('resetZoom').addEventListener('click', function() {
         zoomOut();  
+    });
+
+    document.getElementById('Download').addEventListener('click', function() {
+        alert('Downloading...'); 
     });
     
     // Event handler for form submission
