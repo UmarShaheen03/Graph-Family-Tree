@@ -365,7 +365,6 @@
             .attr("fill", "currentColor")
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
-            // .text(d => d.data.name);
             .text(d => {
                 // Check if the node is the root node,  or has any children -> display up to 30 char
                 if (d.depth === 0 || !d.children) {
