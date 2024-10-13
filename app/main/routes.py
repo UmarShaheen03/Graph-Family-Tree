@@ -1,5 +1,6 @@
 """Main route views"""
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+import os
+from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
 from app.forms import *
 from app.models import Comment, User
 from app.accounts import *
@@ -200,6 +201,17 @@ def reset_form():
 #tree page (tree_name is the tree displayed)
 @main_bp.route("/tree/<tree_name>", methods=['GET', 'POST'])
 def tree(tree_name):
+    check = check_login()
+    if check != None:
+        return check
+    
+    check = check_login_admin()
+    if check != None: #check for tree access, only if not an admin
+        users_with_access = get_all_ids_with_tree(tree_name)
+        print(users_with_access)
+        if (User.get_id(current_user) not in users_with_access):
+            return redirect(url_for("main_bp.my_dashboard", tree_info=f"Access forbidden to Tree {tree_name}. Request access here")) 
+    
     form = Search_Node()
     
     # Fetch nodes for the form
@@ -960,10 +972,13 @@ def log():
 
 #returns None if user, or returns login page if not user 
 def check_login():
-    if not current_user.is_authenticated:
+    if not current_user.is_authenticated: #if not logged in
         form = LoginForm()
         logoutForm  = LogoutForm()
         return render_template("login.html", loginForm=form, logoutForm=logoutForm, info="Please login or create an account to view this page")
+    
+    elif not User.is_verified(current_user): #if unverified
+        return render_template("unverified.html") 
     
     else:
         return None

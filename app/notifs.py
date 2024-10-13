@@ -213,6 +213,10 @@ def get_all_ids():
 def get_all_ids_with_tree(name):
     ids = []
     tree = db.session.query(Tree).filter(Tree.name == name).first()
+    
+    if tree == None:
+        return []
+    
     for user in tree.users.split(", "):
         ids.append(int(user))
     return ids
