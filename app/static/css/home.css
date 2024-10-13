@@ -43,34 +43,27 @@ body{
 }
 
 
-
-#started{
+/* Common button styling */
+.btn {
   background-color: transparent;
-  border: 1px, rgba(225, 225, 225, 0.7), solid;
+  border: 1px solid rgba(225, 225, 225, 0.7);
   border-radius: 1000px;
+  padding: 0.5rem 1.5rem;
   margin: 30px;
-  transition: all, ease, 0.3s;
+  transition: all ease 0.3s;
+  color: inherit;
+  text-decoration: none;
+  font-size: larger;
+  text-align: center;
 }
 
-#started:hover{
-  background-image: linear-gradient(to right, rgb(50, 100, 175) , rgb(196, 52, 172));
+/* Common hover effect for all buttons */
+.btn:hover {
+  background-image: linear-gradient(to right, rgb(50, 100, 175), rgb(196, 52, 172));
   transform: scale(1.2);
-  box-shadow: -40px 0 100px rgb(50, 100, 175) , 40px 0 100px rgb(196, 52, 172);
+  box-shadow: -40px 0 100px rgb(50, 100, 175), 40px 0 100px rgb(196, 52, 172);
   color: white;
 }
-
-#learnMore{
-  background-color: transparent;
-  border: 1px, rgba(225,225,225,0.7), solid;
-  border-radius: 1000px;
-  transition: all,ease, 0.3s;
-}
-
-#learnMore:hover{
-  transform: scale(1.2);
-  background-color: rgba(214, 214, 214, 0.253);
-}
-
 #name{
   background-image: linear-gradient(to right, rgb(67, 125, 212) , rgb(230, 61, 201));
   background-clip: text;
@@ -196,7 +189,7 @@ img{
 }
 }
 
-#usermanual{
+/* #usermanual{
 text-align: center;
 }
 
@@ -213,7 +206,7 @@ transition: all,ease, 0.3s;
 #usermanual>button:hover{
 background-color: rgb(100, 3, 100);
 transform: scale(1.2);
-}
+} */
 /* width */
 ::-webkit-scrollbar {
  width: 10px;

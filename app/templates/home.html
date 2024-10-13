@@ -15,8 +15,9 @@
     <p> Discover connections, trace your lineage, and watch your family story come to life in an intuitive,
       easy-to-navigate interface.</p>
     <div class='buttons'>
-    <a class="btn", id = 'started' href="{{ url_for('main_bp.login_page') }}"> Get Started</a>
+      <a class="btn", id = 'started' href="{{ url_for('main_bp.login_page') }}"> Get Started</a>
       <a class="btn", id = 'learnMore'> Learn More</a>
+      <a class="btn", id='usermanual' href="/pdf/usermanual.pdf" target="_blank">User Manual</a>
     </div>
   </div>
 </div>
@@ -75,9 +76,7 @@
     
   </div>
 </div>
-<div id ='usermanual'>
-  <button onclick="window.open('/pdf/usermanual.pdf', '_blank')">Open User Manual</button>
-</div>
+
 
 
 {%endblock %}
