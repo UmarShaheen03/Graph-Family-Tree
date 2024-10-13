@@ -25,6 +25,9 @@
                 <br>
                 <p>{{ forgotForm.submit(class="btn btn-primary rounded-pill") }}</p>
             </div>
+            {% if error is defined %}
+            <p style="color:red">{{ error }}</p>
+            {% endif %}
         </form>
     </div>
 </div>

@@ -80,7 +80,7 @@ class AddNodeForm(FlaskForm):
         choices=[]  # Populate this dynamically in your view
     )
 
-    submit = SubmitField('Submit')
+    submit_modify = SubmitField('Submit')
 
 class RelationshipForm(FlaskForm):
     node = SelectField('Node:', choices=[], validators=[DataRequired()])
@@ -139,15 +139,11 @@ class BiographyEditForm(FlaskForm):
     submit=SubmitField('Update')
 
 class Search_Node (FlaskForm):
-      fullname = SelectField(
+    fullname = SelectField(
         'Search',
         choices=[]  # Populate this dynamically in your view
     )
-      submit = SubmitField("Search")
-
-class ImageUploadForm(FlaskForm):
-    profile_image = FileField('Profile Image', validators=[DataRequired()])
-    submit = SubmitField('Upload Image')
+    submit_search = SubmitField("Search")
 
 class submit_File (FlaskForm):
     file=FileField("Upload Your CSV file")
@@ -155,21 +151,43 @@ class submit_File (FlaskForm):
     submit=SubmitField('Submit')
 
 
-
 class Request_Tree (FlaskForm):
-    Tree_Name = SelectField(
-        'Tree Name',
+    tree_name = SelectField(
+        'Select Tree Name',
         choices=[]  # Populate this dynamically in your view
     )
-    submit = SubmitField("Submit")
+    submit = SubmitField("Submit Request")
 
-
-class RequestTreeForm(FlaskForm):
-    tree_name = SelectField(
-        'Tree Name',
-        choices=[],  # This can be populated dynamically in your view
-        validators=[DataRequired()],
-        render_kw={"class": "form-control rounded-pill"}
+class EmailPreference(FlaskForm):
+    preference = SelectField(
+        "Choose how often would you like emails, and submit (emails are sent 5pm daily, or 5pm Friday if weekly).",
+        choices=["Daily","Weekly","None"],
+        validators=[DataRequired()]
     )
-   
-    submit = SubmitField('Submit Request', render_kw={"class": "btn btn-primary rounded-pill"})
+    submit=SubmitField("Submit Preferences")
+
+class IgnoreNotifs (FlaskForm):
+    login=BooleanField("Logins", default=False)
+    logout=BooleanField("Logouts", default=False)
+    reset=BooleanField("Password Resets", default=False)
+    signup=BooleanField("Sign Ups", default=False)
+
+    user_req=BooleanField("User Requests", default=False)
+    admin_req=BooleanField("Admin Requests", default=False)
+    tree_req=BooleanField("Tree Requests", default=False)
+    req_accepted=BooleanField("Request Accepted", default=False)
+
+    comment=BooleanField("New Comments", default=False)
+    bio_edit=BooleanField("Biography Edits", default=False)
+
+    new_tree=BooleanField("New Tree", default=False)
+    tree_create=BooleanField("New Person", default=False)
+    tree_move=BooleanField("Person Moved", default=False)
+    tree_update=BooleanField("Person Renamed", default=False)
+    tree_delete=BooleanField("Person Removed", default=False)
+
+    submit=SubmitField("Submit Preferences")
+    # "Login", "Logout", "Reset", "Signup" (account related) 
+    # "User Request", "Admin Request", "Tree Request", "Request Accept" (request related)
+    # "Comment", "Bio Edit" (bio related)
+    # "New Tree", "Tree Create", "Tree Move", "Tree Update" "Tree Delete" (tree related)

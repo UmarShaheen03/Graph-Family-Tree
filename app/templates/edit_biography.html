@@ -3,7 +3,7 @@
 {% block headBlock %}
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/edit_biography.css') }}">
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4eneOOeiHunYMHble0GvihiawcOy3xsc&libraries=places&callback=initAutocomplete" async defer></script>
-<title>Edit Bibliography</title>
+<title>Edit Biography</title>
 {% endblock %}
 
 {% block bodyBlock %}
@@ -42,6 +42,8 @@
                     {{ edit_form.email.label }}
                     {{ edit_form.email(class="form-control") }}
                 </div>
+                {% if is_admin %}
+                
 
                 <div class="form-group">
                     {{ edit_form.phonenumber.label }}
@@ -52,6 +54,7 @@
                     {{ edit_form.address.label }}
                     {{ edit_form.address(class="form-control") }}
                 </div>
+                {% endif %}
 
                 <div class="form-group">
                     {{ edit_form.submit(class="btn-submit btn btn-primary btn-lg rounded-pill") }}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block headBlock %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/login.css') }}"/>
+    <title>Verification</title>
+{% endblock %}
+
+{% block bodyBlock %}
+<div class="d-md-flex flex-md-row container">
+    <div class="box-grey flex-grow-1" style="padding-left:25%; padding-right:25%; padding-top:5%; padding-bottom:5%;">    
+        <h2 class="text-center">Your account is currently unverified!</h2>
+        <p>Please wait for an admin to accept your verification request.
+        <br>When your request is accepted, you will receive a notification.</p>
+    </div>
+</div>
+{% endblock %}

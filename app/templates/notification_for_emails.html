@@ -1,0 +1,13 @@
+<div class="notif_box" id="notif_{{ notif.id }}">
+    <div style="justify-content:space-between; display:flex;">
+        <div style="width: 320px">
+            <p class="notif_timestamp">{{ notif.time.strftime("%m/%d/%Y, %H:%M") }}</p>
+            <p class="notif_text">{{ notif.text }}</p>
+        </div>
+        <div style="width: 60px">
+            {% if notif.goto != None and notif.type != " Tree Request" and notif.type != " Admin Request" %}
+            <a class="go_to_button btn btn-secondary" href="{{ notif.goto }}">Go To</a>
+            {% endif %}
+        </div>
+    </div>
+</div>

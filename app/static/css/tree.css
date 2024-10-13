@@ -1,34 +1,50 @@
 #graph-container {
-    background-color: rgb(115, 113, 119);
-    width: 87vw;
-    height: 83vh;
-    /* border: 1px solid #ccc; */
+    /* background-color: rgb(115, 113, 119); */
+    width: 96vw;
+    height: 85vh;
     border: none;
     overflow: hidden;
     padding:0%;
     margin:0%;
     margin-top:1.5%
 }
-svg {
-    width: 100%;
-    height: 100%;
+
+.form-group > .select2-container {
+    width: 100% !important;
 }
-.node {
-    cursor: pointer;
-    stroke: #fff;
-    stroke-width: 2px;
+
+#resetGraph {
+    display: block;
+    margin: auto;
+    margin-bottom: 1rem;
 }
-.link {
-    stroke: #ccc;
-    stroke-width: 2px;
-    stroke-opacity: 0.8;
-    visibility: hidden; /* Hide edges by default */
+
+@media (min-width: 992px) {
+    #graph-container {
+        width: 73vw;
+    }
+
+    .card {
+        height: 100vh;
+    }
 }
+
+@media (max-width: 576px) {
+    .col-auto > .select2-container {
+        width: 150% !important;
+    }
+
+    #Search {
+        margin-left: 110%;
+    }
+}
+
 .highlighted {
     stroke: #ff5722; /* Highlight color */
     stroke-width: 3px;
     visibility: visible; /* Make edges visible when highlighted */
 }
+
 #tooltip {
     position: absolute;
     text-align: center;
@@ -39,6 +55,36 @@ svg {
     border-radius: 3px;
     pointer-events: none;
     opacity: 0;
+}
+
+#Search {
+    background-color: #593196; 
+    color: white; 
+    padding: 8px 16px; 
+    border: none; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-size: 14px; 
+    /* margin-left: 10px; */
+    white-space: nowrap; /* Prevent the button text from wrapping */
+}
+
+.custom-menu {
+    list-style: none;
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    width: 150px;
+}
+
+.custom-menu li {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.custom-menu li:hover {
+    background-color: #f1f1f1;
 }
 
 .card {
@@ -71,12 +117,9 @@ h2 {
 }
 
 #Multi_Tree{
-    
     text-align: center;
     font-family: 'Arial', sans-serif;
     font-size: 32px;
     color: #593196;
     margin-top: 40px; /* Adjust this value to move the title lower */
-  
-     
 }
