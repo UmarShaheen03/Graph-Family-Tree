@@ -634,18 +634,6 @@ def biography(name):
                            comments=comments, 
                            comment_form=comment_form)
 
-    # Pass the fetched biography details and comments to the template
-    return render_template('biography.html', 
-                           full_name=person['name'], 
-                           dob=person.get('dob', 'Unknown'), 
-                           bio=person.get('biography', 'No biography available'), 
-                           location=person.get('location', 'Unknown'),
-                           email=person.get('email', 'No email provided'),
-                           phone_number=person.get('phone_number', 'No phone number provided'),
-                           address=person.get('address', 'No address provided'),
-                           comments=comments, 
-                           comment_form=comment_form)
-
 #biography edit page (and form submission)
 @main_bp.route('/biography/edit/<person_name>', methods=['GET', 'POST'])
 def edit_biography(person_name):

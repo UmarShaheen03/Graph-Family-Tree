@@ -42,6 +42,8 @@
                     {{ edit_form.email.label }}
                     {{ edit_form.email(class="form-control") }}
                 </div>
+                {% if is_admin %}
+                
 
                 <div class="form-group">
                     {{ edit_form.phonenumber.label }}
@@ -52,6 +54,7 @@
                     {{ edit_form.address.label }}
                     {{ edit_form.address(class="form-control") }}
                 </div>
+                {% endif %}
 
                 <div class="form-group">
                     {{ edit_form.submit(class="btn-submit btn btn-primary btn-lg rounded-pill") }}
