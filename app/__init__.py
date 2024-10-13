@@ -13,6 +13,7 @@ from flask_wtf import CSRFProtect
 
 from .databases import db, login
 from .main import main_bp
+from jinja2 import Environment
 
 def create_app():
     """Create and configure app"""

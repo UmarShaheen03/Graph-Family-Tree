@@ -2,9 +2,9 @@ from app.models import *
 from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
-from flask import current_app, url_for
-from app.notifs import log_notif, get_all_admin_ids
-import sys #TODO using for debug printing, remove in final
+from flask import url_for
+from app.notifs import *
+
 from config import WEBSITE_URL, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 from jinja2 import Template
 from neo4j import GraphDatabase
@@ -17,14 +17,17 @@ from datetime import datetime
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+#basic error classes, used for some exceptions in routes.py
 class SignupError(Exception):
     pass
 
 class LoginError(Exception):
     pass
 
+#neo4j database driver, used to get tree names
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
+#ONLY RUN TO INITIALISE DATABASES, if you run it again it will reset to a default state
 def init_database():
     #create tables
     db.create_all()
@@ -34,40 +37,58 @@ def init_database():
     Tree.query.delete()
 
     #create mock accounts
-    nima = User(
+    perma_admin = User(
         user_id=0,
-        username="Nima Dehdashti",
-        email="nima519@gmail.com",
+        username="PermaAdmin",
+        email="test@test.com", #TODO give a real email?
+        verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("CHANGEME"))
+        password_hash=str(generate_password_hash("CantResetM3")),
+        notifs_ignored=""
+    )
+
+    nima = User(
+        user_id=1,
+        username="Nima Dehdashti",
+        email="nima519@gmail.com",
+        verified=True,
+        admin=True,
+        create_time=datetime.now(),
+        password_hash=str(generate_password_hash("CHANGEME")),
+        notifs_ignored=""
     )
 
     group31 = User(
-        user_id=1,
+        user_id=2,
         username="Group 31",
         email="cits3200group31@gmail.com",
+        verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("CHANGEME"))
+        password_hash=str(generate_password_hash("CHANGEME")),
+        notifs_ignored=""
     )
 
     test_user = User(
-        user_id=2,
+        user_id=3,
         username="user_test",
         email="user@test.com",
+        verified=True,
         admin=False,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("test1234"))
+        password_hash=str(generate_password_hash("test1234")),
+        notifs_ignored=" Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
     )
 
-    cooper = User( #TODO remove this, only using it to quickly test email 
-        user_id=3,
-        username="cooper",
-        email="cooptrooper04@gmail.com",
+    test_admin = User(
+        user_id=4,
+        username="admin_test",
+        email="admin@test.com",
+        verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("test")),
+        password_hash=str(generate_password_hash("test1234")),
         notifs_ignored=" Logout"
     )
 
@@ -78,6 +99,16 @@ def init_database():
         time=datetime.now()
     )
 
+    #add mock accounts to db
+    db.session.add(perma_admin)
+    db.session.add(nima)
+    db.session.add(group31)
+    db.session.add(test_user)
+    db.session.add(test_admin)
+    #add first notification to db
+    db.session.add(first_notif)
+    db.session.commit()
+
     #get all tree names from the neo4j server
     with driver.session() as session:
         # Retrieve distinct labels
@@ -85,25 +116,24 @@ def init_database():
         choices = [(label, label) for record in result for label in record["labels"]]
     
     for name in choices:
-        tree = Tree(
-            name=name[0],
-            create_time=datetime.now(),
-            users="0, 1, 3"
-        )
-        db.session.add(tree)
-
-
-    #add mock accounts to db
-    db.session.add(nima)
-    db.session.add(group31)
-    db.session.add(test_user)
-    db.session.add(cooper)
-    #add first notification to db
-    db.session.add(first_notif)
+        if (name[0] == "Dehdashti"):
+            tree = Tree(
+                name=name[0],
+                create_time=datetime.now(),
+                users=str(get_all_ids()).replace("[","").replace("]","")
+            )
+            db.session.add(tree)
+        elif (name[0] != "Person"):
+            tree = Tree(
+                name=name[0],
+                create_time=datetime.now(),
+                users=str(get_all_admin_ids()).replace("[","").replace("]","")
+            )
+            db.session.add(tree)
+    
     db.session.commit()
 
-
-
+#creates a new unverified account, and logs them in
 def signup(email, username, password, repeat, remember):
     if password != repeat:
         raise SignupError("Passwords do not match")
@@ -126,21 +156,25 @@ def signup(email, username, password, repeat, remember):
         user_id = new_id,
         username = username,
         email = email,
-        admin = False
+        verified = False,
+        admin = False,
+        create_time=datetime.now(),
+        notifs_ignored = " Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
     )
 
     user.set_password(password)
     
     db.session.add(user)
+
+    #add new user to the dehdashti tree
+    dehdashti = db.session.query(Tree).filter(Tree.name == "Dehdashti").first()
+    dehdashti.users += ", " + str(user.user_id)
     db.session.commit()
 
-
-    #was getting error as type wasnt provided, currently filled with null will check with cooper
-    log_notif(f"New account created for user {User.get_username(user)}",get_all_admin_ids(), "NULL") #notify all admins of new account
+    log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids(), " Login") #notify all admins of new account
     login(username, password, remember)
     
-
-
+#logs into an account
 def login(email_or_username, password, remember):
     user = db.session.query(User).filter((User.username == email_or_username) | (User.email == email_or_username)).first()
 
@@ -152,7 +186,7 @@ def login(email_or_username, password, remember):
     
     login_user(user, remember=remember)
 
-
+#generates and sends a reset email to a user
 def reset_email(receiver_email):
     #smtp ssl info
     port = 465 #ssl port
@@ -188,7 +222,6 @@ def reset_email(receiver_email):
     message["To"] = receiver_email
 
     #html version of email
-    #TODO: href works with real urls, doesn't with 127.0.0.1, change when deploying
     file = open("app/templates/email_reset.html", "r").read()
     html = Template(file).render(link=link)
     
@@ -214,8 +247,7 @@ def reset_email(receiver_email):
     
     return
 
-
-
+#checks that reset tokens are valid
 def verify_reset(user_id, token):
     if user_id == None or token == None: #if missing params
         return False
@@ -234,8 +266,7 @@ def verify_reset(user_id, token):
     
     return True
 
-
-
+#resets a users password
 def reset(user_id, password, repeat):
     if password != repeat:
         raise SignupError("Passwords do not match")

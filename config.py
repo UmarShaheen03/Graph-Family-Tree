@@ -21,3 +21,4 @@ class Config:
         'sqlite:///' + os.path.join(basedir, 'app.db')
     
     WTF_CSRF_ENABLED = False
+

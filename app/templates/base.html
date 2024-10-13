@@ -39,14 +39,15 @@
                     <li>
                         <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.login_page') }}">Login</a>
                     </li>
-                    <!-- TODO make these two buttons only show up for admins -->
+                    {% if is_admin %}
                     <li>
                         <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.create_tree') }}">Create Tree</a>
                     </li>
                     <li>
                         <a id="home-nav-link" class="nav-link" href="{{ url_for('main_bp.log') }}">Log</a>
                     </li>
-                    <!---->
+                    {% endif %}
+                    {% if is_verified %}
                     <li>
                         <a id="dashboard-nav-link" class="nav-link" href="{{ url_for('main_bp.my_dashboard') }}">My Dashboard</a>
                     </li>
@@ -63,6 +64,7 @@
                             {% endif %}
                         </a>
                     </div>
+                    {% endif %}
                 </ul>
             </div>
         </nav>

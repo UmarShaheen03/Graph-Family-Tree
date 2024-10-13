@@ -34,32 +34,33 @@
 
     
     <div class="col-md-8">
-      {% if not admin %}
+      {% if not is_admin %}
       <div class="box mb-4">
         <h3>Request Access to a Family Tree</h3>
         <form id="requestTreeAccessForm" action="/request_tree" method="post">
           <div class="form-group">
             <label for="tree_name">{{ treeForm.tree_name.label }}</label>
             <select id="tree_name" name="tree_name">
-            {% for tree in all_trees %}
+            {% for tree in no_access_trees %}
             <option value="{{tree.name}}">{{tree.name}}</option>
             {% endfor %}
             </select>
           </div>
           {{ treeForm.submit(class="btn btn-primary") }}
         </form>
+        {% if tree_info != None %}
+        <p style="color:blue">{{ tree_info }}</p>
+        {% endif %}
       </div>
 
       <div class="box mb-4">
         <h3>Request Admin Access</h3>
-        <form id="requestAdminAccessForm">
-          <div class="form-group">
-            <label for="reason">Reason for Admin Access:</label>
-            <textarea id="reason" name="reason" class="form-control" placeholder="Provide a reason for admin access" required></textarea>
-          </div>
-
+        <form action="/request_admin" method="post">
           <input type="submit" class="btn btn-primary" value="Request Admin Access"></input>
         </form>
+        {% if admin_info != None %}
+        <p style="color:blue">{{ admin_info }}</p>
+        {% endif %}
       </div>
       {% endif %}
 
@@ -74,6 +75,9 @@
             {{ preferenceForm.submit(class="btn btn-primary") }}
           </div>
         </form>
+        {% if email_info != None %}
+        <p style="color:blue">{{ email_info }}</p>
+        {% endif %}
       </div>
 
       <div class="box mb-4">
@@ -83,40 +87,44 @@
 
             <div style="display:inline-block;vertical-align:top;width:24%">
               <h4>Accounts</h4>
-              {% if admin %}
+              {% if is_admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.login.label(style="width:150%") }}
+                {{ ignoreForm.login.label(style="width:180%") }}
                 {{ ignoreForm.login(style="height:20px;margin:0") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.logout.label(style="width:150%") }}
+                {{ ignoreForm.logout.label(style="width:180%") }}
                 {{ ignoreForm.logout(style="height:20px;margin:0;") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.signup.label(style="width:150%") }}
+                {{ ignoreForm.signup.label(style="width:180%") }}
                 {{ ignoreForm.signup(style="height:20px;margin:0;") }}
               </div>
               {% endif %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.reset.label(style="width:150%") }}
+                {{ ignoreForm.reset.label(style="width:180%") }}
                 {{ ignoreForm.reset(style="height:20px;margin:0;") }}
               </div>
             </div>
 
             <div style="display:inline-block;vertical-align:top;width:24%;">
               <h4>Requests</h4>
-              {% if admin %}
+              {% if is_admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.admin_req.label(style="width:150%") }}
+                {{ ignoreForm.user_req.label(style="width:180%") }}
+                {{ ignoreForm.user_req(style="height:20px;margin:0") }}
+              </div>
+              <div class="form-group" style="display: flex; justify-content: space-between; ">
+                {{ ignoreForm.admin_req.label(style="width:180%") }}
                 {{ ignoreForm.admin_req(style="height:20px;margin:0") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_req.label(style="width:150%") }}
+                {{ ignoreForm.tree_req.label(style="width:180%") }}
                 {{ ignoreForm.tree_req(style="height:20px;margin:0;") }}
               </div>
               {% endif %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.req_accepted.label(style="width:150%") }}
+                {{ ignoreForm.req_accepted.label(style="width:180%") }}
                 {{ ignoreForm.req_accepted(style="height:20px;margin:0;") }}
               </div>
             </div>
@@ -124,42 +132,45 @@
             <div style="display:inline-block;vertical-align:top;width:24%;">
               <h4>Biographies</h4>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.comment.label(style="width:150%") }}
+                {{ ignoreForm.comment.label(style="width:180%") }}
                 {{ ignoreForm.comment(style="height:20px;margin:0") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.bio_edit.label(style="width:150%") }}
+                {{ ignoreForm.bio_edit.label(style="width:180%") }}
                 {{ ignoreForm.bio_edit(style="height:20px;margin:0;") }}
               </div>
             </div>
 
             <div style="display:inline-block;vertical-align:top;width:24%">
               <h4>Trees</h4>
-              {% if admin %}
+              {% if is_admin %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.new_tree.label(style="width:150%") }}
+                {{ ignoreForm.new_tree.label(style="width:180%") }}
                 {{ ignoreForm.new_tree(style="height:20px;margin:0") }}
               </div>
               {% endif %}
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_create.label(style="width:150%") }}
+                {{ ignoreForm.tree_create.label(style="width:180%") }}
                 {{ ignoreForm.tree_create(style="height:20px;margin:0") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_move.label(style="width:150%") }}
+                {{ ignoreForm.tree_move.label(style="width:180%") }}
                 {{ ignoreForm.tree_move(style="height:20px;margin:0;") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_update.label(style="width:150%") }}
+                {{ ignoreForm.tree_update.label(style="width:180%") }}
                 {{ ignoreForm.tree_update(style="height:20px;margin:0;") }}
               </div>
               <div class="form-group" style="display: flex; justify-content: space-between; ">
-                {{ ignoreForm.tree_delete.label(style="width:150%") }}
+                {{ ignoreForm.tree_delete.label(style="width:180%") }}
                 {{ ignoreForm.tree_delete(style="height:20px;margin:0;") }}
               </div>
             </div>
             <p></p>
             {{ ignoreForm.submit(class="btn btn-primary") }}
+            {% if ignore_info != None %}
+            <p style="color:blue">{{ ignore_info }}</p>
+            {% endif %}
           </div>
         </form>
       </div>
@@ -167,12 +178,8 @@
   </div>
 </div>
 
-
-<!--script src="{{ url_for('static', filename='js/dashboard.js') }}"></script -->
-
 <script>
   //scripts to set the defaults on all the forms
-  //uses jinja so i couldn't put it in the other file
 
   often = "{{ often }}"
   document.getElementById("preference").value = often;
@@ -191,13 +198,16 @@
       document.getElementById("signup").checked = true;
   }
 
-  if (preferences.includes(" Admin Req")) {
+  if (preferences.includes(" User Request")) {
+      document.getElementById("user_req").checked = true;
+  }
+  if (preferences.includes(" Admin Request")) {
       document.getElementById("admin_req").checked = true;
   }
-  if (preferences.includes(" Tree Req")) {
+  if (preferences.includes(" Tree Request")) {
       document.getElementById("tree_req").checked = true;
   }
-  if (preferences.includes(" Request")) {
+  if (preferences.includes(" Request Accept")) {
       document.getElementById("req_accepted").checked = true;
   }
 
