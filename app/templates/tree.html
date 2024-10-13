@@ -155,7 +155,7 @@
     const radius = Math.min(width, height) / 2 - 30;
 
     // Setup zoom
-    const zoom = d3.zoom()
+    let zoom = d3.zoom()
         .scaleExtent([0.01, 4])
         .on("zoom", (event) => {
             svg.attr("transform", event.transform);
@@ -165,11 +165,11 @@
         .attr("width", width)
         .attr("height", height)
         .attr("viewBox", [-cx, -cy, width, height])
-        .attr("style", "width: 100%; height: auto; font: 10px sans-serif;")
+        .attr("style", "width: 100%; height: auto; font: 12px sans-serif;")
         .call(zoom)
         .append("g")
-        .attr("transform", "translate(0, 0) scale(0.3)");  // Centering the radial layout
-    
+        // .attr("transform", "translate(0, 0) scale(0.3)");  // Centering the radial layout
+
     const tree = d3.tree()
         .size([2 * Math.PI, radius])
         .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
@@ -276,8 +276,6 @@
     }
 
     function initialiseGraph(rootNode) {
-        // var currentRoot = rootNode;
-        console.log("currentRoot: " + currentRoot);
         // Build the tree layout using the stratified hierarchy
         const root = tree(d3.hierarchy(rootNode)
             .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
@@ -359,21 +357,19 @@
     }
 
     function zoomOut(){
-        const scale = 0.1;
-        const x = 0;
-        const y = 0
+        let scale = 0.3;
+        let x = 0;
+        let y = 0;
 
-        // svg.transition()
-        //     .duration(750)
-        //     .call(zoom.transform, d3.zoomIdentity.translate(0,0).scale(scale));
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity.translate(0,0).scale(scale));
         
-        svg.attr("transform", "translate(0, 0) scale(0.3)");
+        // svg.attr("transform", "translate(0, 0) scale(0.3)");
     }
 
     // Function to zoom into a specific node
     function zoomToNode(node) {
-        console.log('zoomToNode');
-        console.log(node);
         const scale = 2; // Adjust zoom scale as needed
 
         // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
@@ -382,24 +378,22 @@
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
 
-        console.log(x,y);
-
-        let newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 150, height / 2 - y * scale - 250).scale(scale);
+        let newTransform = d3.zoomIdentity.translate(cx - x * scale - 150, cy - y * scale - 250).scale(scale);
 
         if (windowWidth576px.matches){
-            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 200, height / 2 - y * scale - 250).scale(scale);
+            newTransform = d3.zoomIdentity.translate(cx - x * scale - 200, cy - y * scale - 250).scale(scale);
         }
 
         if (windowWidth768px.matches){
-            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 300, height / 2 - y * scale - 250).scale(scale);
+            newTransform = d3.zoomIdentity.translate(cx- x * scale - 300, cy - y * scale - 250).scale(scale);
         }
 
         if (windowWidth992px.matches){
-            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 375, height / 2 - y * scale - 300).scale(scale);
+            newTransform = d3.zoomIdentity.translate(cx - x * scale - 375, cy - y * scale - 300).scale(scale);
         }
         
         if (windowWidth1200px.matches){
-            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 500, height / 2 - y * scale - 350).scale(scale);
+            newTransform = d3.zoomIdentity.translate(cx - x * scale - 500, cy - y * scale - 350).scale(scale);
         }
         // const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale);
 
@@ -438,6 +432,8 @@
         initialiseGraph(rootNode);
     }
 
+    initialiseGraph(standInRoot);
+
     document.addEventListener('click', function () {
         document.getElementById('context-menu').style.display = 'none';
     });
@@ -454,11 +450,8 @@
     document.getElementById('Search').addEventListener('click', function(event) {
         event.preventDefault(); // Prevent default form submission
 
-        console.log("descendants" + currentRoot);
         const nodeName = document.getElementById('fullname').value;
         const nodeData = currentRoot.descendants().find(d => d.data.name === nodeName);  // Find the node in the hierarchical structure
-        console.log("searching for...");
-        console.log(nodeName, nodeData);
 
         if (nodeData) {
             zoomToNode(nodeData);  // Zoom to the found node
@@ -466,9 +459,6 @@
             alert("Node not found: " + nodeName );
         }
     });
-
-    initialiseGraph(standInRoot);
-
 </script>
 
 <!-- Modify graph script -->
