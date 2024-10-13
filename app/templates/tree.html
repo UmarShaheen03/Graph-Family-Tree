@@ -124,7 +124,6 @@
 
     var addedNodes = new Set();     //Track added nodes to prevent duplicates
 
-
     //Build the hierarchy by linking child nodes to their parents
     links.forEach(link => {
         const parentNode = nodeMap[link.source];
@@ -158,9 +157,6 @@
     let zoom = d3.zoom()
         .scaleExtent([0.01, 4])
         .on('zoom', handleZoom);
-        // .on("zoom", (event) => {
-        //     svg.attr("transform", event.transform);
-        // });
 
     function initZoom() {
         d3.select('svg')
@@ -365,23 +361,12 @@
             .text(d => d.data.name);
         
         zoomOut()
-        // svg.attr("transform", "translate(0, 0) scale(0.3)");
     }
 
     function zoomOut(){
         d3.select('svg')
             .transition()
-            // .call(zoom.scaleTo, 0.3)
             .call(zoom.transform, d3.zoomIdentity.translate(0, 0).scale(0.3));
-        // let scale = 0.3;
-        // let x = 0;
-        // let y = 0;
-
-        // svg.transition()
-        //     .duration(750)
-        //     .call(zoom.transform, d3.zoomIdentity.translate(0,0).scale(scale));
-        
-        // svg.attr("transform", "translate(0, 0) scale(0.3)");
     }
 
     // Function to zoom into a specific node
@@ -394,6 +379,7 @@
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
 
+        // Based on screen size, set translation identity for zoom
         let newTransform = d3.zoomIdentity.translate(cx - x * scale - 150, cy - y * scale - 250).scale(scale);
 
         if (windowWidth576px.matches){
@@ -411,17 +397,11 @@
         if (windowWidth1200px.matches){
             newTransform = d3.zoomIdentity.translate(cx - x * scale - 500, cy - y * scale - 350).scale(scale);
         }
-        // const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale);
-
         // Apply the transition
         d3.select('svg')
             .transition()
             .duration(750)
             .call(zoom.transform, newTransform);
-
-        // svg.transition()
-        //     .duration(750)
-        //     .call(zoom.transform, newTransform);  // Programmatically zoom to the node
     }
 
     let windowWidth576px = window.matchMedia("(min-width:576px)")
@@ -439,7 +419,7 @@
                 ...selectedNode,
                 children: descendants
             };
-            updateGraph(newRoot);  // Function to update the graph with new data
+            updateGraph(newRoot);  // Update the graph with new data
 
             // Close context menu
             document.getElementById('context-menu').style.display = 'none';
@@ -473,7 +453,7 @@
         const nodeData = currentRoot.descendants().find(d => d.data.name === nodeName);  // Find the node in the hierarchical structure
 
         if (nodeData) {
-            zoomToNode(nodeData);  // Zoom to the found node
+            zoomToNode(nodeData);
         } else {
             alert("Node not found: " + nodeName );
         }
