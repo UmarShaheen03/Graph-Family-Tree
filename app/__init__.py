@@ -19,6 +19,7 @@ def create_app():
     """Create and configure app"""
     flask_app = Flask(__name__)
     flask_app.config.from_object(Config)
+    flask_app.config['IMAGE_UPLOADS'] = os.path.join(flask_app.root_path,'static', 'uploads')
     csrf = CSRFProtect(flask_app)
 
     db.init_app(flask_app)

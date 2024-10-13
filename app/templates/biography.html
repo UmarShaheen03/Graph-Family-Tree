@@ -16,18 +16,27 @@
             <div class="col-md-4 text-center d-flex flex-column align-items-center">
                 <div class="profile-image-frame">
                     {% if profile_image %}
-                    <img id="profilePreview" src="{{ url_for('static', filename='profile_image') }}" class="biography-image">
+                    <img id="profilePreview" src="{{ url_for('static', filename='uploads/' + profile_image) }}" class="biography-image">
                     {% else %}
-                    <img id="profilePreview" src="{{ url_for('static', filename='default-profile.png') }}" class="biography-image">
+                    <img id="profilePreview" src="{{ url_for('static', filename='uploads/default-profile.png') }}" class="biography-image">
                     {% endif %}
                 </div>
-               
-                <form method="post" action="{{ url_for('main_bp.biography', name=full_name) }}" enctype="multipart/form-data">
-                    <input type="file" id="profile_image" name="profile_image" accept="image/*" class="d-none" onchange="previewImage(event)">
-                    <label for="profile_image" type="submit" class="btn btn-primary btn-lg btn-custom rounded-pill">Choose image</label>
-                </form>
-
+                
+                {% if is_admin %}
+                <div class="image-options">
+                    <form method="post" action="{{ url_for('main_bp.biography', name=full_name) }}" enctype="multipart/form-data" class="d-flex flex-column align-items-center">
+                        <input type="file" id="profile_image" name="profile_image" accept="image/*" class="d-none" onchange="previewImage(event)">
+                        <label for="profile_image" class="upload-link">Upload Image</label>
+                        <button type="submit" class="btn btn-primary btn-custom mt-2">Save Image</button>
+                    </form>
+                    
+                    <form method="post" action="{{ url_for('main_bp.delete_image', name=full_name) }}">
+                        <button type="submit" class="btn btn-danger btn-custom mt-2">Delete Image</button>
+                    </form>
+                </div>
+                {% endif %}
             </div>
+            
             <div class="col-md-8">
                 <div class="biography-details">
                     <p><strong>Full Name:</strong> {{full_name if full_name else "None"}}</p>
@@ -35,42 +44,38 @@
                     <p><strong>Biography:</strong> {{bio if bio else "None"}}</p>
                     <p><strong>Location:</strong> {{location if location else "None"}}</p>
                     <div id="map" style="height: 400px; width: 100%; margin-top: 10px;"></div>
-                    
-
                     <p><strong>Email:</strong> {{email if email else "None"}}</p>
                     <p><strong>Phone Number:</strong> {{phone_number if phone_number else "None"}}</p>
                     <p><strong>Address:</strong> {{address if address else "None"}}</p>
-
+                    
                     {% if is_admin %}
                     <form action="/biography/edit/{{ full_name }}" method="get">
                         <input type="submit" value="Edit Bio" class="btn btn-primary btn-lg btn-custom rounded-pill"></input>
                     </form>
                     {% endif %}
-                </div>    
-
+                </div>
             </div>
         </div>
-        
     </div>
 </div>
 
 <div class="comments-section">
     <h2>Comments</h2>
     {% if comments %}
-        <ul class="list-unstyled">
-            {% for comment in comments %}
-            <li class="media">
-                <div class="media-body">
-                    <h5 class="mt-0 mb-1">{{ comment.user.username }}</h5>
-                    {{ comment.text }}
-                    <div class="text-muted">{{ comment.timestamp.strftime("%m/%d/%Y, %H:%M") }}</div>
-                </div>
-            </li>
-            <br>
-            {% endfor %}
-        </ul>
+    <ul class="list-unstyled">
+        {% for comment in comments %}
+        <li class="media">
+            <div class="media-body">
+                <h5 class="mt-0 mb-1">{{ comment.user.username }}</h5>
+                {{ comment.text }}
+                <div class="text-muted">{{ comment.timestamp.strftime("%m/%d/%Y, %H:%M") }}</div>
+            </div>
+        </li>
+        <br>
+        {% endfor %}
+    </ul>
     {% else %}
-        <p>No comments yet. Be the first to leave a comment</p>
+    <p>No comments yet. Be the first to leave a comment</p>
     {% endif %}
 
     <div class="comment-form">
@@ -84,6 +89,7 @@
         </form>
     </div>
 </div>
+
 <script>
     function previewImage(event) {
         const reader = new FileReader();
@@ -95,44 +101,30 @@
     }
     
     function initMap() {
-        
         var geocoder = new google.maps.Geocoder();
-        var location = "{{ location }}";  
-
-        var defaultLocation = {lat: -31.97868759085506, lng: 115.81803988679991}; 
-
-        var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 15,
-            center: defaultLocation  
-        });
-
-        var marker = new google.maps.Marker({
-            map: map,
-            position: defaultLocation,  
-            visible: true
-        });
-        
+        var location = "{{ location }}";
+        var defaultLocation = {lat: -31.97868759085506, lng: 115.81803988679991};
+        var map = new google.maps.Map(document.getElementById('map'), {zoom: 15, center: defaultLocation});
+        var marker = new google.maps.Marker({map: map, position: defaultLocation, visible: true});
         geocodeAddress(geocoder, map, marker, location);
     }
 
     function geocodeAddress(geocoder, map, marker, location) {
-        if (location !== "None") { 
-            geocoder.geocode({'address': location}, function(results, status) {  
+        if (location !== "None") {
+            geocoder.geocode({'address': location}, function(results, status) {
                 if (status === 'OK') {
-                    map.setCenter(results[0].geometry.location);  
-                    marker.setPosition(results[0].geometry.location);  
+                    map.setCenter(results[0].geometry.location);
+                    marker.setPosition(results[0].geometry.location);
                     marker.setVisible(true);
                 } else {
                     alert('Geocode was not successful for the following reason: ' + status);
                 }
             });
         } else {
-          
             marker.setPosition(defaultLocation);
             marker.setVisible(true);
         }
     }
 </script>
+
 {% endblock %}
-
-

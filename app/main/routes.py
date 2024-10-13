@@ -10,6 +10,7 @@ from datetime import datetime
 from flask_login import login_required, current_user, logout_user
 from itsdangerous import URLSafeTimedSerializer
 from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
+from werkzeug.utils import secure_filename
 from threading import Thread
 
 main_bp = Blueprint('main_bp', __name__)
@@ -253,7 +254,7 @@ def tree(tree_name):
                     MATCH (n:{tree_name} {{FullName: $old_name}})
                     SET n.FullName = $new_name
                 """, old_name=form_modify.old_name.data, new_name=form_modify.new_name.data)
-
+                
             log_notif(f"User {User.get_username(current_user)} renamed Person {form_modify.old_name.data} from Tree {tree_name} to {form_modify.new_name.data}", 
             get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Tree Update", "tree/" + tree_name)
 
@@ -305,7 +306,6 @@ def tree(tree_name):
                 
                 log_notif(f"User {User.get_username(current_user)} moved Person {form_modify.person_to_shift.data} from Tree {tree_name} to under {form_modify.new_parent.data}", 
                           get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Tree Move", "tree/" + tree_name)
-
                 return redirect(url_for("main_bp.tree", tree_name=tree_name))
 
     # Fetch nodes and relationships for rendering the tree
@@ -552,6 +552,7 @@ def biography(name):
     if not person:
         return "Biography not found.", 404
     if person:
+        print(f"Profile Image URL: {person.get('image_url')}")
         with driver.session() as session:
             # Query to get the labels of the node
             query = """
@@ -563,7 +564,31 @@ def biography(name):
             if record and record['labels']:
                 # Use the first label, assuming the node has only one main label
                 tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
+         
+     # Handle image upload
+    if request.method == 'POST':
+        if 'profile_image' in request.files:
+            file = request.files['profile_image']
+            if file and allowed_file(file.filename):
+                # Save the file
+                filename = secure_filename(file.filename)
+                upload_dir = current_app.config['IMAGE_UPLOADS']
+                
+                filepath = os.path.join(upload_dir, filename)
+                filepath = filepath.replace("\\", "/")
+                print(filepath + "-------------------------------------")
+                file.save(filepath)
 
+                # Update Neo4j with image URL
+                with driver.session() as session:
+                    query = """
+                    MATCH (p {FullName: $full_name})
+                    SET p.image_url = $image_url
+                    """
+                    session.run(query, full_name=name, image_url=filename)
+
+                flash('Image uploaded successfully.')
+                return redirect(url_for('main_bp.biography', name=name))
     # Fetch comments related to this person
     comments = Comment.query.filter(Comment.bio_name == name).all()
     comment_form = CommentForm()
@@ -583,6 +608,19 @@ def biography(name):
                   get_all_ids_with_tree(tree_name), " Comment", "biography/" + name) #notify all admins/users with access about comment
         
         return redirect(url_for('main_bp.biography', name=name))  # Pass 'name' to redirect properly
+
+    # Pass the fetched biography details and comments to the template
+    return render_template('biography.html', 
+                           full_name=person['name'], 
+                           dob=person.get('dob', 'Unknown'), 
+                           bio=person.get('biography', 'No biography available'), 
+                           location=person.get('location', 'Unknown'),
+                           email=person.get('email', 'No email provided'),
+                           phone_number=person.get('phone_number', 'No phone number provided'),
+                           address=person.get('address', 'No address provided'),
+                           profile_image=person.get('image_url'),
+                           comments=comments, 
+                           comment_form=comment_form)
 
     # Pass the fetched biography details and comments to the template
     return render_template('biography.html', 
@@ -663,6 +701,35 @@ def edit_biography(person_name):
         return redirect(url_for('main_bp.biography', name=person_name))
 
     return render_template('edit_biography.html', biography=biography, edit_form=edit_form,tree_name=tree_name)
+  
+@main_bp.route('/biography/delete_image/<name>', methods=['POST'])
+def delete_image(name):
+    # Fetch the person to get their current image URL
+    person = get_person_bio(name)
+
+    if person and person.get('image_url'):
+        image_url = person['image_url']
+
+        # Remove the image file from the local directory
+        upload_dir = current_app.config['IMAGE_UPLOADS']
+        full_path = os.path.join(upload_dir, os.path.basename(image_url))  # Ensure correct local path
+
+        try:
+            os.remove(full_path)
+        except OSError as e:
+            print(f"Error deleting image file: {e}")
+
+        # Update Neo4j to set the image URL to null
+        with driver.session() as session:
+            query = """
+            MATCH (p {FullName: $full_name})
+            SET p.image_url = null
+            """
+            session.run(query, full_name=name)
+
+        flash('Profile image deleted successfully.')
+
+    return redirect(url_for('main_bp.biography', name=name))
     
 """NOTIFICATION AND DASHBOARD ROUTES"""
 
@@ -873,7 +940,7 @@ def seen_notif(notif_id):
     db.session.query(Notification).filter(Notification.id == notif_id).delete()
     db.session.commit()
     return redirect(url_for("main_bp.home_page"))
-
+    
 @main_bp.route("/log")
 def log():
     check = check_login_admin()
@@ -924,7 +991,8 @@ def get_person_bio(full_name):
            p.Location AS location, 
            p.Email AS email, 
            p.PhoneNumber AS phone_number, 
-           p.Address AS address
+           p.Address AS address,
+           p.image_url AS image_url
     """
     with driver.session() as session:
         result = session.run(query, full_name=full_name)
@@ -980,3 +1048,8 @@ def calculate_age(date_of_birth_str):
     if age is not None:
             print(f"Calculated Age: {age}",date_of_birth_str)
     return age
+    
+#function for checking if image has right extension
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
