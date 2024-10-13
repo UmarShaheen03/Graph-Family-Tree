@@ -448,10 +448,6 @@
         zoomOut();  
     });
 
-    document.getElementById('Download').addEventListener('click', function() {
-        alert('Downloading...'); 
-    });
-    
     // Event handler for form submission
     document.getElementById('Search').addEventListener('click', function(event) {
         event.preventDefault(); // Prevent default form submission
@@ -465,6 +461,27 @@
             alert("Node not found: " + nodeName );
         }
     });
+
+    document.getElementById('Download').addEventListener('click', function() {
+        const currentTransform = d3.zoomTransform(svg.node());
+
+        svg.transition()
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity
+            .translate(-86.48138319941552,-21.892951824506817)
+            .scale(0.38565487746149063)
+            )
+            .on('end', function() {
+                triggerDownload(); 
+            });
+    });
+
+    function triggerDownload() {
+        const graph = document.getElementById('graph');
+        const data = new XMLSerializer().serializeToString(graph);
+        const image = new Blob([data], { type: 'image/svg+xml;charset=utf-8' });
+        saveAs(image, 'FamilyTree.svg'); 
+    }
 
     initialiseGraph(standInRoot);
 </script>
