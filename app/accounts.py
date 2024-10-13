@@ -40,7 +40,7 @@ def init_database():
     perma_admin = User(
         user_id=0,
         username="PermaAdmin",
-        email="test@test.com", #TODO give a real email?
+        email="perma_admin@test.com", #TODO give a real email?
         verified=True,
         admin=True,
         create_time=datetime.now(),
@@ -73,7 +73,7 @@ def init_database():
     test_user = User(
         user_id=3,
         username="user_test",
-        email="user@test.com",
+        email="cooptrooper04@gmail.com",
         verified=True,
         admin=False,
         create_time=datetime.now(),
@@ -159,7 +159,8 @@ def signup(email, username, password, repeat, remember):
         verified = False,
         admin = False,
         create_time=datetime.now(),
-        notifs_ignored = " Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
+        notifs_ignored = " Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments",
+        email_preference = "None"
     )
 
     user.set_password(password)
