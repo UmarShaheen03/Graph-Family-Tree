@@ -2,18 +2,18 @@ from app.models import User, Notification, Tree
 from app.databases import db
 from datetime import datetime
 from config import WEBSITE_URL
-from threading import Thread
 from time import sleep
 import smtplib
 import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from sqlalchemy import desc
-from jinja2 import Template, Environment, BaseLoader, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader
 from flask import url_for
-import sys
 
-def get_users_notifs(user): #check through notif db for all notifs with user id
+#returns all the notifs related to this user id
+#filters out ignored notifs, marks them as seen automatically
+def get_users_notifs(user):
     if user == -1: #master log
         id = -1
         ignored = ""
@@ -35,7 +35,10 @@ def get_users_notifs(user): #check through notif db for all notifs with user id
     db.session.commit()
     return notifications
 
-def log_notif(text, users, type, goto = None): #users is a list of ids to send the notif to
+#sends a notification to all users in users
+#sends a backup copy to user -1 (the master log)
+#goto link can be None
+def log_notif(text, users, type, goto = None): 
     new_id = db.session.query(Notification).order_by(Notification.id.desc()).first().id
     users.append(-1) #master log, send backup of all notifs to it
 
@@ -56,7 +59,9 @@ def log_notif(text, users, type, goto = None): #users is a list of ids to send t
         db.session.add(notif)
     db.session.commit()
 
-def check_for_emails(): #threaded task, runs every second
+#ran in a seperate thread, once every second
+#checks for 5pm and friday, and sends daily/weekly emails
+def check_for_emails():
     while True:
         sleep(1)
         #print("Email Time: " + str(datetime.now().time())[:8])
@@ -67,6 +72,7 @@ def check_for_emails(): #threaded task, runs every second
                 print("sending weekly emails too!")
                 send_emails(get_all_ids_with_weekly())
 
+#sends the notification email to all users in the id list
 def send_emails(ids):
     for id in ids:
         user = db.session.query(User).filter(User.user_id == id).first()
@@ -142,7 +148,9 @@ def send_emails(ids):
             server.sendmail(sender_email, receiver_email, message.as_string())
         
         return
-    
+
+#takes the ignore notifs forms output and formats it into a string
+#e.g. " Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
 def create_notifs_string(request):
     string = ""
 
@@ -182,27 +190,34 @@ def create_notifs_string(request):
     
     return string
 
-def get_all_admin_ids(): #returns list of all admin users' ids
+"""GET ID FUNCTIONS"""
+#these all return a list of user ids, filtered by some property, for use with log_notifs
+
+#returns all admins
+def get_all_admin_ids(): 
     admin_ids = []
     results = db.session.query(User).filter(User.admin == True).all()
     for user in results:
         admin_ids.append(User.get_id(user))
     return admin_ids
 
-def get_all_ids(): #returns list of all user ids
+#returns all users (verified and unverified), used for logs
+def get_all_ids():
     ids = []
     results = db.session.query(User).all()
     for user in results:
         ids.append(User.get_id(user))
     return ids
 
-def get_all_ids_with_tree(name): #returns list of all users with access to this tree
+#returns all users with access to the tree <name>
+def get_all_ids_with_tree(name):
     ids = []
     tree = db.session.query(Tree).filter(Tree.name == name).first()
     for user in tree.users.split(", "):
         ids.append(int(user))
     return ids
 
+#returns all trees accessible to user <id>
 def get_all_trees_with_id(id):
     result = []
     trees = db.session.query(Tree).all()
@@ -211,6 +226,7 @@ def get_all_trees_with_id(id):
             result.append(tree)
     return result
 
+#returns all users with daily email preferences
 def get_all_ids_with_daily():
     ids = []
     results = db.session.query(User).filter(User.email_preference == "Daily").all()
@@ -218,6 +234,7 @@ def get_all_ids_with_daily():
         ids.append(User.get_id(user))
     return ids
 
+#returns all users with weekly email preferences
 def get_all_ids_with_weekly():
     ids = []
     results = db.session.query(User).filter(User.email_preference == "Weekly").all()
@@ -226,30 +243,8 @@ def get_all_ids_with_weekly():
     return ids
 
 
-        
-
-#what is logged:
-#   X website starting (only master log)
-#   X account creation (viewable to admins, linked to user)
-#   X logins (viewable to admins, linked to user)
-#   X password resets (viewable to admins, linked to user)
-#   X logouts (viewable to admins, linked to user)
-#   - user requests
-#   X admin requests (viewable to admins, linked to user)
-#   X tree requests (viewable to admins, linked to user)
-#   - request acceptance (viewable to users, linked to user)
-#   X tree edits [CRUD] (viewable to users, linked to tree)
-#   X new tree creation
-#   ~ bio edits
-#   ~ comments
-
-#TODO
-# - add errors to more pages
-# - move joshs download button
+#TODO (todo list for cooper, ignore this)
 # - delete non-verified accounts? with notif?
-# - fix what i can in bio
-# - make databases permanent
-# - clean up routes functions
 #   
 # - testing
 # - documentation
