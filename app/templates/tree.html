@@ -157,9 +157,20 @@
     // Setup zoom
     let zoom = d3.zoom()
         .scaleExtent([0.01, 4])
-        .on("zoom", (event) => {
-            svg.attr("transform", event.transform);
-        });
+        .on('zoom', handleZoom);
+        // .on("zoom", (event) => {
+        //     svg.attr("transform", event.transform);
+        // });
+
+    function initZoom() {
+        d3.select('svg')
+            .call(zoom);
+    }
+
+    function handleZoom(e) {
+        d3.select('svg g')
+            .attr('transform', e.transform);
+    }
 
     const svg = d3.select("#graph")
         .attr("width", width)
@@ -352,18 +363,23 @@
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
             .text(d => d.data.name);
-
-        svg.attr("transform", "translate(0, 0) scale(0.3)");
+        
+        zoomOut()
+        // svg.attr("transform", "translate(0, 0) scale(0.3)");
     }
 
     function zoomOut(){
-        let scale = 0.3;
-        let x = 0;
-        let y = 0;
+        d3.select('svg')
+            .transition()
+            // .call(zoom.scaleTo, 0.3)
+            .call(zoom.transform, d3.zoomIdentity.translate(0, 0).scale(0.3));
+        // let scale = 0.3;
+        // let x = 0;
+        // let y = 0;
 
-        svg.transition()
-            .duration(750)
-            .call(zoom.transform, d3.zoomIdentity.translate(0,0).scale(scale));
+        // svg.transition()
+        //     .duration(750)
+        //     .call(zoom.transform, d3.zoomIdentity.translate(0,0).scale(scale));
         
         // svg.attr("transform", "translate(0, 0) scale(0.3)");
     }
@@ -398,9 +414,14 @@
         // const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale);
 
         // Apply the transition
-        svg.transition()
+        d3.select('svg')
+            .transition()
             .duration(750)
-            .call(zoom.transform, newTransform);  // Programmatically zoom to the node
+            .call(zoom.transform, newTransform);
+
+        // svg.transition()
+        //     .duration(750)
+        //     .call(zoom.transform, newTransform);  // Programmatically zoom to the node
     }
 
     let windowWidth576px = window.matchMedia("(min-width:576px)")
@@ -432,8 +453,6 @@
         initialiseGraph(rootNode);
     }
 
-    initialiseGraph(standInRoot);
-
     document.addEventListener('click', function () {
         document.getElementById('context-menu').style.display = 'none';
     });
@@ -459,6 +478,8 @@
             alert("Node not found: " + nodeName );
         }
     });
+
+    initialiseGraph(standInRoot);
 </script>
 
 <!-- Modify graph script -->
