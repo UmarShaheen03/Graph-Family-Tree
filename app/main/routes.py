@@ -645,12 +645,11 @@ def biography(name):
                            address=person.get('address', 'No address provided'),
                            comments=comments, 
                            comment_form=comment_form)
-
 #biography edit page (and form submission)
 @main_bp.route('/biography/edit/<person_name>', methods=['GET', 'POST'])
 def edit_biography(person_name):
     check = check_login_admin()
-    if check != None:
+    if check is not None:
         return check
     
     # Get the person's name and default tree_name
@@ -669,9 +668,11 @@ def edit_biography(person_name):
             if record and record['labels']:
                 # Use the first label, assuming the node has only one main label
                 tree_name = record['labels'][0]  # Dynamically set the tree_name (label)
-        
+
+    # Create the form
     edit_form = BiographyEditForm()
-# Fetch nodes (FullName) for the select box for the form
+
+    # Fetch nodes (FullName) for the select box for the form
     with driver.session() as session:
         query = f"MATCH (n:{tree_name}) RETURN n.FullName AS name"
         result = session.run(query)
@@ -679,6 +680,10 @@ def edit_biography(person_name):
 
     # Set choices for the FullName dropdown field
     edit_form.fullname.choices = nodes
+
+    # Set the default value for fullname to person_name from the URL
+    if person_name:
+        edit_form.fullname.data = person_name  # This will pre-select the person_name in the dropdown
 
     # Check if the form is submitted and validated
     if edit_form.validate_on_submit():
@@ -712,7 +717,8 @@ def edit_biography(person_name):
 
         return redirect(url_for('main_bp.biography', name=person_name))
 
-    return render_template('edit_biography.html', biography=biography, edit_form=edit_form,tree_name=tree_name)
+    return render_template('edit_biography.html', biography=biography, edit_form=edit_form, tree_name=tree_name)
+
   
 @main_bp.route('/biography/delete_image/<name>', methods=['POST'])
 def delete_image(name):
