@@ -37,6 +37,7 @@
                         </div>
                     </div>    
 
+                    {% if is_admin %}
                     <form action="" method="post" novalidate class="Form">
                         {{ form_modify.hidden_tag() }}
                         
@@ -83,7 +84,8 @@
                         <div class="d-grid gap-2">
                             {{ form_modify.submit_modify(class="btn btn-primary btn-lg rounded-pill") }}
                         </div>
-                    </form>   
+                    </form> 
+                    {% endif %}  
 
                     <div class="d-grid gap-2 mt-2">
                         <button id="Download" class="btn btn-secondary rounded-pill">Download</button>
@@ -103,10 +105,12 @@
 
 <!-- Custom Context Menu -->
 <ul id="context-menu" class="custom-menu" style="display:none; position:absolute; z-index:1000;">
+    {% if is_admin %}
     <li onclick="modifyGraphAction('edit')">Edit Node</li>
     <li onclick="modifyGraphAction('delete')">Delete Node</li>
     <li onclick="modifyGraphAction('shift')">Shift Node</li>
     <li onclick="modifyGraphAction('add')">Add Child</li>
+    {% endif %} 
     <li onclick="goToBiography()">View Biography</li>
     <li onclick="drillDown()">Drill Down</li> <!-- New Drill Down option -->
 </ul>
