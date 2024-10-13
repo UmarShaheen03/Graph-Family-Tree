@@ -176,6 +176,8 @@ Pierce_Hawthorne,Frank_Hawthorne,Evelyn_Hawthorne"""
       self.assertEqual(Relationships, expected_relationships)
       print("Successfully Parsed the file to create relationships")
 
+class SignupTests(unittest.TestCase):
+    pass
 
 
 if __name__ == '__main__':
