@@ -17,8 +17,7 @@ class Config:
     SECRET_KEY = "test1234"
     # SECRET_KEY = os.environ.get('SECRET_KEY')
 
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
-        'sqlite:///' + os.path.join(basedir, 'app.db')
+    SQLALCHEMY_DATABASE_URI = 'postgres://u4dkert2vv161k:pff214f3fdb2711aa0b42c1196f511ba49807707ba3b34ab996419697015223ad@c5flugvup2318r.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d5qfiu95um7ve8'
     
     WTF_CSRF_ENABLED = False
 
