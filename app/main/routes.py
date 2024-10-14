@@ -2,19 +2,19 @@
 import os
 from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
 from app.forms import *
-from app.models import Comment, User
-from app.accounts import *
-from app.notifs import *
+from app.models import Comment, User, Tree, Notification
+from app.accounts import init_database, signup, login, SignupError, LoginError, reset_email, verify_reset, reset
+from app.notifs import check_for_emails, get_users_notifs, log_notif, get_all_admin_ids, get_all_ids_with_tree, get_all_trees_with_id, create_notifs_string
 from app import db
 from neo4j import GraphDatabase
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user
 from itsdangerous import URLSafeTimedSerializer
-from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
+from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD, WEBSITE_URL
 from werkzeug.utils import secure_filename
 from threading import Thread
+from . import main_bp
 
-main_bp = Blueprint('main_bp', __name__)
 # Connect to Neo4j
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 

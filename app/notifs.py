@@ -9,7 +9,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from sqlalchemy import desc
 from jinja2 import Environment, FileSystemLoader
-from flask import url_for
+from app import create_app
 
 #returns all the notifs related to this user id
 #filters out ignored notifs, marks them as seen automatically
@@ -62,15 +62,32 @@ def log_notif(text, users, type, goto = None):
 #ran in a seperate thread, once every second
 #checks for 5pm and friday, and sends daily/weekly emails
 def check_for_emails():
+    app = create_app()
     while True:
         sleep(1)
-        #print("Email Time: " + str(datetime.now().time())[:8])
+        print("Email Time: " + str(datetime.now().time())[:8])
         if(str(datetime.now().time())[:8] == "17:00:00"): #5pm
             print("sending daily emails!")
-            send_emails(get_all_ids_with_daily())
+            
+            ids = []
+            with app.app_context():
+                results = User.query.filter(User.email_preference == "Daily").all()
+            for user in results:
+                ids.append(User.get_id(user))
+
+            print("to..." + str(ids))
+            send_emails(ids)
             if (datetime.now().weekday() == 4): #friday
                 print("sending weekly emails too!")
-                send_emails(get_all_ids_with_weekly())
+
+                ids = []
+                with app.app_context():
+                    results = User.query.filter(User.email_preference == "Weekly").all()
+                for user in results:
+                    ids.append(User.get_id(user))
+                
+                print("to..." + str(ids))
+                send_emails(ids)
 
 #sends the notification email to all users in the id list
 def send_emails(ids):
@@ -213,7 +230,7 @@ def get_all_ids():
 def get_all_ids_with_tree(name):
     ids = []
     tree = db.session.query(Tree).filter(Tree.name == name).first()
-    
+
     if tree == None:
         return []
     
@@ -229,26 +246,3 @@ def get_all_trees_with_id(id):
         if str(id) in tree.users:
             result.append(tree)
     return result
-
-#returns all users with daily email preferences
-def get_all_ids_with_daily():
-    ids = []
-    results = db.session.query(User).filter(User.email_preference == "Daily").all()
-    for user in results:
-        ids.append(User.get_id(user))
-    return ids
-
-#returns all users with weekly email preferences
-def get_all_ids_with_weekly():
-    ids = []
-    results = db.session.query(User).filter(User.email_preference == "Weekly").all()
-    for user in results:
-        ids.append(User.get_id(user))
-    return ids
-
-
-#TODO (todo list for cooper, ignore this)
-# - delete non-verified accounts? with notif?
-#   
-# - testing
-# - documentation
