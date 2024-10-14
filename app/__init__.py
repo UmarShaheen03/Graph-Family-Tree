@@ -12,8 +12,6 @@ from config import Config #from config.py import the Config class
 from flask_wtf import CSRFProtect
 
 from .databases import db, login
-from .main import main_bp
-from jinja2 import Environment
 
 def create_app():
     """Create and configure app"""
@@ -27,6 +25,7 @@ def create_app():
 
     migrate = Migrate(flask_app, db)
 
+    from .main import main_bp
     flask_app.register_blueprint(main_bp)
 
     return flask_app

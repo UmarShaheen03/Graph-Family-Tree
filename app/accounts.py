@@ -3,7 +3,7 @@ from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
 from flask import url_for
-from app.notifs import *
+from app.notifs import get_all_ids, get_all_admin_ids, log_notif
 
 from config import WEBSITE_URL, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 from jinja2 import Template
@@ -84,7 +84,7 @@ def init_database():
     test_admin = User(
         user_id=4,
         username="admin_test",
-        email="admin@test.com",
+        email="cooptrooper04@gmail.com",
         verified=True,
         admin=True,
         create_time=datetime.now(),
@@ -172,7 +172,7 @@ def signup(email, username, password, repeat, remember):
     dehdashti.users += ", " + str(user.user_id)
     db.session.commit()
 
-    log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids(), " Login") #notify all admins of new account
+    log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids(), " Signup") #notify all admins of new account
     login(username, password, remember)
     
 #logs into an account
