@@ -17,7 +17,7 @@ class Config:
     SECRET_KEY = "test1234"
     # SECRET_KEY = os.environ.get('SECRET_KEY')
 
-    SQLALCHEMY_DATABASE_URI = 'postgres://u8e57pohvucjvo:p6d24eed4fc4904f600be8dce36f0a29dcba768328be8ff53d847736242c3fd4b@cbdhrtd93854d5.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d7dpcv9276uaul'
+    SQLALCHEMY_DATABASE_URI = 'postgres://u62gq6b5fje1gc:pa6bddafe45a81b2af9f68dbcc74bd33fdd5ffe681563b41f933a72ba8a731b20@cbec45869p4jbu.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/d1p5lggi7fhn8u'
     
     WTF_CSRF_ENABLED = False
 
