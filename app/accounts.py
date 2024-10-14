@@ -37,6 +37,10 @@ def init_database():
     Tree.query.delete()
 
     #create mock accounts
+    master_log = User(
+        user_id=-1
+    )
+
     perma_admin = User(
         user_id=0,
         username="PermaAdmin",
@@ -105,6 +109,7 @@ def init_database():
     )
 
     #add mock accounts to db
+    db.session.add(master_log)
     db.session.add(perma_admin)
     db.session.add(nima)
     db.session.add(group31)
