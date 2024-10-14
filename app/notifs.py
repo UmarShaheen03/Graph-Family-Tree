@@ -66,7 +66,7 @@ def check_for_emails():
     while True:
         sleep(1)
         print("Email Time: " + str(datetime.now().time())[:8])
-        if(str(datetime.now().time())[:8] != "17:00:00"): #5pm
+        if(str(datetime.now().time())[:8] == "17:00:00"): #5pm
             print("sending daily emails!")
             
             ids = []
@@ -75,7 +75,7 @@ def check_for_emails():
             for user in results:
                 ids.append(User.get_id(user))
 
-            print(ids)
+            print("to..." + str(ids))
             send_emails(ids)
             if (datetime.now().weekday() == 4): #friday
                 print("sending weekly emails too!")
@@ -85,7 +85,8 @@ def check_for_emails():
                     results = User.query.filter(User.email_preference == "Weekly").all()
                 for user in results:
                     ids.append(User.get_id(user))
-
+                
+                print("to..." + str(ids))
                 send_emails(ids)
 
 #sends the notification email to all users in the id list

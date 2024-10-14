@@ -45,7 +45,8 @@ def init_database():
         admin=True,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("CantResetM3")),
-        notifs_ignored=""
+        notifs_ignored="",
+        email_preference="None"
     )
 
     nima = User(
@@ -56,7 +57,8 @@ def init_database():
         admin=True,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("CHANGEME")),
-        notifs_ignored=""
+        notifs_ignored="",
+        email_preference="Weekly"
     )
 
     group31 = User(
@@ -67,7 +69,8 @@ def init_database():
         admin=True,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("MichaelWise#1Fans")),
-        notifs_ignored=""
+        notifs_ignored="",
+        email_preference="Weekly"
     )
 
     test_user = User(
@@ -78,7 +81,8 @@ def init_database():
         admin=False,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("DocumentationAndTesting31")),
-        notifs_ignored=" Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
+        notifs_ignored=" Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments",
+        email_preference="Daily"
     )
 
     test_admin = User(
@@ -89,7 +93,8 @@ def init_database():
         admin=True,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("DocumentationAndTesting31")),
-        notifs_ignored=" Logout"
+        notifs_ignored=" Logout",
+        email_preference="Daily"
     )
 
     first_notif = Notification(
