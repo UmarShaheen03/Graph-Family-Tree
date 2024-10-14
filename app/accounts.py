@@ -88,7 +88,7 @@ def init_database():
     test_admin = User(
         user_id=4,
         username="admin_test",
-        email="cooptrooper04@gmail.com",
+        email="admin@test.com",
         verified=True,
         admin=True,
         create_time=datetime.now(),
