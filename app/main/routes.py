@@ -25,7 +25,7 @@ serializer = URLSafeTimedSerializer("SecretKey")
 @main_bp.before_request
 def run_once_on_start():
     #ONLY UNCOMMENT BELOW TO RESET DATABASE
-    #init_database()
+    init_database()
     email_thread = Thread(target=check_for_emails)
     email_thread.start() #TODO may be leaking?
     print("created email thread")
@@ -896,7 +896,7 @@ def reject_user():
     user = db.session.query(User).filter(User.user_id == int(string)).first()
 
     if (user.verified == False): #only allow deletion of unverified accounts
-        db.session.query(User).filter(User.user_id == int(string)).delete
+        db.session.query(User).filter(User.user_id == int(string)).delete()
         db.session.commit()
 
         log_notif(f"User {user.username}'s user request has been denied, and the account has been deleted", get_all_admin_ids(), " Request Accept")
