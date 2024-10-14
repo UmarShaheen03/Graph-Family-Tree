@@ -21,5 +21,5 @@ class Config:
     
     WTF_CSRF_ENABLED = False
 
-    #SERVER_NAME = "http://0.0.0.0:5006" #TODO CHANGE WHEN DEPLOYING!!!
+    SERVER_NAME = "dehdashti-family-cits3200-d6c7dbd3631a.herokuapp.com" 
 
