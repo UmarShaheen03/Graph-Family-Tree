@@ -206,10 +206,10 @@ def tree(tree_name):
         return check
     
     check = check_login_admin()
-    if check != None: #check for tree access, only if not an admin
+    if check != None:  # check for tree access, only if not an admin
         users_with_access = get_all_ids_with_tree(tree_name)
         print(users_with_access)
-        if (User.get_id(current_user) not in users_with_access):
+        if User.get_id(current_user) not in users_with_access:
             return redirect(url_for("main_bp.my_dashboard", tree_info=f"Access forbidden to Tree {tree_name}. Request access here")) 
     
     form = Search_Node()
@@ -221,10 +221,12 @@ def tree(tree_name):
             RETURN p.FullName AS name"""
         result = session.run(query)
         nodes_choices = [(record["name"], record["name"]) for record in result]
+    
     form.fullname.choices = nodes_choices
     form_modify = AddNodeForm()
+    no_parent_option = [("No Parent", "No Parent")]
 
-    form_modify.parent.choices = nodes_choices
+    form_modify.parent.choices = nodes_choices + no_parent_option
     form_modify.new_parent.choices = nodes_choices
     form_modify.person_to_delete.choices = nodes_choices
     form_modify.person_to_shift.choices = nodes_choices
@@ -233,26 +235,32 @@ def tree(tree_name):
     if form_modify.submit_modify.data and form_modify.validate_on_submit():
         if form_modify.action.data == "add":
             with driver.session() as session:
-                # Retrieve the parent's hierarchy
-                parent_hierarchy_query = f"""
-                    MATCH (p:{tree_name} {{FullName: $Parent}})
-                    RETURN p.Hierarchy AS parent_hierarchy
-                """
-                parent_result = session.run(parent_hierarchy_query, Parent=form_modify.parent.data)
-                parent_hierarchy = parent_result.single()["parent_hierarchy"]
-                
-                # Add new node with hierarchy as parent's hierarchy + 1
-                session.run(f"""
-                    CREATE (n:{tree_name} {{FullName: $full_name, Hierarchy: $new_hierarchy}})
-                """, full_name=form_modify.name.data, new_hierarchy=parent_hierarchy + 1)
-                
-                # Build the dynamic query string to add a relationship
-                query = f"""
-                    MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
-                    MERGE (a)-[r:PARENT_OF]->(b)
-                """
-                # Create or update relationship
-                session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
+                if form_modify.parent.data == "No Parent":
+                    # Add new node with no parent relationship
+                    session.run(f"""
+                        CREATE (n:{tree_name} {{FullName: $full_name, Hierarchy: 1}})
+                    """, full_name=form_modify.name.data)
+                else:
+                    # Retrieve the parent's hierarchy
+                    parent_hierarchy_query = f"""
+                        MATCH (p:{tree_name} {{FullName: $Parent}})
+                        RETURN p.Hierarchy AS parent_hierarchy
+                    """
+                    parent_result = session.run(parent_hierarchy_query, Parent=form_modify.parent.data)
+                    parent_hierarchy = parent_result.single()["parent_hierarchy"]
+                    
+                    # Add new node with hierarchy as parent's hierarchy + 1
+                    session.run(f"""
+                        CREATE (n:{tree_name} {{FullName: $full_name, Hierarchy: $new_hierarchy}})
+                    """, full_name=form_modify.name.data, new_hierarchy=parent_hierarchy + 1)
+                    
+                    # Build the dynamic query string to add a relationship
+                    query = f"""
+                        MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
+                        MERGE (a)-[r:PARENT_OF]->(b)
+                    """
+                    # Create or update relationship
+                    session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
 
             log_notif(f"User {User.get_username(current_user)} added Person {form_modify.name.data} to Tree {tree_name}", 
             get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Tree Create", "tree/" + tree_name)
@@ -352,7 +360,7 @@ def tree(tree_name):
             # Add link from parent to child
             links.append({'source': parent_name, 'target': child_name})
 
-    return render_template('tree.html', nodes=nodes, relationships=links, form_search=form, tree_name=tree_name,form_modify=form_modify)
+    return render_template('tree.html', nodes=nodes, relationships=links, form_search=form, tree_name=tree_name, form_modify=form_modify)
 
 #modify tree page (and form submission)
 @main_bp.route("/modify_graph", methods=['GET', 'POST'])
