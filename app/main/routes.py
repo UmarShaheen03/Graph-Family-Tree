@@ -28,6 +28,8 @@ def run_once_on_start():
     init_database()
     email_thread = Thread(target=check_for_emails)
     email_thread.start() #TODO may be leaking?
+    for i in range(101):
+        log_notif("test", [3], " Test")
     print("created email thread")
     #replaces code of this function with none, so it only runs once
     run_once_on_start.__code__ = (lambda:None).__code__
