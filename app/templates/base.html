@@ -53,12 +53,12 @@
                     </li>
                     <div class="dropdown">
                         <a id="home-nav-link" class="nav-link bell_box" onclick="clickNotifications()">
-                            {% if notifications|length > 0 %} <!-- if user has notifcations, make icon white and add num -->
+                            {% if notifications|length > 99 %} <!-- if user has notifcations, make icon white and add num -->
                                 <i id="notif_bell" class="bi bi-bell-fill"></i> 
-                                <p id="notif_count">{{ notifications|length }}</p>
-                            {% elif notifications|length > 99 %}
-                                <i id="notif_bell" class="bi bi-bell-fill"></i>
                                 <p id="notif_count">99+</p>
+                            {% elif notifications|length > 0 %}
+                                <i id="notif_bell" class="bi bi-bell-fill"></i>
+                                <p id="notif_count">{{ notifications|length }}</p>
                             {% else %}
                                 <i id="notif_bell" class="bi bi-bell"></i>
                             {% endif %}
