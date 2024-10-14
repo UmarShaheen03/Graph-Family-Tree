@@ -184,8 +184,9 @@ def reset_form():
 
     user = db.session.query(User).filter(User.user_id == user_id).first()
     ids = get_all_admin_ids()
-    if user_id not in ids: #if resetter is a user
+    if int(user_id) not in ids: #if resetter is a user
         ids.append(user_id)
+
     log_notif(f"User {User.get_username(user)} reset their password", ids, " Reset") #notify all admins (and user) of password reset
 
     loginForm = LoginForm()

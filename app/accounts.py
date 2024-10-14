@@ -37,10 +37,6 @@ def init_database():
     Tree.query.delete()
 
     #create mock accounts
-    master_log = User(
-        user_id=-1
-    )
-
     perma_admin = User(
         user_id=0,
         username="PermaAdmin",
@@ -92,7 +88,7 @@ def init_database():
     test_admin = User(
         user_id=4,
         username="admin_test",
-        email="cooptrooper04@gmail.com",
+        email="admin@test.com",
         verified=True,
         admin=True,
         create_time=datetime.now(),
@@ -109,15 +105,18 @@ def init_database():
     )
 
     #add mock accounts to db
-    db.session.add(master_log)
     db.session.add(perma_admin)
     db.session.add(nima)
     db.session.add(group31)
     db.session.add(test_user)
     db.session.add(test_admin)
+    db.session.commit()
+
     #add first notification to db
     db.session.add(first_notif)
     db.session.commit()
+
+
 
     #get all tree names from the neo4j server
     with driver.session() as session:
