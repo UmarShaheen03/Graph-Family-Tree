@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 import os
 from flask import url_for, app, Blueprint
-from app.models import Comment
+from app.models import Comment, Notification
 import io
 from PIL import Image
 from neo4j import GraphDatabase
@@ -29,13 +29,13 @@ class BiographyPageTest(unittest.TestCase):
         self.upload_path = "static/uploads"
 
     def login(self, username, password):
-        return self.client.post(url_for('auth.login'), data={
+        return self.client.post(url_for('main_bp.login_request'), data={
             'username': username,
             'password': password
         }, follow_redirects=True)
     
     def logout(self):
-        return self.client.get(url_for('auth.logout'), follow_redirects=True)
+        return self.client.get(url_for('main_bp.logout_request'), follow_redirects=True)
 
     def test_image_upload(self):
         self.login('user_test', 'test1234')
@@ -62,6 +62,24 @@ class BiographyPageTest(unittest.TestCase):
         assert comment is not None
         assert comment.text == 'This is a test comment.'
         assert comment.username == 'user_test'
+
+    def test_notification_comment(self):
+        self.login('user_test', 'test1234')
+        assert response.status_code == 200
+        response = self.client.post(url_for('main_bp.biography', name='Linda_Barnes'), data={
+        'comment': 'This is a test comment.'
+    }, follow_redirects=True)
+        assert b'Comment added successfully' in response.data
+        self.logout()  
+
+        response = self.client.post(url_for('main_bp.login_request'), data={
+        'username': 'admin_test',
+        'password': 'test1234'
+    }, follow_redirects=True)
+        assert response.status_code == 200
+        notifications = Notification.query.filter_by(user_id=4).all()  # Assuming admin_test has user_id=4
+        assert len(notifications) > 0
+        assert 'commented on Person Linda_Barnes' in notifications[0].message
 
     def test_admin_edit_biography(self):
         self.login('admin_test', 'test1234')
