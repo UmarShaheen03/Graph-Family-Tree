@@ -44,7 +44,7 @@ body{
 
 
 /* Common button styling */
-.btn {
+.buttons > .btn {
   background-color: transparent;
   border: 1px solid rgba(225, 225, 225, 0.7);
   border-radius: 1000px;
@@ -58,7 +58,7 @@ body{
 }
 
 /* Common hover effect for all buttons */
-.btn:hover {
+.buttons >.btn:hover {
   background-image: linear-gradient(to right, rgb(50, 100, 175), rgb(196, 52, 172));
   transform: scale(1.2);
   box-shadow: -40px 0 100px rgb(50, 100, 175), 40px 0 100px rgb(196, 52, 172);
