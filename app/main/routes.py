@@ -25,7 +25,7 @@ serializer = URLSafeTimedSerializer("SecretKey")
 @main_bp.before_request
 def run_once_on_start():
     #ONLY UNCOMMENT BELOW TO RESET DATABASE
-    init_database()
+    #init_database()
     email_thread = Thread(target=check_for_emails)
     email_thread.start() #TODO may be leaking?
     print("created email thread")

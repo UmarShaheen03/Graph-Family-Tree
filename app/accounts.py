@@ -66,18 +66,18 @@ def init_database():
         verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("CHANGEME")),
+        password_hash=str(generate_password_hash("MichaelWise#1Fans")),
         notifs_ignored=""
     )
 
     test_user = User(
         user_id=3,
         username="user_test",
-        email="cooptrooper04@gmail.com",
+        email="user@test.com",
         verified=True,
         admin=False,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("test1234")),
+        password_hash=str(generate_password_hash("DocumentationAndTesting31")),
         notifs_ignored=" Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
     )
 
@@ -88,7 +88,7 @@ def init_database():
         verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("test1234")),
+        password_hash=str(generate_password_hash("DocumentationAndTesting31")),
         notifs_ignored=" Logout"
     )
 
