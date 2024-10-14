@@ -2,7 +2,7 @@
 
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
-WEBSITE_URL = "http://127.0.0.1:5000/" #TODO change when deploying
+WEBSITE_URL = "https://dehdashti-family-cits3200-d6c7dbd3631a.herokuapp.com/" #TODO change when deploying
 
 NEO4J_URI='neo4j+ssc://633149e1.databases.neo4j.io' #TODO encrypt?
 NEO4J_USERNAME='neo4j'
@@ -21,5 +21,5 @@ class Config:
     
     WTF_CSRF_ENABLED = False
 
-    SERVER_NAME = "127.0.0.1:5000" #TODO CHANGE WHEN DEPLOYING!!!
+    #SERVER_NAME = "http://0.0.0.0:5006" #TODO CHANGE WHEN DEPLOYING!!!
 
