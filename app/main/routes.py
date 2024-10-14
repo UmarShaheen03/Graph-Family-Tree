@@ -2,19 +2,19 @@
 import os
 from flask import Blueprint, render_template, flash, redirect, url_for, request, current_app
 from app.forms import *
-from app.models import Comment, User
-from app.accounts import *
-from app.notifs import *
+from app.models import Comment, User, Tree, Notification
+from app.accounts import init_database, signup, login, SignupError, LoginError, reset_email, verify_reset, reset
+from app.notifs import check_for_emails, get_users_notifs, log_notif, get_all_admin_ids, get_all_ids_with_tree, get_all_trees_with_id, create_notifs_string
 from app import db
 from neo4j import GraphDatabase
 from datetime import datetime
 from flask_login import login_required, current_user, logout_user
 from itsdangerous import URLSafeTimedSerializer
-from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
+from config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD, WEBSITE_URL
 from werkzeug.utils import secure_filename
 from threading import Thread
+from . import main_bp
 
-main_bp = Blueprint('main_bp', __name__)
 # Connect to Neo4j
 driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
@@ -206,10 +206,10 @@ def tree(tree_name):
         return check
     
     check = check_login_admin()
-    if check != None: #check for tree access, only if not an admin
+    if check != None:  # check for tree access, only if not an admin
         users_with_access = get_all_ids_with_tree(tree_name)
         print(users_with_access)
-        if (User.get_id(current_user) not in users_with_access):
+        if User.get_id(current_user) not in users_with_access:
             return redirect(url_for("main_bp.my_dashboard", tree_info=f"Access forbidden to Tree {tree_name}. Request access here")) 
     
     form = Search_Node()
@@ -221,10 +221,12 @@ def tree(tree_name):
             RETURN p.FullName AS name"""
         result = session.run(query)
         nodes_choices = [(record["name"], record["name"]) for record in result]
+    
     form.fullname.choices = nodes_choices
     form_modify = AddNodeForm()
+    no_parent_option = [("No Parent", "No Parent")]
 
-    form_modify.parent.choices = nodes_choices
+    form_modify.parent.choices = nodes_choices + no_parent_option
     form_modify.new_parent.choices = nodes_choices
     form_modify.person_to_delete.choices = nodes_choices
     form_modify.person_to_shift.choices = nodes_choices
@@ -233,26 +235,32 @@ def tree(tree_name):
     if form_modify.submit_modify.data and form_modify.validate_on_submit():
         if form_modify.action.data == "add":
             with driver.session() as session:
-                # Retrieve the parent's hierarchy
-                parent_hierarchy_query = f"""
-                    MATCH (p:{tree_name} {{FullName: $Parent}})
-                    RETURN p.Hierarchy AS parent_hierarchy
-                """
-                parent_result = session.run(parent_hierarchy_query, Parent=form_modify.parent.data)
-                parent_hierarchy = parent_result.single()["parent_hierarchy"]
-                
-                # Add new node with hierarchy as parent's hierarchy + 1
-                session.run(f"""
-                    CREATE (n:{tree_name} {{FullName: $full_name, Hierarchy: $new_hierarchy}})
-                """, full_name=form_modify.name.data, new_hierarchy=parent_hierarchy + 1)
-                
-                # Build the dynamic query string to add a relationship
-                query = f"""
-                    MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
-                    MERGE (a)-[r:PARENT_OF]->(b)
-                """
-                # Create or update relationship
-                session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
+                if form_modify.parent.data == "No Parent":
+                    # Add new node with no parent relationship
+                    session.run(f"""
+                        CREATE (n:{tree_name} {{FullName: $full_name, Hierarchy: 1}})
+                    """, full_name=form_modify.name.data)
+                else:
+                    # Retrieve the parent's hierarchy
+                    parent_hierarchy_query = f"""
+                        MATCH (p:{tree_name} {{FullName: $Parent}})
+                        RETURN p.Hierarchy AS parent_hierarchy
+                    """
+                    parent_result = session.run(parent_hierarchy_query, Parent=form_modify.parent.data)
+                    parent_hierarchy = parent_result.single()["parent_hierarchy"]
+                    
+                    # Add new node with hierarchy as parent's hierarchy + 1
+                    session.run(f"""
+                        CREATE (n:{tree_name} {{FullName: $full_name, Hierarchy: $new_hierarchy}})
+                    """, full_name=form_modify.name.data, new_hierarchy=parent_hierarchy + 1)
+                    
+                    # Build the dynamic query string to add a relationship
+                    query = f"""
+                        MATCH (a:{tree_name} {{FullName: $Parent}}), (b:{tree_name} {{FullName: $full_name}})
+                        MERGE (a)-[r:PARENT_OF]->(b)
+                    """
+                    # Create or update relationship
+                    session.run(query, full_name=form_modify.name.data, Parent=form_modify.parent.data)
 
             log_notif(f"User {User.get_username(current_user)} added Person {form_modify.name.data} to Tree {tree_name}", 
             get_all_admin_ids() + get_all_ids_with_tree(tree_name), " Tree Create", "tree/" + tree_name)
@@ -352,7 +360,7 @@ def tree(tree_name):
             # Add link from parent to child
             links.append({'source': parent_name, 'target': child_name})
 
-    return render_template('tree.html', nodes=nodes, relationships=links, form_search=form, tree_name=tree_name,form_modify=form_modify)
+    return render_template('tree.html', nodes=nodes, relationships=links, form_search=form, tree_name=tree_name, form_modify=form_modify)
 
 #modify tree page (and form submission)
 @main_bp.route("/modify_graph", methods=['GET', 'POST'])
@@ -888,7 +896,7 @@ def reject_user():
     user = db.session.query(User).filter(User.user_id == int(string)).first()
 
     if (user.verified == False): #only allow deletion of unverified accounts
-        db.session.query(User).filter(User.user_id == int(string)).delete
+        db.session.query(User).filter(User.user_id == int(string)).delete()
         db.session.commit()
 
         log_notif(f"User {user.username}'s user request has been denied, and the account has been deleted", get_all_admin_ids(), " Request Accept")

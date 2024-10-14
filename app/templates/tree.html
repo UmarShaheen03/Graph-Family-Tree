@@ -10,82 +10,91 @@
 {% endblock %}
 
 {% block bodyBlock %}
-<h1 id="Multi_Tree">{{ tree_name }} Family Graph</h1>
 <div class="container-fluid">
     <div class="row">
-        <!-- Modify Graph -->
         <div class="col-lg-3">
             <div class="card shadow-lg rounded-lg border-0">
                 <div class="card-body p-2">
-                    <h5 class="text-center mb-2 mt-2">MODIFY GRAPH</h5>
+                    <h5 id="Multi_Tree" class="text-center mb-2 mt-2">{{ tree_name }} Family</h5>
+
+                    <label for="Search" class="mt-3 form-label fw-bold">Search for Person</label>
+                    <div class="row">
+                        {{ form_search.hidden_tag() }}
+                        <div class="mt-2">
+                            {{ form_search.fullname(id="fullname", class="form-select-searchable") }}
+                        </div>
+                        <div class="d-grid gap-2 mt-2">
+                            {{ form_search.submit_search(id="Search", class="btn btn-primary btn-lg rounded-pill") }}
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <div class="mt-2 col-auto">
+                            <button id="resetGraph" class="btn btn-secondary rounded-pill">Reset Graph</button>
+                        </div>
+                        <div class="mt-2 col-auto">
+                            <button id="resetZoom" class="btn btn-secondary rounded-pill">Reset Zoom</button>
+                        </div>
+                    </div>    
+
+                    {% if is_admin %}
                     <form action="" method="post" novalidate class="Form">
                         {{ form_modify.hidden_tag() }}
                         
-                        <div class="form-group mb-4">
+                        <div class="form-group mb-2">
                             <label for="action" class="form-label fw-bold">{{ form_modify.action.label }}</label>
                             {{ form_modify.action(class="form-select form-select-lg") }}
                         </div>
 
-                        <div id="name-group" class="form-group mb-4" style="display:none;">
+                        <div id="name-group" class="form-group mb-2" style="display:none;">
                             <label for="name" class="form-label fw-bold">{{ form_modify.name.label }}</label>
                             {{ form_modify.name(class="form-control form-control-lg") }}
                         </div>
 
-                        <div id="new-name-group" class="form-group mb-4" style="display:none;">
+                        <div id="new-name-group" class="form-group mb-2" style="display:none;">
                             <label for="new_name" class="form-label fw-bold">{{ form_modify.new_name.label }}</label>
                             {{ form_modify.new_name(class="form-control form-control-lg") }}
                         </div>
 
-                        <div id="old-name-group" class="form-group mb-4" style="display:none;">
+                        <div id="old-name-group" class="form-group mb-2" style="display:none;">
                             <label for="old_name" class="form-label fw-bold">{{ form_modify.old_name.label }}</label>
                             {{ form_modify.old_name(class="form-select form-select-lg form-select-searchable") }}
                         </div>
 
-                        <div id="person-to-shift-group" class="form-group mb-4" style="display:none;">
+                        <div id="person-to-shift-group" class="form-group mb-2" style="display:none;">
                             <label for="person_to_shift" class="form-label fw-bold">{{ form_modify.person_to_shift.label }}</label>
                             {{ form_modify.person_to_shift(class="form-select form-select-lg form-select-searchable") }}
                         </div>
 
-                        <div id="person-to-delete-group" class="form-group mb-4" style="display:none;">
+                        <div id="person-to-delete-group" class="form-group mb-2" style="display:none;">
                             <label for="person_to_delete" class="form-label fw-bold">{{ form_modify.person_to_delete.label }}</label>
                             {{ form_modify.person_to_delete(class="form-select form-select-lg form-select-searchable") }}
                         </div>
 
-                        <div id="parent-group" class="form-group mb-4">
+                        <div id="parent-group" class="form-group mb-2">
                             <label for="parent" class="form-label fw-bold">{{ form_modify.parent.label }}</label>
                             {{ form_modify.parent(class="form-select form-select-lg form-select-searchable") }}
                         </div>
 
-                        <div id="new-parent-group" class="form-group mb-4" style="display:none;">
+                        <div id="new-parent-group" class="form-group mb-2" style="display:none;">
                             <label for="new_parent" class="form-label fw-bold">{{ form_modify.new_parent.label }}</label>
                             {{ form_modify.new_parent(class="form-select form-select-lg form-select-searchable") }}
                         </div>
 
-                        <div class="d-grid gap-2 mb-3">
+                        <div class="d-grid gap-2">
                             {{ form_modify.submit_modify(class="btn btn-primary btn-lg rounded-pill") }}
                         </div>
-                    </form>
-                    <div class="col-auto">
-                        <button id="resetGraph" class="btn btn-secondary btn-lg rounded-pill">Reset Graph</button>
-                    </div>                    
+                    </form> 
+                    {% endif %}  
+
+                    <div class="d-grid gap-2 mt-2">
+                        <button id="Download" class="btn btn-secondary rounded-pill">Download</button>
+                    </div>    
+
                 </div>
             </div>
         </div>
         <div class="col-lg-9 vh-100 mt-2">
-            <p></p>
-            {{ form_search.hidden_tag() }}
-            <div class="row align-items-center">
-                <div class="col-auto">
-                    {{ form_search.fullname(id="fullname", class="form-select-searchable") }}
-                </div>
-                <div class="col-auto">
-                    {{ form_search.submit_search(id="Search", class="btn btn-primary btn-lg rounded-pill") }}
-                </div>
-                <div>
-                    <button id="Download" style="background-color: purple; color: white; border: none; border-radius: 5px;  font-size: 16px; cursor: pointer; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">Download</button>
-
-                </div>
-            </div>
             <div id="graph-container">                
                 <svg id="graph"></svg>
             </div>
@@ -96,16 +105,17 @@
 
 <!-- Custom Context Menu -->
 <ul id="context-menu" class="custom-menu" style="display:none; position:absolute; z-index:1000;">
+    {% if is_admin %}
     <li onclick="modifyGraphAction('edit')">Edit Node</li>
     <li onclick="modifyGraphAction('delete')">Delete Node</li>
     <li onclick="modifyGraphAction('shift')">Shift Node</li>
     <li onclick="modifyGraphAction('add')">Add Child</li>
+    {% endif %} 
     <li onclick="goToBiography()">View Biography</li>
     <li onclick="drillDown()">Drill Down</li> <!-- New Drill Down option -->
 </ul>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
     var nodes = {{ nodes|tojson }};
@@ -120,7 +130,6 @@
     });
 
     var addedNodes = new Set();     //Track added nodes to prevent duplicates
-
 
     //Build the hierarchy by linking child nodes to their parents
     links.forEach(link => {
@@ -152,21 +161,29 @@
     const radius = Math.min(width, height) / 2 - 30;
 
     // Setup zoom
-    const zoom = d3.zoom()
+    let zoom = d3.zoom()
         .scaleExtent([0.01, 4])
-        .on("zoom", (event) => {
-            svg.attr("transform", event.transform);
-        });
+        .on('zoom', handleZoom);
+
+    function initZoom() {
+        d3.select('svg')
+            .call(zoom);
+    }
+
+    function handleZoom(e) {
+        d3.select('svg g')
+            .attr('transform', e.transform);
+    }
 
     const svg = d3.select("#graph")
         .attr("width", width)
         .attr("height", height)
         .attr("viewBox", [-cx, -cy, width, height])
-        .attr("style", "width: 100%; height: auto; font: 10px sans-serif;")
+        .attr("style", "width: 100%; height: auto; font: 12px sans-serif;")
         .call(zoom)
         .append("g")
-        .attr("transform", "translate(0, 0) scale(1)");  // Centering the radial layout
-    
+        // .attr("transform", "translate(0, 0) scale(0.3)");  // Centering the radial layout
+
     const tree = d3.tree()
         .size([2 * Math.PI, radius])
         .separation((a, b) => (a.parent == b.parent ? 1 : 2) / a.depth);
@@ -273,15 +290,13 @@
     }
 
     function initialiseGraph(rootNode) {
-        // var currentRoot = rootNode;
-        console.log("currentRoot: " + currentRoot);
         // Build the tree layout using the stratified hierarchy
         const root = tree(d3.hierarchy(rootNode)
             .sort((a, b) => d3.ascending(a.data.name, b.data.name)));
 
         // Adjust the radius manually to increase distance between generations
         root.each(d => {
-            d.y = d.depth * 100;  // Increase the multiplier (150) to add more space between generations
+            d.y = d.depth * 150;  // Increase the multiplier (150) to add more space between generations
         });
 
         currentRoot = root;
@@ -314,7 +329,7 @@
 
         node.append("circle")
             .attr("fill", d => colorScale(d.depth % 8))  // Assign color based on hierarchy level
-            .attr("r", 5)
+            .attr("r", 8)
             .on("mouseover", function (event, d) {
                 tooltip.transition().duration(200).style("opacity", 0.9);
                 tooltip.html(d.data.name)  // Display node name in tooltip
@@ -350,13 +365,26 @@
             .attr("fill", "currentColor")
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
-            .text(d => d.data.name);
+            .text(d => {
+                // Check if the node is the root node,  or has any children -> display up to 30 char
+                if (d.depth === 0 || !d.children) {
+                    return d.data.name.length > 33 ? d.data.name.slice(0, 30) + "..." : d.data.name;
+                }
+
+                // Else show up to 20 char
+                return d.data.name.length > 23 ? d.data.name.slice(0, 20) + "..." : d.data.name;
+            });     
+        zoomOut()
+    }
+
+    function zoomOut(){
+        d3.select('svg')
+            .transition()
+            .call(zoom.transform, d3.zoomIdentity.translate(0, 0).scale(0.25));
     }
 
     // Function to zoom into a specific node
     function zoomToNode(node) {
-        console.log('zoomToNode');
-        console.log(node);
         const scale = 2; // Adjust zoom scale as needed
 
         // Convert polar coordinates (angle `x`, radius `y`) to Cartesian coordinates
@@ -365,31 +393,29 @@
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius;
 
-        console.log(x,y);
-
-        let newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 150, height / 2 - y * scale - 250).scale(scale);
+        // Based on screen size, set translation identity for zoom
+        let newTransform = d3.zoomIdentity.translate(cx - x * scale - 150, cy - y * scale - 250).scale(scale);
 
         if (windowWidth576px.matches){
-            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 200, height / 2 - y * scale - 250).scale(scale);
+            newTransform = d3.zoomIdentity.translate(cx - x * scale - 200, cy - y * scale - 250).scale(scale);
         }
 
         if (windowWidth768px.matches){
-            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 300, height / 2 - y * scale - 250).scale(scale);
+            newTransform = d3.zoomIdentity.translate(cx- x * scale - 300, cy - y * scale - 250).scale(scale);
         }
 
         if (windowWidth992px.matches){
-            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 375, height / 2 - y * scale - 300).scale(scale);
+            newTransform = d3.zoomIdentity.translate(cx - x * scale - 375, cy - y * scale - 300).scale(scale);
         }
         
         if (windowWidth1200px.matches){
-            newTransform = d3.zoomIdentity.translate(width / 2 - x * scale - 500, height / 2 - y * scale - 350).scale(scale);
+            newTransform = d3.zoomIdentity.translate(cx - x * scale - 500, cy - y * scale - 350).scale(scale);
         }
-        // const newTransform = d3.zoomIdentity.translate(width / 2 - x * scale, height / 2 - y * scale).scale(scale);
-
         // Apply the transition
-        svg.transition()
+        d3.select('svg')
+            .transition()
             .duration(750)
-            .call(zoom.transform, newTransform);  // Programmatically zoom to the node
+            .call(zoom.transform, newTransform);
     }
 
     let windowWidth576px = window.matchMedia("(min-width:576px)")
@@ -407,7 +433,7 @@
                 ...selectedNode,
                 children: descendants
             };
-            updateGraph(newRoot);  // Function to update the graph with new data
+            updateGraph(newRoot);  // Update the graph with new data
 
             // Close context menu
             document.getElementById('context-menu').style.display = 'none';
@@ -428,51 +454,49 @@
     document.getElementById('resetGraph').addEventListener('click', function() {
         updateGraph(standInRoot);  // Reinitialize the graph with the original root node
     });
-    
+
+    document.getElementById('resetZoom').addEventListener('click', function() {
+        zoomOut();  
+    });
+
     // Event handler for form submission
     document.getElementById('Search').addEventListener('click', function(event) {
         event.preventDefault(); // Prevent default form submission
 
-        console.log("descendants" + currentRoot);
         const nodeName = document.getElementById('fullname').value;
         const nodeData = currentRoot.descendants().find(d => d.data.name === nodeName);  // Find the node in the hierarchical structure
-        console.log("searching for...");
-        console.log(nodeName, nodeData);
 
         if (nodeData) {
-            zoomToNode(nodeData);  // Zoom to the found node
+            zoomToNode(nodeData);
         } else {
             alert("Node not found: " + nodeName );
         }
     });
 
-    initialiseGraph(standInRoot);
+    function triggerDownload() {
+        const graph = document.getElementById('graph');
+        const data = new XMLSerializer().serializeToString(graph);
+        const image = new Blob([data], { type: 'image/svg+xml;charset=utf-8' });
+        saveAs(image, 'FamilyTree.svg'); 
+    }
 
     document.getElementById('Download').addEventListener('click', function() {
-  
-  const currentTransform = d3.zoomTransform(svg.node());
-  
-  
-  svg.transition()
-      .duration(750)
-      .call(zoom.transform, d3.zoomIdentity
-      .translate(-86.48138319941552,-21.892951824506817)
-      .scale(0.38565487746149063)
-      )
-      .on('end', function() {
-          triggerDownload(); 
-      });
-});
-function triggerDownload() {
-  const graph = document.getElementById('graph');
-  const data = new XMLSerializer().serializeToString(graph);
-  const image = new Blob([data], { type: 'image/svg+xml;charset=utf-8' });
-  saveAs(image, 'FamilyTree.svg'); 
-}
+        d3.select('svg')
+            .transition()
+            .duration(750)
+            .call(zoom.transform, d3.zoomIdentity
+            .translate(0,0)
+            .scale(0.25)
+            )
+            .on('end', function() {
+                triggerDownload(); 
+            });
+    });
 
+    initialiseGraph(standInRoot);
 </script>
 
-<!-- Modify graph script -->
 <script src="{{ url_for('static', filename='js/modify_graph.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 {% endblock %}

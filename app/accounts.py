@@ -3,7 +3,7 @@ from flask_login import login_user
 from app.databases import db
 from werkzeug.security import generate_password_hash
 from flask import url_for
-from app.notifs import *
+from app.notifs import get_all_ids, get_all_admin_ids, log_notif
 
 from config import WEBSITE_URL, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 from jinja2 import Template
@@ -37,15 +37,20 @@ def init_database():
     Tree.query.delete()
 
     #create mock accounts
+    master_log = User(
+        user_id=-1
+    )
+
     perma_admin = User(
         user_id=0,
         username="PermaAdmin",
-        email="test@test.com", #TODO give a real email?
+        email="perma_admin@test.com", #TODO give a real email?
         verified=True,
         admin=True,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("CantResetM3")),
-        notifs_ignored=""
+        notifs_ignored="",
+        email_preference="None"
     )
 
     nima = User(
@@ -56,7 +61,8 @@ def init_database():
         admin=True,
         create_time=datetime.now(),
         password_hash=str(generate_password_hash("CHANGEME")),
-        notifs_ignored=""
+        notifs_ignored="",
+        email_preference="Weekly"
     )
 
     group31 = User(
@@ -66,8 +72,9 @@ def init_database():
         verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("CHANGEME")),
-        notifs_ignored=""
+        password_hash=str(generate_password_hash("MichaelWise#1Fans")),
+        notifs_ignored="",
+        email_preference="Weekly"
     )
 
     test_user = User(
@@ -77,19 +84,21 @@ def init_database():
         verified=True,
         admin=False,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("test1234")),
-        notifs_ignored=" Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
+        password_hash=str(generate_password_hash("DocumentationAndTesting31")),
+        notifs_ignored=" Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments",
+        email_preference="Daily"
     )
 
     test_admin = User(
         user_id=4,
         username="admin_test",
-        email="admin@test.com",
+        email="cooptrooper04@gmail.com",
         verified=True,
         admin=True,
         create_time=datetime.now(),
-        password_hash=str(generate_password_hash("test1234")),
-        notifs_ignored=" Logout"
+        password_hash=str(generate_password_hash("DocumentationAndTesting31")),
+        notifs_ignored=" Logout",
+        email_preference="Daily"
     )
 
     first_notif = Notification(
@@ -100,6 +109,7 @@ def init_database():
     )
 
     #add mock accounts to db
+    db.session.add(master_log)
     db.session.add(perma_admin)
     db.session.add(nima)
     db.session.add(group31)
@@ -159,7 +169,8 @@ def signup(email, username, password, repeat, remember):
         verified = False,
         admin = False,
         create_time=datetime.now(),
-        notifs_ignored = " Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments"
+        notifs_ignored = " Tree Create Tree Move Tree Update Tree Delete Bio Edit Comments",
+        email_preference = "None"
     )
 
     user.set_password(password)
@@ -171,7 +182,7 @@ def signup(email, username, password, repeat, remember):
     dehdashti.users += ", " + str(user.user_id)
     db.session.commit()
 
-    log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids(), " Login") #notify all admins of new account
+    log_notif(f"New account created for user {User.get_username(user)}", get_all_admin_ids(), " Signup") #notify all admins of new account
     login(username, password, remember)
     
 #logs into an account

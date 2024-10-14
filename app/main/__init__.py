@@ -1,3 +1,7 @@
 """Blueprint for the main parts of the app"""
 
-from .routes import main_bp
+from flask import Blueprint
+
+main_bp = Blueprint('main_bp', __name__)
+
+from . import routes
