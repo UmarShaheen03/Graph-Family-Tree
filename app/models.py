@@ -81,7 +81,7 @@ class Tree(db.Model):
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False) #user_id notif is sent to, -1 for master log
+    user_id = db.Column(db.Integer) #user_id notif is sent to, -1 for master log
     text = db.Column(db.Text, nullable=False)
     time = db.Column(db.DateTime, default=datetime.utcnow)
     goto = db.Column(db.String, nullable=True) #optional, url to go to when clicked
