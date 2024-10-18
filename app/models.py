@@ -67,7 +67,7 @@ class User(UserMixin, db.Model):
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, db.ForeignKey('user.username', ondelete="CASCADE") nullable=False)
+    username = db.Column(db.String, db.ForeignKey('user.username', ondelete="CASCADE"), nullable=False)
     text = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', back_populates='comments') 
