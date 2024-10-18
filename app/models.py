@@ -17,7 +17,7 @@ class User(UserMixin, db.Model):
     create_time = db.Column(db.DateTime)
     reset_token = db.Column(db.String)
     reset_expiry = db.Column(db.Integer) #is a datetime, but i store it as an int
-    comments = db.relationship('Comment', back_populates='user', lazy=True)
+    comments = db.relationship('Comment', back_populates='user', cascade='all,delete-orphan', lazy=True)
     email_preference = db.Column(db.String) #values of "None", "Daily" or "Weekly"
     notifs_ignored = db.Column(db.String) #big string treated as list of notifications to ignore
 
@@ -67,7 +67,7 @@ class User(UserMixin, db.Model):
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, db.ForeignKey('user.username'), nullable=False)
+    username = db.Column(db.String, db.ForeignKey('user.username', ondelete="CASCADE") nullable=False)
     text = db.Column(db.Text)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship('User', back_populates='comments') 
